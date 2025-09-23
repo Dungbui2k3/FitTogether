@@ -1,25 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import { Routes, Route } from "react-router-dom"
+import { Box } from "@chakra-ui/react"
+import Header from "./components/Header"
+import Footer from "./components/Footer"
+import HomePage from "./pages/HomePage"
+import Login from "./pages/Login"
+import Register from "./pages/Register"
+import Products from "./pages/Products"
+import Cart from "./pages/Cart"
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <Box minH="100vh" display="flex" flexDirection="column">
+      <Header />
+      <Box flex="1">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/cart" element={<Cart />} />
+        </Routes>
+      </Box>
+      <Footer />
+    </Box>
+  )
 }
 
-export default App;
+export default App
