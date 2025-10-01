@@ -1,204 +1,353 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { User, Mail, Edit, Save, X } from 'lucide-react';
+import { useAuth, useToast } from '../hooks';
+import ToastContainer from '../components/ToastContainer';
+import type { UpdateProfileRequest } from '../types/auth';
 
 const ProfilePage: React.FC = () => {
+  const { user, updateProfile, changePassword, isLoading, error, clearError } = useAuth();
+  const { success, toasts, removeToast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 123-4567',
-    address: '123 Fitness Street',
-    city: 'New York',
-    postalCode: '10001',
-    country: 'United States'
+  
+  const [profileData, setProfileData] = useState({
+    name: '',
+    email: '',
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  const [profileError, setProfileError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  // Initialize profile data when user is loaded
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        name: user.name || '',
+        email: user.email || '',
+      });
+    }
+  }, [user]);
+
+  // Clear messages after 5 seconds
+
+  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setProfileData(prev => ({ ...prev, [name]: value }));
+    if (profileError) setProfileError('');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsEditing(false);
-    // Handle profile update logic here
-    console.log('Profile updated:', formData);
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({ ...prev, [name]: value }));
+    if (passwordError) setPasswordError('');
   };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileError('');
+    clearError();
+
+    if (!profileData.name.trim()) {
+      setProfileError('Name cannot be empty');
+      return;
+    }
+
+    try {
+      const updates: UpdateProfileRequest = {
+        name: profileData.name.trim(),
+      };
+
+      // Only include email if it's different from current
+      if (profileData.email !== user?.email) {
+        updates.email = profileData.email;
+      }
+
+      const result = await updateProfile(updates);
+      
+      if (result.success) {
+        success('✅ Profile updated successfully!', 3000);
+        setIsEditing(false);
+      } else {
+        setProfileError(result.error || 'Update failed');
+      }
+    } catch (err) {
+      setProfileError('An unexpected error occurred');
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+    clearError();
+
+    if (!passwordData.currentPassword || !passwordData.newPassword) {
+      setPasswordError('Please fill in all information');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 8) {
+      setPasswordError('New password must be at least 8 characters');
+      return;
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
+
+    try {
+      const result = await changePassword({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+      
+      if (result.success) {
+        success('🔐 Password changed successfully!', 3000);
+        setPasswordData({
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+      } else {
+        setPasswordError(result.error || 'Password change failed');
+      }
+    } catch (err) {
+      setPasswordError('An unexpected error occurred');
+    }
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setProfileError('');
+    if (user) {
+      setProfileData({
+        name: user.name || '',
+        email: user.email || '',
+      });
+    }
+  };
+
+  const cancelPasswordChange = () => {
+    setPasswordError('');
+    setPasswordData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Loading user information...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">My Profile</h1>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Profile Information */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Personal Information</h2>
+    <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Profile Information</h1>
+          <p className="text-gray-600 mt-2">Manage your account information</p>
+        </div>
+
+
+        {/* Global Error */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-600">{error}</p>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Profile Information */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 flex items-center">
+                <User className="h-5 w-5 mr-2 text-blue-600" />
+                Basic Information
+              </h2>
               {!isEditing && (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
                 >
-                  Edit Profile
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
                 </button>
               )}
             </div>
-            
-            {isEditing ? (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">First Name</label>
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      className="w-full border rounded-lg px-3 py-2"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Last Name</label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleInputChange}
-                      className="w-full border rounded-lg px-3 py-2"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Email</label>
+
+            {profileError && (
+              <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-red-600 text-sm">{profileError}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleUpdateProfile}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={profileData.name}
+                    onChange={handleProfileChange}
+                    disabled={!isEditing}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <input
                       type="email"
                       name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      className="w-full border rounded-lg px-3 py-2"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Phone</label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="w-full border rounded-lg px-3 py-2"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium mb-2">Address</label>
-                    <input
-                      type="text"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      className="w-full border rounded-lg px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">City</label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      className="w-full border rounded-lg px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Postal Code</label>
-                    <input
-                      type="text"
-                      name="postalCode"
-                      value={formData.postalCode}
-                      onChange={handleInputChange}
-                      className="w-full border rounded-lg px-3 py-2"
+                      value={profileData.email}
+                      onChange={handleProfileChange}
+                      disabled = {true}
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
                     />
                   </div>
                 </div>
-                
-                <div className="flex gap-4">
+
+                {/* <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Role
+                  </label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      value={new Date(user.createdAt).toLocaleDateString('en-US')}
+                      disabled
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
+                    />
+                  </div>
+                </div> */}
+              </div>
+
+              {isEditing && (
+                <div className="mt-6 flex space-x-3">
                   <button
                     type="submit"
-                    className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    disabled={isLoading}
+                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    Save Changes
+                    <Save className="h-4 w-4 mr-2" />
+                    {isLoading ? 'Saving...' : 'Save Changes'}
                   </button>
                   <button
                     type="button"
-                    onClick={() => setIsEditing(false)}
-                    className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    onClick={cancelEditing}
+                    className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-500 transition-colors"
                   >
+                    <X className="h-4 w-4 mr-2" />
                     Cancel
                   </button>
                 </div>
-              </form>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-600">First Name</h3>
-                  <p className="text-lg">{formData.firstName}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-600">Last Name</h3>
-                  <p className="text-lg">{formData.lastName}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-600">Email</h3>
-                  <p className="text-lg">{formData.email}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-gray-600">Phone</h3>
-                  <p className="text-lg">{formData.phone}</p>
-                </div>
-                <div className="md:col-span-2">
-                  <h3 className="text-sm font-medium text-gray-600">Address</h3>
-                  <p className="text-lg">{formData.address}, {formData.city} {formData.postalCode}</p>
-                </div>
-              </div>
-            )}
+              )}
+            </form>
           </div>
-        </div>
-        
-        {/* Quick Actions */}
-        <div>
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-            
-            <div className="space-y-3">
-              <button className="w-full text-left px-4 py-3 border rounded-lg hover:bg-gray-50">
-                <div className="font-medium">Change Password</div>
-                <div className="text-sm text-gray-600">Update your password</div>
-              </button>
-              
-              <button className="w-full text-left px-4 py-3 border rounded-lg hover:bg-gray-50">
-                <div className="font-medium">Notification Settings</div>
-                <div className="text-sm text-gray-600">Manage your preferences</div>
-              </button>
-              
-              <button className="w-full text-left px-4 py-3 border rounded-lg hover:bg-gray-50">
-                <div className="font-medium">Download Data</div>
-                <div className="text-sm text-gray-600">Export your information</div>
-              </button>
-              
-              <button className="w-full text-left px-4 py-3 border border-red-300 text-red-600 rounded-lg hover:bg-red-50">
-                <div className="font-medium">Delete Account</div>
-                <div className="text-sm">Permanently delete your account</div>
-              </button>
+
+          {/* Password Change */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Change Password</h2>
             </div>
+              <>
+                {passwordError && (
+                  <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-red-600 text-sm">{passwordError}</p>
+                  </div>
+                )}
+
+                <form onSubmit={handleChangePassword}>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Current Password
+                      </label>
+                      <input
+                        type="password"
+                        name="currentPassword"
+                        value={passwordData.currentPassword}
+                        onChange={handlePasswordChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter current password"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        New Password
+                      </label>
+                      <input
+                        type="password"
+                        name="newPassword"
+                        value={passwordData.newPassword}
+                        onChange={handlePasswordChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter new password (minimum 8 characters)"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Confirm New Password
+                      </label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        value={passwordData.confirmPassword}
+                        onChange={handlePasswordChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Re-enter new password"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex space-x-3">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      {isLoading ? 'Updating...' : 'Update Password'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelPasswordChange}
+                      className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-500 transition-colors"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </>
+            
           </div>
         </div>
       </div>
+      
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} removeToast={removeToast} position="top-right" />
     </div>
   );
 };

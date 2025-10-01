@@ -1,205 +1,320 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useRef, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import {
+  Menu,
+  X,
+  User,
+  LogIn,
+  UserPlus,
+  ChevronDown,
+  UserCircle,
+  ShoppingBag,
+  LogOut,
+} from "lucide-react";
+import { useAuth } from "../../hooks";
+import CartIcon from "../Cart/CartIcon";
 
-interface HeaderProps {
-  onViewChange: (view: string, productId?: string) => void;
-}
+const FitTogetherLogo = () => {
+  return (
+    <div className="flex items-center space-x-3">
+      <div className="relative">
+        {/* Sports equipment icon effect */}
+        <div className="w-10 h-10 relative transform rotate-12">
+          {/* Main icon */}
+          <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg shadow-lg flex items-center justify-center">
+            <span className="text-white font-bold text-lg">F</span>
+          </div>
+          {/* Secondary element */}
+          <div className="absolute -top-1 -right-1 w-10 h-10 bg-gradient-to-br from-blue-400 to-green-500 rounded-lg transform -rotate-12 opacity-80 flex items-center justify-center">
+            <span className="text-white font-bold text-lg">T</span>
+          </div>
+        </div>
+        {/* Floating particles effect */}
+        <div className="absolute -top-1 -left-1 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+        <div className="absolute -bottom-1 -right-2 w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse delay-300"></div>
+        <div className="absolute top-2 -right-3 w-1 h-1 bg-pink-400 rounded-full animate-pulse delay-700"></div>
+      </div>
+      <div className="flex flex-col">
+        <span className="text-2xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-800 bg-clip-text text-transparent">
+          FitTogether
+        </span>
+        <span className="text-xs text-gray-500 font-medium -mt-1">
+          PHỤ KIỆN THỂ THAO
+        </span>
+      </div>
+    </div>
+  );
+};
 
-const Header: React.FC<HeaderProps> = ({ onViewChange }) => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+const Header = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Mock user state - replace with real authentication
-  const isLoggedIn = false;
-  const cartItemCount = 0;
+  const handleNavClick = (sectionId: string) => {
+    if (location.pathname !== '/') {
+      // If not on home page, navigate to home first then scroll
+      navigate('/');
+      setTimeout(() => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      // If already on home page, just scroll
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+    setIsMenuOpen(false);
+  };
 
-  const navigation = [
-    { name: 'Home', href: '/', current: true },
-    { name: 'Products', href: '/products', current: false },
-    { name: 'Categories', href: '/categories', current: false },
-    { name: 'About', href: '/about', current: false },
-    { name: 'Contact', href: '/contact', current: false },
-  ];
+  const handleLogout = async () => {
+    await logout();
+    setIsDropdownOpen(false);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        event.target &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
-    <header className="bg-white shadow-lg">
-      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 justify-between">
-          <div className="flex">
-            {/* Logo */}
-            <div className="flex flex-shrink-0 items-center">
-              <Link to="/" className="text-2xl font-bold text-blue-600">
-                FitTogether
-              </Link>
-            </div>
-            
-            {/* Desktop Navigation */}
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
-                    item.current
-                      ? 'border-b-2 border-blue-500 text-gray-900'
-                      : 'border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  }`}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-          </div>
+    <header className="bg-white shadow-lg sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center py-4">
+          <Link to="/">
+            <FitTogetherLogo />
+          </Link>
 
-          {/* Search Bar */}
-          <div className="flex flex-1 items-center justify-center px-2 lg:ml-6 lg:justify-end">
-            <div className="w-full max-w-lg lg:max-w-xs">
-              <label htmlFor="search" className="sr-only">
-                Search
-              </label>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <svg
-                    className="h-5 w-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
-                <input
-                  id="search"
-                  name="search"
-                  className="block w-full rounded-md border border-gray-300 bg-white py-2 pl-10 pr-3 text-sm placeholder-gray-500 focus:border-blue-500 focus:text-gray-900 focus:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  placeholder="Search fitness equipment..."
-                  type="search"
-                />
-              </div>
-            </div>
-          </div>
+          <nav className="hidden md:flex space-x-8">
+            <button
+              onClick={() => handleNavClick('home')}
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+            >
+              Trang Chủ
+            </button>
+            <button
+              onClick={() => handleNavClick('products')}
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+            >
+              Sản Phẩm
+            </button>
+            <button
+              onClick={() => handleNavClick('about')}
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+            >
+              Về Chúng Tôi
+            </button>
+            <button
+              onClick={() => handleNavClick('contact')}
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+            >
+              Liên Hệ
+            </button>
+          </nav>
 
-          {/* Right side buttons */}
           <div className="flex items-center space-x-4">
-            {/* Cart */}
-            <Link to="/cart" className="relative p-2 text-gray-600 hover:text-gray-900">
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {/* Authentication buttons */}
+            {isAuthenticated ? (
+              <div
+                className="hidden md:flex items-center space-x-4"
+                ref={dropdownRef}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.8 5.2a1 1 0 001 1.3h9.6a1 1 0 001-1.3L15 13"
-                />
-              </svg>
-              {cartItemCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {cartItemCount}
-                </span>
-              )}
-            </Link>
+                <CartIcon />
+                <div className="relative">
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors group px-3 py-2 rounded-lg hover:bg-gray-50"
+                  >
+                    <User className="h-5 w-5" />
+                    <span className="text-sm font-medium">
+                      Hi, {user?.name}
+                    </span>
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform duration-200 ${
+                        isDropdownOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                </div>
 
-            {/* User Menu */}
-            {isLoggedIn ? (
-              <div className="relative">
-                <button
-                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
-                    <span className="text-sm font-medium text-gray-700">U</span>
-                  </div>
-                </button>
-                
-                {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Your Profile
-                    </Link>
-                    <Link
-                      to="/purchase-history"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Purchase History
-                    </Link>
-                    <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      Sign out
-                    </button>
+                {/* Dropdown Menu */}
+                {isDropdownOpen && (
+                  <div className="absolute right-12 mt-48 w-52 bg-white rounded-lg shadow-lg border border-gray-100 py-1 animate-in fade-in duration-200">
+                    <div className="py-1">
+                      <Link
+                        to="/profile"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <UserCircle className="h-4 w-4 mr-3" />
+                        Hồ Sơ Cá Nhân
+                      </Link>
+
+                      <Link
+                        to="/purchase-history"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <ShoppingBag className="h-4 w-4 mr-3" />
+                        Lịch Sử Mua Hàng
+                      </Link>
+
+                      <div className="border-t border-gray-100 my-1"></div>
+
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                      >
+                        <LogOut className="h-4 w-4 mr-3" />
+                        Đăng Xuất
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="flex space-x-2">
+              <div className="hidden md:flex items-center space-x-4">
                 <Link
                   to="/login"
-                  className="bg-white text-blue-600 border border-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50"
+                  className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 transition-colors font-medium"
                 >
-                  Sign In
+                  <LogIn className="h-4 w-4" />
+                  <span>Đăng Nhập</span>
                 </Link>
                 <Link
                   to="/register"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  className="flex items-center space-x-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all font-medium"
                 >
-                  Sign Up
+                  <UserPlus className="h-4 w-4" />
+                  <span>Đăng Ký</span>
                 </Link>
               </div>
             )}
 
-            {/* Mobile menu button */}
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="sm:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              className="md:hidden p-2 text-gray-700 hover:text-blue-600 transition-colors"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-                />
-              </svg>
+              {isMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
 
-        {/* Mobile menu */}
-        {isMobileMenuOpen && (
-          <div className="sm:hidden">
-            <div className="space-y-1 pb-3 pt-2">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`block py-2 pl-3 pr-4 text-base font-medium ${
-                    item.current
-                      ? 'bg-blue-50 border-blue-500 text-blue-700'
-                      : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
-                  }`}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
+        {isMenuOpen && (
+          <div className="md:hidden py-4 border-t bg-gradient-to-r from-blue-50 to-purple-50">
+            <nav className="flex flex-col space-y-4">
+              <button
+                onClick={() => handleNavClick('home')}
+                className="text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white text-left"
+              >
+                Trang Chủ
+              </button>
+              <button
+                onClick={() => handleNavClick('products')}
+                className="text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white text-left"
+              >
+                Sản Phẩm
+              </button>
+              <button
+                onClick={() => handleNavClick('about')}
+                className="text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white text-left"
+              >
+                Về Chúng Tôi
+              </button>
+              <button
+                onClick={() => handleNavClick('contact')}
+                className="text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white text-left"
+              >
+                Liên Hệ
+              </button>
+
+              {/* Mobile Auth buttons */}
+              <div className="border-t pt-4 mt-4">
+                {isAuthenticated ? (
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center space-x-2 text-gray-700 px-2 py-1 bg-white rounded">
+                      <User className="h-5 w-5" />
+                      <span className="text-sm font-medium">
+                        Hi, {user?.name}!
+                      </span>
+                    </div>
+
+                    <Link
+                      to="/profile"
+                      className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <UserCircle className="h-4 w-4" />
+                      <span>Thông tin cá nhân</span>
+                    </Link>
+
+                    <Link
+                      to="/purchase-history"
+                      className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <ShoppingBag className="h-4 w-4" />
+                      <span>Lịch sử mua hàng</span>
+                    </Link>
+
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMenuOpen(false);
+                      }}
+                      className="flex items-center space-x-2 text-left text-gray-700 hover:text-red-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white w-full"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Đăng Xuất</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col space-y-2">
+                    <Link
+                      to="/login"
+                      className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white"
+                    >
+                      <LogIn className="h-4 w-4" />
+                      <span>Đăng Nhập</span>
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-1 rounded hover:from-blue-700 hover:to-purple-700 transition-all font-medium"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      <span>Đăng Ký</span>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </nav>
           </div>
         )}
-      </nav>
+      </div>
     </header>
   );
 };

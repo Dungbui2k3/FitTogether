@@ -1,45 +1,308 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  CheckCircle,
+  Package,
+  Phone,
+  Mail,
+  Calendar,
+  ArrowLeft,
+  CreditCard,
+  Truck,
+} from "lucide-react";
+import { Order } from "../types/order";
 
 const OrderSuccessPage: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Get order data from location state
+    const orderData = location.state?.order;
+    if (orderData) {
+      setOrder(orderData);
+      setLoading(false);
+    } else {
+      // If no order data, redirect to home
+      navigate("/");
+    }
+  }, [location.state, navigate]);
+
+  const formatPrice = (price: number, currency: string = "VND") => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: currency,
+    }).format(price);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "text-yellow-600 bg-yellow-100";
+      case "success":
+        return "text-green-600 bg-green-100";
+      case "cancel":
+        return "text-red-600 bg-red-100";
+      default:
+        return "text-gray-600 bg-gray-100";
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "Processing";
+      case "success":
+        return "Success";
+      case "cancel":
+        return "Cancelled";
+      default:
+        return status;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!order) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Order Not Found
+          </h1>
+          <button
+            onClick={() => navigate("/")}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+          >
+            Go to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto px-4 py-16">
-      <div className="max-w-md mx-auto text-center">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-          </svg>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Success Header */}
+        <div className="text-center mb-10">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-green-400 to-green-600 mb-6 shadow-lg">
+            <CheckCircle className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+            Order Placed Successfully!
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Thank you for your order. We will process your order as soon as
+            possible.
+          </p>
         </div>
-        
-        <h1 className="text-3xl font-bold text-green-600 mb-4">Order Confirmed!</h1>
-        <p className="text-gray-600 mb-6">
-          Thank you for your purchase. Your order has been successfully placed and will be processed shortly.
-        </p>
-        
-        <div className="bg-gray-50 rounded-lg p-6 mb-6">
-          <h2 className="font-semibold mb-2">Order Details</h2>
-          <p className="text-sm text-gray-600">Order ID: #FT-2025-001</p>
-          <p className="text-sm text-gray-600">Total: $323.99</p>
-          <p className="text-sm text-gray-600">Estimated Delivery: 3-5 business days</p>
-        </div>
-        
-        <p className="text-sm text-gray-600 mb-6">
-          A confirmation email has been sent to your email address with order details and tracking information.
-        </p>
-        
-        <div className="space-y-3">
-          <Link 
-            to="/purchase-history" 
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 block"
-          >
-            View Order History
-          </Link>
-          <Link 
-            to="/" 
-            className="w-full border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-50 block"
-          >
-            Continue Shopping
-          </Link>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Order Details */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Order Info */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                <div className="p-2 bg-blue-100 rounded-lg mr-3">
+                  <Package className="h-5 w-5 text-blue-600" />
+                </div>
+                Order Information
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 gap-x-16 mb-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                    Order ID
+                  </label>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {/* #{order._id.slice(-8).toUpperCase()} */}
+                    {order.orderCode}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                    Status
+                  </label>
+                  <span
+                    className={`inline-flex px-4 py-2 rounded-full text-sm font-semibold ${getStatusColor(
+                      order.status
+                    )}`}
+                  >
+                    {getStatusText(order.status)}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                    Order Date
+                  </label>
+                  <p className="text-lg text-gray-900 flex items-center">
+                    <Calendar className="h-5 w-5 mr-2 text-gray-400" />
+                    {formatDate(order.orderDate)}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                    Total Amount
+                  </label>
+                  <p className="text-2xl font-bold text-green-600">
+                    {formatPrice(order.totalAmount)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Order Items */}
+              <div className="border-t border-gray-200 pt-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                  Ordered Items
+                </h3>
+                <div className="space-y-4">
+                  {order.items.map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex-1">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                          Product ID: {item.productId}
+                        </h4>
+                        <div className="flex items-center space-x-4">
+                          <span
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              item.type === "digital"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-green-100 text-green-800"
+                            }`}
+                          >
+                            {item.type === "digital" ? "Digital" : "Physical"}
+                          </span>
+                          <span className="text-sm text-gray-600">
+                            Qty: {item.quantity}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xl font-bold text-gray-900">
+                          {formatPrice(item.price * item.quantity)}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {formatPrice(item.price)} × {item.quantity}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Info */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+              <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                <div className="p-2 bg-green-100 rounded-lg mr-3">
+                  <CreditCard className="h-5 w-5 text-green-600" />
+                </div>
+                Payment Information
+              </h2>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium text-gray-700">
+                    Payment Method:
+                  </span>
+                  <span className="font-bold text-gray-900 flex items-center">
+                    <Truck className="h-4 w-4 mr-2 text-green-600" />
+                    Cash on Delivery (COD)
+                  </span>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <span className="font-medium text-gray-700">
+                    Order Total:
+                  </span>
+                  <span className="text-lg font-bold text-gray-900">
+                    {formatPrice(order.totalAmount)}
+                  </span>
+                </div>
+                <div className="border-t border-gray-200 pt-4">
+                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
+                    <span className="text-lg font-bold text-gray-900">
+                      Total Amount:
+                    </span>
+                    <span className="text-xl font-bold text-green-600">
+                      {formatPrice(order.totalAmount)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 sticky top-8">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">
+                What's Next
+              </h2>
+
+              <div className="space-y-4">
+                <button
+                  onClick={() => navigate("/")}
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl"
+                >
+                  <ArrowLeft className="h-5 w-5 mr-2" />
+                  Continue Shopping
+                </button>
+
+                <button
+                  onClick={() => navigate("/purchase-history")}
+                  className="w-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 py-3 px-4 rounded-xl font-bold hover:from-gray-200 hover:to-gray-300 transition-all duration-300 shadow-md hover:shadow-lg"
+                >
+                  View My Orders
+                </button>
+
+                <div className="pt-6 border-t border-gray-200">
+                  <h3 className="font-bold text-gray-900 mb-3">
+                    Need Support?
+                  </h3>
+                  <p className="text-gray-600 mb-4 text-sm">
+                    If you have any questions about your order, please contact
+                    us:
+                  </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center p-2 bg-gray-50 rounded-lg">
+                      <Phone className="h-4 w-4 mr-2 text-blue-600" />
+                      <span className="font-medium text-gray-800 text-sm">
+                        0123 456 789
+                      </span>
+                    </div>
+                    <div className="flex items-center p-2 bg-gray-50 rounded-lg">
+                      <Mail className="h-4 w-4 mr-2 text-blue-600" />
+                      <span className="font-medium text-gray-800 text-sm">
+                        support@childes3d.com
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

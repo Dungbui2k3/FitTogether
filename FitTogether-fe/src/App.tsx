@@ -16,28 +16,22 @@ import LoginPage from "./pages/Auth/LoginPage";
 import RegisterPage from "./pages/Auth/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
-import AdminDashboard from "./pages/Admin/AdminDashboard";
 import UserManagement from "./pages/Admin/UserManagement";
 import OrderManagement from "./pages/Admin/OrderManagement";
-import CategoryManagement from "./pages/Admin/CategoryManagement";
-import ProductManagement from "./pages/Admin/ProductManagement";
+import AdminCategoryManagement from "./pages/Admin/CategoryManagement";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/Admin/AdminRoute";
 import AdminLayout from "./components/Admin/AdminLayout";
 import Header from "./components/Home/Header";
 import Footer from "./components/Home/Footer";
-import { CartProvider } from "./context/CartContext";
+import ProductManagement from "./pages/Admin/ProductManagement";
+import { CartProvider } from "./contexts/CartContext";
 
 // Layout có Header/Footer
 const MainLayout = () => {
-  const handleViewChange = (_view: string, _productId?: string) => {
-    // This function is not used in the new routing structure
-    // but kept for compatibility with Header component
-  };
-
   return (
     <div className="min-h-screen">
-      <Header onViewChange={handleViewChange} />
+      <Header />
       <main className="min-h-screen">
         <Outlet />
       </main>
@@ -57,7 +51,7 @@ const AdminLayoutWrapper = () => {
 
 function App() {
   return (
-      <CartProvider>
+    <CartProvider>
       <Router>
         <Routes>
           {/* Routes với Header/Footer */}
@@ -93,11 +87,10 @@ function App() {
               <AdminLayoutWrapper />
             </AdminRoute>
           }>
-            <Route index element={<AdminDashboard />} />
             <Route path="users" element={<UserManagement />} />
             <Route path="products" element={<ProductManagement />} />
             <Route path="orders" element={<OrderManagement />} />
-            <Route path="categories" element={<CategoryManagement />} />
+            <Route path="categories" element={<AdminCategoryManagement />} />
           </Route>
           
           <Route path="/login" element={<LoginPage />} />
@@ -106,7 +99,7 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Router>
-      </CartProvider>
+    </CartProvider>
   );
 }
 
