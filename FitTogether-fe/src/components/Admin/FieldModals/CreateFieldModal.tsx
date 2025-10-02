@@ -120,7 +120,6 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
       formDataToSend.append('phone', formData.phone.trim());
       formDataToSend.append('description', formData.description?.trim() || '');
 
-      // Append facilities as JSON string or individual items
       facilities.forEach(facility => {
         formDataToSend.append('facilities', facility);
       });
