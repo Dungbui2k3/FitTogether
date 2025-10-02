@@ -7,7 +7,7 @@ import {
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { GetProductsQueryDto } from './dto/get-products-query.dto';
-import { Product3D, Product3DDocument } from 'src/schemas/product3D.schema';
+import { Product, ProductDocument } from 'src/schemas/product.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { ProductsRepository } from './products.repository';
@@ -18,8 +18,8 @@ import { CloudinaryService } from '../../common/services/cloudinary.service';
 export class ProductsService {
   constructor(
     private readonly productsRepository: ProductsRepository,
-    @InjectModel(Product3D.name)
-    private readonly productModel: Model<Product3DDocument>,
+    @InjectModel(Product.name)
+    private readonly productModel: Model<ProductDocument>,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
@@ -47,12 +47,15 @@ export class ProductsService {
 
       // Upload files if provided
       if (createProductDto.urlImgs && createProductDto.urlImgs.length > 0) {
-        const files = createProductDto.urlImgs.map(file => ({
+        const files = createProductDto.urlImgs.map((file) => ({
           buffer: file.buffer,
-          originalName: file.originalname
+          originalName: file.originalname,
         }));
 
-        const uploads = await this.cloudinaryService.uploadMultipleFiles(files, 'image');
+        const uploads = await this.cloudinaryService.uploadMultipleFiles(
+          files,
+          'image',
+        );
         uploadedUrls = uploads.map((upload) => upload.secure_url);
       }
 
@@ -60,8 +63,6 @@ export class ProductsService {
         ...createProductDto,
         urlImgs: uploadedUrls,
         categoryId: new Types.ObjectId(createProductDto.categoryId),
-        available: createProductDto.available ?? true,
-        currency: createProductDto.currency || 'USD',
       };
 
       const newProduct = new this.productModel(productData);
@@ -123,29 +124,11 @@ export class ProductsService {
         filter.categoryId = new Types.ObjectId(categoryId);
       }
 
-      if (available !== undefined) {
-        filter.available = available;
-      }
-
       if (minPrice !== undefined || maxPrice !== undefined) {
-        filter.$or = [];
-
-        if (minPrice !== undefined && maxPrice !== undefined) {
-          filter.$or.push(
-            { digitalPrice: { $gte: minPrice, $lte: maxPrice } },
-            { physicalPrice: { $gte: minPrice, $lte: maxPrice } },
-          );
-        } else if (minPrice !== undefined) {
-          filter.$or.push(
-            { digitalPrice: { $gte: minPrice } },
-            { physicalPrice: { $gte: minPrice } },
-          );
-        } else if (maxPrice !== undefined) {
-          filter.$or.push(
-            { digitalPrice: { $lte: maxPrice } },
-            { physicalPrice: { $lte: maxPrice } },
-          );
-        }
+        const priceFilter: any = {};
+        if (minPrice !== undefined) priceFilter.$gte = minPrice;
+        if (maxPrice !== undefined) priceFilter.$lte = maxPrice;
+        filter.price = priceFilter;
       }
 
       // Calculate pagination
@@ -167,7 +150,7 @@ export class ProductsService {
         .limit(limit)
         .exec();
 
-      const formattedProducts = products.map((product) =>
+      const formattedProducts = products.map((product: any) =>
         this.formatProductResponse(product),
       );
 
@@ -255,21 +238,32 @@ export class ProductsService {
       // 1. Delete old images
       if (updateProductDto.removedImgs?.length) {
         try {
-          await this.cloudinaryService.deleteMultipleFiles(updateProductDto.removedImgs, 'image');
+          await this.cloudinaryService.deleteMultipleFiles(
+            updateProductDto.removedImgs,
+            'image',
+          );
         } catch (error) {
-          console.warn('Failed to delete some images from Cloudinary:', error.message);
+          console.warn(
+            'Failed to delete some images from Cloudinary:',
+            error.message,
+          );
         }
-        finalUrls = finalUrls.filter((u) => !updateProductDto.removedImgs.includes(u));
+        finalUrls = finalUrls.filter(
+          (u) => !updateProductDto.removedImgs.includes(u),
+        );
       }
 
       // 2. Upload new images
       if (updateProductDto.urlImgs?.length) {
-        const files = updateProductDto.urlImgs.map(file => ({
+        const files = updateProductDto.urlImgs.map((file) => ({
           buffer: file.buffer,
-          originalName: file.originalname
+          originalName: file.originalname,
         }));
-        
-        const uploads = await this.cloudinaryService.uploadMultipleFiles(files, 'image');
+
+        const uploads = await this.cloudinaryService.uploadMultipleFiles(
+          files,
+          'image',
+        );
         finalUrls.push(...uploads.map((u) => u.secure_url));
       }
 
@@ -357,20 +351,11 @@ export class ProductsService {
             description: product.categoryId.description,
           }
         : null,
-      digitalPrice: product.digitalPrice,
-      physicalPrice: product.physicalPrice,
+      price: product.price,
       quantity: product.quantity,
-      currency: product.currency,
-      available: product.available,
-      material: product.material,
-      layerHeight: product.layerHeight,
-      printTime: product.printTime,
-      dimensions: product.dimensions,
       urlImgs: product.urlImgs,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
     };
   }
-
-
 }

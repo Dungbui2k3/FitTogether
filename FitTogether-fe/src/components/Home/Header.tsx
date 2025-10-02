@@ -55,20 +55,20 @@ const Header = () => {
   const location = useLocation();
 
   const handleNavClick = (sectionId: string) => {
-    if (location.pathname !== '/') {
+    if (location.pathname !== "/") {
       // If not on home page, navigate to home first then scroll
-      navigate('/');
+      navigate("/");
       setTimeout(() => {
         const element = document.getElementById(sectionId);
         if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
+          element.scrollIntoView({ behavior: "smooth" });
         }
       }, 100);
     } else {
       // If already on home page, just scroll
       const element = document.getElementById(sectionId);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+        element.scrollIntoView({ behavior: "smooth" });
       }
     }
     setIsMenuOpen(false);
@@ -107,29 +107,36 @@ const Header = () => {
 
           <nav className="hidden md:flex space-x-8">
             <button
-              onClick={() => handleNavClick('home')}
+              onClick={() => handleNavClick("home")}
               className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
             >
               Trang Chủ
             </button>
             <button
-              onClick={() => handleNavClick('products')}
+              onClick={() => handleNavClick("products")}
               className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
             >
               Sản Phẩm
             </button>
+
             <button
-              onClick={() => handleNavClick('about')}
-              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
-            >
-              Về Chúng Tôi
-            </button>
-            <button
-              onClick={() => handleNavClick('contact')}
+              onClick={() => handleNavClick("contact")}
               className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
             >
               Liên Hệ
             </button>
+            <Link
+              to="/fields"
+              className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
+              onClick={() => {
+                // Scroll to top when navigating to fields page
+                setTimeout(() => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 100);
+              }}
+            >
+              Danh sách sân
+            </Link>
           </nav>
 
           <div className="flex items-center space-x-4">
@@ -228,29 +235,37 @@ const Header = () => {
           <div className="md:hidden py-4 border-t bg-gradient-to-r from-blue-50 to-purple-50">
             <nav className="flex flex-col space-y-4">
               <button
-                onClick={() => handleNavClick('home')}
+                onClick={() => handleNavClick("home")}
                 className="text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white text-left"
               >
                 Trang Chủ
               </button>
               <button
-                onClick={() => handleNavClick('products')}
+                onClick={() => handleNavClick("products")}
                 className="text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white text-left"
               >
                 Sản Phẩm
               </button>
+
               <button
-                onClick={() => handleNavClick('about')}
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white text-left"
-              >
-                Về Chúng Tôi
-              </button>
-              <button
-                onClick={() => handleNavClick('contact')}
+                onClick={() => handleNavClick("contact")}
                 className="text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white text-left"
               >
                 Liên Hệ
               </button>
+              <Link
+                to="/fields"
+                className="text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white text-left"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  // Scroll to top when navigating to fields page
+                  setTimeout(() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }, 100);
+                }}
+              >
+                Danh sách sân
+              </Link>
 
               {/* Mobile Auth buttons */}
               <div className="border-t pt-4 mt-4">

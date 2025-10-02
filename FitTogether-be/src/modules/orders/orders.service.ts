@@ -10,15 +10,15 @@ import { CreateOrderDto, PaymentMethod } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { GetOrdersQueryDto, OrderStatus } from './dto/get-orders-query.dto';
 import { Orders, OrdersDocument } from '../../schemas/orders.schema';
-import { Product3D, Product3DDocument } from '../../schemas/product3D.schema';
+import { Product, ProductDocument } from '../../schemas/product.schema';
 import { User, UserDocument } from '../../schemas/user.schema';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectModel(Orders.name) private orderModel: Model<OrdersDocument>,
-    @InjectModel(Product3D.name)
-    private product3DModel: Model<Product3DDocument>,
+    @InjectModel(Product.name)
+    private productModel: Model<ProductDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
@@ -32,12 +32,11 @@ export class OrdersService {
       throw new NotFoundException('User not found');
     }
 
-    // Verify all products exist and are available
+    // Verify all products exist
     const productIds = createOrderDto.items.map((item) => item.productId);
-    const products = await this.product3DModel
+    const products = await this.productModel
       .find({
         _id: { $in: productIds },
-        available: true,
         isDeleted: { $ne: true },
       })
       .lean();
@@ -49,8 +48,7 @@ export class OrdersService {
         throw new BadRequestException(`Product ${item.productId} not found`);
       }
 
-      const price =
-        item.type === 'digital' ? product.digitalPrice : product.physicalPrice;
+      const price = product.price;
       const quantity = item.type === 'digital' ? 1 : item.quantity;
 
       // Validate digital product quantity
@@ -153,7 +151,7 @@ export class OrdersService {
     const orders = await this.orderModel
       .find(filter)
       .populate('userId', 'name email')
-      .populate('items.productId', 'name urlImgs digitalPrice physicalPrice')
+      .populate('items.productId', 'name urlImgs price')
       .skip(skip)
       .limit(limit)
       .sort(sort)
@@ -180,7 +178,7 @@ export class OrdersService {
     const order = await this.orderModel
       .findById(id)
       .populate('userId', 'name email')
-      .populate('items.productId', 'name urlImgs digitalPrice physicalPrice')
+      .populate('items.productId', 'name urlImgs price')
       .exec();
 
     if (!order) {
@@ -194,7 +192,7 @@ export class OrdersService {
     const order = await this.orderModel
       .findOne({ orderCode })
       .populate('userId', 'name email')
-      .populate('items.productId', 'name urlImgs digitalPrice physicalPrice')
+      .populate('items.productId', 'name urlImgs price')
       .exec();
 
     if (!order) {
@@ -227,7 +225,7 @@ export class OrdersService {
     const updatedOrder = await this.orderModel
       .findByIdAndUpdate(id, updateOrderDto, { new: true })
       .populate('userId', 'name email')
-      .populate('items.productId', 'name urlImgs digitalPrice physicalPrice')
+      .populate('items.productId', 'name urlImgs price')
       .exec();
 
     if (!updatedOrder) {

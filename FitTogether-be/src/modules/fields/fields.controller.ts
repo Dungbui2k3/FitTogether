@@ -1,0 +1,138 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+  HttpCode,
+  HttpStatus,
+  Put,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+  ApiParam,
+} from '@nestjs/swagger';
+import { FieldsService } from './fields.service';
+import { CreateFieldDto } from './dto/create-field.dto';
+import { UpdateFieldDto } from './dto/update-field.dto';
+import { GetFieldsQueryDto } from './dto/get-fields-query.dto';
+import { Public, Roles } from 'src/decorators';
+import { JwtAuthGuard, Role } from 'src/guards';
+
+@ApiTags('Fields')
+@Controller('api/v1/fields')
+export class FieldsController {
+  constructor(private readonly fieldsService: FieldsService) {}
+
+  @Post()
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Create a new field (Admin only)' })
+  @ApiResponse({ status: 201, description: 'Field created successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 409, description: 'Field name or phone already exists' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  async create(@Body() createFieldDto: CreateFieldDto) {
+    return this.fieldsService.create(createFieldDto);
+  }
+
+  @Public()
+  @Get()
+  @ApiOperation({ summary: 'Get all fields with pagination and filtering' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'name',
+    required: false,
+    type: String,
+    description: 'Search by name',
+  })
+  @ApiQuery({
+    name: 'address',
+    required: false,
+    type: String,
+    description: 'Search by address',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'General search term',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['name', 'address', 'createdAt', 'updatedAt'],
+    description: 'Sort by field',
+  })
+  @ApiQuery({ 
+    name: 'sortOrder', 
+    required: false, 
+    enum: ['asc', 'desc'],
+    description: 'Sort order',
+  })
+  @ApiResponse({ status: 200, description: 'Fields retrieved successfully' })
+  async findAll(@Query() query: GetFieldsQueryDto) {
+    return this.fieldsService.findAll(query);
+  }
+
+  @Public()
+  @Get(':id')
+  @ApiOperation({ summary: 'Get field by ID' })
+  @ApiParam({ name: 'id', description: 'Field ID' })
+  @ApiResponse({ status: 200, description: 'Field retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Field not found' })
+  @ApiResponse({ status: 400, description: 'Invalid field ID' })
+  async findOne(@Param('id') id: string) {
+    return this.fieldsService.findById(id);
+  }
+
+  @Put(':id')
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update field by ID (Admin only)' })
+  @ApiParam({ name: 'id', description: 'Field ID' })
+  @ApiResponse({ status: 200, description: 'Field updated successfully' })
+  @ApiResponse({ status: 404, description: 'Field not found' })
+  @ApiResponse({ status: 409, description: 'Field name or phone already exists' })
+  @ApiResponse({ status: 400, description: 'Invalid field ID' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  async update(
+    @Param('id') id: string,
+    @Body() updateFieldDto: UpdateFieldDto,
+  ) {
+    return this.fieldsService.update(id, updateFieldDto);
+  }
+
+  @Delete(':id')
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete field by ID (Admin only - soft delete)' })
+  @ApiParam({ name: 'id', description: 'Field ID' })
+  @ApiResponse({ status: 200, description: 'Field deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Field not found' })
+  @ApiResponse({ status: 400, description: 'Invalid field ID' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  async remove(@Param('id') id: string) {
+    return this.fieldsService.remove(id);
+  }
+}

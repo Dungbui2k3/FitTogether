@@ -24,7 +24,7 @@ export class CloudinaryService {
     customFolder?: string,
   ): Promise<UploadApiResponse> {
     return new Promise<UploadApiResponse>((resolve, reject) => {
-      const folder = customFolder || `childes3D/${fileCategory}`;
+      const folder = customFolder || `fittogether/${fileCategory}`;
       const resourceType = this.getResourceType(fileCategory);
 
       const uploadOptions: any = {

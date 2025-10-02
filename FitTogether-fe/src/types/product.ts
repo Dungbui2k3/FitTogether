@@ -1,27 +1,19 @@
 export interface Product {
   id: string;
   name: string;
-  description: string;
-  nation: string;
-  category: {
+  description?: string;
+  nation?: string;
+  categoryId: string;
+  category?: {
     _id: string;
     name: string;
     description: string;
   };
-  digitalPrice: number;
-  physicalPrice: number;
+  price: number;
   quantity: number;
-  currency: string;
-  available: boolean;
-  material: string[];
-  layerHeight: string;
-  printTime: string;
-  dimensions: {
-    width: number;
-    height: number;
-    depth: number;
-  };
   urlImgs: string[];
+  isDeleted: boolean;
+  deletedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -75,23 +67,12 @@ export interface ProductListResponse {
 
 export interface CreateProductRequest {
   name: string;
-  description: string;
-  nation: string;
+  description?: string;
+  nation?: string;
   categoryId: string;
-  digitalPrice: number;
-  physicalPrice: number;
+  price: number;
   quantity: number;
-  currency: string;
-  available: boolean;
-  material: string[];
-  layerHeight: string;
-  printTime: string;
-  dimensions: {
-    width: number;
-    height: number;
-    depth: number;
-  };
-  urlImgs: string[];
+  urlImgs?: string[];
 }
 
 export interface UpdateProductRequest {
@@ -99,19 +80,8 @@ export interface UpdateProductRequest {
   description?: string;
   nation?: string;
   categoryId?: string;
-  digitalPrice?: number;
-  physicalPrice?: number;
+  price?: number;
   quantity?: number;
-  currency?: string;
-  available?: boolean;
-  material?: string[];
-  layerHeight?: string;
-  printTime?: string;
-  dimensions?: {
-    width: number;
-    height: number;
-    depth: number;
-  };
   urlImgs?: string[];
 }
  

@@ -444,26 +444,13 @@ const ProductManagement: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
-                      <div className="flex flex-col">
-                        <span className="font-medium">
-                          Digital:{" "}
-                          {formatCurrency(
-                            product.digitalPrice,
-                            product.currency
-                          )}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          Physical:{" "}
-                          {formatCurrency(
-                            product.physicalPrice,
-                            product.currency
-                          )}
-                        </span>
-                      </div>
+                      <span className="font-medium">
+                        {formatCurrency(product.price, "VND")}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                        {product.category.name}
+                        {product.category?.name || 'No Category'}
                       </span>
                     </td>
                     <td className="px-6 py-4">

@@ -19,13 +19,6 @@ export class Category {
   })
   @Prop()
   description?: string;
-
-  @ApiProperty({
-    description: 'URL to an image representing the category',
-    example: 'https://example.com/images/furniture.png',
-  })
-  @Prop()
-  thumbnail?: string;
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);

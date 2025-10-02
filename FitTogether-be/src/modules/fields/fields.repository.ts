@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Product, ProductDocument } from 'src/schemas/product.schema';
+import { Field, FieldDocument } from 'src/schemas/field.schema';
 
 @Injectable()
-export class ProductsRepository {
+export class FieldsRepository {
   constructor(
-    @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    @InjectModel(Field.name) private fieldModel: Model<FieldDocument>,
   ) {}
 
   async exists(id: string): Promise<boolean> {
@@ -14,50 +14,42 @@ export class ProductsRepository {
       return false;
     }
 
-    const product = await this.productModel.findOne({
+    const field = await this.fieldModel.findOne({
       _id: new Types.ObjectId(id),
       isDeleted: { $ne: true },
     });
 
-    return !!product;
+    return !!field;
   }
 
-  async findByName(name: string): Promise<ProductDocument | null> {
-    return this.productModel.findOne({
+  async findByName(name: string): Promise<FieldDocument | null> {
+    return this.fieldModel.findOne({
       name,
       isDeleted: { $ne: true },
     });
   }
 
-  async findById(id: string): Promise<ProductDocument | null> {
+  async findById(id: string): Promise<FieldDocument | null> {
     if (!Types.ObjectId.isValid(id)) {
       return null;
     }
 
-    return this.productModel.findOne({
+    return this.fieldModel.findOne({
       _id: new Types.ObjectId(id),
       isDeleted: { $ne: true },
     });
   }
 
-  async findByOwnerId(ownerId: string): Promise<ProductDocument[]> {
-    if (!Types.ObjectId.isValid(ownerId)) {
-      return [];
-    }
-
-    return this.productModel.find({
-      owner: new Types.ObjectId(ownerId),
+  async findByAddress(address: string): Promise<FieldDocument[]> {
+    return this.fieldModel.find({
+      address: { $regex: address, $options: 'i' },
       isDeleted: { $ne: true },
     });
   }
 
-  async countByCategory(categoryId: string): Promise<number> {
-    if (!Types.ObjectId.isValid(categoryId)) {
-      return 0;
-    }
-
-    return this.productModel.countDocuments({
-      categoryId: new Types.ObjectId(categoryId),
+  async findByPhone(phone: string): Promise<FieldDocument | null> {
+    return this.fieldModel.findOne({
+      phone,
       isDeleted: { $ne: true },
     });
   }
@@ -67,7 +59,7 @@ export class ProductsRepository {
       return false;
     }
 
-    const result = await this.productModel.updateOne(
+    const result = await this.fieldModel.updateOne(
       { _id: new Types.ObjectId(id) },
       { isDeleted: true, deletedAt: new Date() }
     );
@@ -80,10 +72,16 @@ export class ProductsRepository {
       return false;
     }
 
-    const result = await this.productModel.deleteOne({
+    const result = await this.fieldModel.deleteOne({
       _id: new Types.ObjectId(id),
     });
 
     return result.deletedCount > 0;
+  }
+
+  async countAll(): Promise<number> {
+    return this.fieldModel.countDocuments({
+      isDeleted: { $ne: true },
+    });
   }
 }

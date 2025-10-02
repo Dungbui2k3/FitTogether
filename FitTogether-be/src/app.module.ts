@@ -13,6 +13,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ProductsModule } from './modules/products/products.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { FieldsModule } from './modules/fields/fields.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { OrdersModule } from './modules/orders/orders.module';
     CategoriesModule,
     ProductsModule,
     OrdersModule,
+    FieldsModule,
   ],
   controllers: [AppController],
   providers: [

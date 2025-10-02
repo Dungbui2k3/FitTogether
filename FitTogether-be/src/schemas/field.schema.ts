@@ -1,0 +1,70 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
+import { ApiProperty } from '@nestjs/swagger';
+
+export type FieldDocument = Field & Document;
+
+@Schema({ timestamps: true })
+export class Field {
+  @ApiProperty({
+    description: 'Tên sân / tiêu đề',
+    example: 'Sân bóng đá FitTogether Arena',
+  })
+  @Prop({ required: true })
+  name: string;
+
+  @ApiProperty({
+    description: 'Địa chỉ sân',
+    example: '123 Đường Nguyễn Văn Linh, Quận 7, TP.HCM',
+  })
+  @Prop({ required: true })
+  address: string;
+
+  @ApiProperty({
+    description: 'Số điện thoại liên hệ',
+    example: '0901234567',
+  })
+  @Prop({ required: true })
+  phone: string;
+
+  @ApiProperty({
+    description: 'Danh sách tiện ích, mô tả chi tiết',
+    example: [
+      'Sân cỏ nhân tạo chất lượng cao',
+      'Hệ thống đèn chiếu sáng hiện đại',
+      'Phòng thay đồ rộng rãi',
+      'Bãi đậu xe miễn phí',
+      'Căng tin phục vụ đồ uống'
+    ],
+  })
+  @Prop({ type: [String], default: [] })
+  facilities: string[];
+
+  @ApiProperty({
+    description: 'Thông điệp giới thiệu / kêu gọi',
+    example: 'Sân bóng đá hiện đại với cỏ nhân tạo chất lượng cao, phù hợp cho các trận đấu giao hữu và thi đấu chuyên nghiệp. Hãy đến và trải nghiệm không gian thể thao tuyệt vời!',
+  })
+  @Prop()
+  description?: string;
+
+  // === Soft Delete ===
+  @ApiProperty({ description: 'Soft delete flag', example: false })
+  @Prop({ default: false })
+  isDeleted: boolean;
+
+  @ApiProperty({ description: 'Deleted at timestamp' })
+  @Prop()
+  deletedAt?: Date;
+
+  // === Timestamps ===
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export const FieldSchema = SchemaFactory.createForClass(Field);
+
+// Add indexes for better performance
+FieldSchema.index({ name: 1 });
+FieldSchema.index({ address: 1 });
+FieldSchema.index({ isDeleted: 1 });
+FieldSchema.index({ createdAt: -1 });

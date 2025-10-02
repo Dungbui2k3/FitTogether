@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { Product3D } from './product3D.schema';
+import { Product } from './product.schema';
 import { User } from './user.schema';
 
 export type OrdersDocument = Orders & Document;
@@ -12,16 +12,9 @@ export class OrderItem {
     description: 'ID of the product',
     example: '507f1f77bcf86cd799439011',
   })
-  @Prop({ type: Types.ObjectId, ref: Product3D.name, required: true })
+  @Prop({ type: Types.ObjectId, ref: Product.name, required: true })
   productId: Types.ObjectId;
 
-  @ApiProperty({
-    description: 'Type of product',
-    enum: ['physical', 'digital'],
-    example: 'physical',
-  })
-  @Prop({ type: String, enum: ['physical', 'digital'], required: true })
-  type: 'physical' | 'digital';
 
   @ApiProperty({ description: 'Quantity of this product', example: 2 })
   @Prop({
@@ -30,11 +23,9 @@ export class OrderItem {
     default: 1,
     validate: {
       validator: function (value: number) {
-        // Nếu là digital thì quantity luôn = 1
-        if (this.type === 'digital' && value !== 1) return false;
         return true;
       },
-      message: 'Digital product quantity must be 1',
+      message: 'Product quantity must be 1',
     },
   })
   quantity: number;
@@ -77,13 +68,14 @@ export class Orders {
 
   @ApiProperty({
     description: 'Payment method used for the order',
-    enum: ['payos', 'bank_transfer', 'cash_on_delivery', 'wallet'],
-    example: 'payos',
+    enum: ['payos', 'cod'],
+    example: 'cod',
+    required: false,
   })
   @Prop({
     type: String,
-    enum: ['payos', 'cod'],
-    required: true,
+    enum: ['payos', 'bank_transfer', 'cod', 'wallet'],
+    required: false,
   })
   paymentMethod: string;
 

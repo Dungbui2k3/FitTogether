@@ -26,7 +26,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    if (!product.digitalPrice) {
+    if (!product.price) {
       showError("Price not available for this product");
       return;
     }
@@ -34,11 +34,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     addToCart({
       productId: product.id,
       name: product.name,
-      price: product.digitalPrice,
+      price: product.price,
       quantity: 1,
       version: 'digital',
       image: product.urlImgs?.[0],
-      currency: product.currency,
+      currency: 'VND',
     });
 
     success(`${product.name} added to cart!`);
@@ -101,11 +101,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <span className="text-lg font-bold text-blue-600">
               {new Intl.NumberFormat('vi-VN', {
                 style: 'currency',
-                currency: product.currency,
-              }).format(product.digitalPrice)}
+                currency: 'VND',
+              }).format(product.price)}
             </span>
             <span className="text-sm text-gray-500">
-              Digital
+              Quantity: {product.quantity}
             </span>
           </div>
           <div className="flex space-x-2">

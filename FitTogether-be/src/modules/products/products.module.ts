@@ -5,12 +5,12 @@ import { ProductsController } from './products.controller';
 import { ProductsRepository } from './products.repository';
 import { CloudinaryProvider } from './cloudinary/cloudinary.provider';
 import { CloudinaryService } from '../../common/services/cloudinary.service';
-import { Product3D, Product3DSchema } from 'src/schemas/product3D.schema';
+import { Product, ProductSchema } from 'src/schemas/product.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: Product3D.name, schema: Product3DSchema }
+      { name: Product.name, schema: ProductSchema }
     ])
   ],
   controllers: [ProductsController],

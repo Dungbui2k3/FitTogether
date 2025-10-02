@@ -24,27 +24,11 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
     name: '',
     description: '',
     nation: '',
-    category: {
-      _id: '',
-      name: '',
-      description: ''
-    },
-    digitalPrice: 0,
-    physicalPrice: 0,
+    categoryId: '',
+    price: 0,
     quantity: 0,
-    currency: 'VND',
-    available: true,
-    material: [],
-    layerHeight: '',
-    printTime: '',
-    dimensions: {
-      width: 0,
-      height: 0,
-      depth: 0,
-    },
     urlImgs: [],
   });
-
 
   // Load categories on component mount
   useEffect(() => {
@@ -72,28 +56,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     
-    if (name.startsWith('dimensions.')) {
-      const dimensionKey = name.split('.')[1] as keyof NonNullable<typeof formData.dimensions>;
-      setFormData(prev => ({
-        ...prev,
-        dimensions: {
-          ...prev.dimensions!,
-          [dimensionKey]: parseFloat(value) || 0,
-        },
-      }));
-    } else if (name === 'material') {
-      const materials = value.split(',').map(m => m.trim()).filter(m => m);
-      setFormData(prev => ({ ...prev, material: materials }));
-    } else if (name === 'categoryId') {
-      const selectedCategory = categories.find(cat => cat._id === value);
-      setFormData(prev => ({
-        ...prev,
-        category: selectedCategory || { _id: '', name: '', description: '' },
-      }));
-    } else if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
-    } else if (type === 'number') {
+    if (type === 'number') {
       setFormData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
@@ -122,18 +85,21 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
     setShowPreview(true);
   };
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
   
     try {
       if (!formData.name?.trim()) {
-        error("Product name is required");
+        error("Tên sản phẩm là bắt buộc");
         return;
       }
-      if (!formData.category?._id) {
-        error("Please select a category");
+      if (!formData.categoryId) {
+        error("Vui lòng chọn danh mục");
+        return;
+      }
+      if (!formData.price || formData.price <= 0) {
+        error("Giá sản phẩm phải lớn hơn 0");
         return;
       }
   
@@ -143,25 +109,10 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
       formDataToSend.append("name", formData.name.trim());
       formDataToSend.append("description", formData.description?.trim() || "");
       formDataToSend.append("nation", formData.nation?.trim() || "");
-      formDataToSend.append("categoryId", formData.category._id);
-      formDataToSend.append("digitalPrice", String(formData.digitalPrice || 0));
-      formDataToSend.append("physicalPrice", String(formData.physicalPrice || 0));
+      formDataToSend.append("categoryId", formData.categoryId || "");
+      formDataToSend.append("price", String(formData.price || 0));
       formDataToSend.append("quantity", String(formData.quantity || 0));
-      formDataToSend.append("currency", formData.currency || "VND");
-      formDataToSend.append("available", String(formData.available));
-      formDataToSend.append("layerHeight", formData.layerHeight || "");
-      formDataToSend.append("printTime", formData.printTime || "");
-  
-      // append materials
-      formData.material?.forEach(m => {
-        formDataToSend.append("material", m);
-      });
-  
-      // append dimensions
-      formDataToSend.append("dimensions[width]", String(formData.dimensions?.width || 0));
-      formDataToSend.append("dimensions[height]", String(formData.dimensions?.height || 0));
-      formDataToSend.append("dimensions[depth]", String(formData.dimensions?.depth || 0));
-  
+
       // append images
       imageFiles.forEach(file => {
         formDataToSend.append("urlImgs", file); 
@@ -171,19 +122,18 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
       const result = await productService.createProduct(formDataToSend);
   
       if (result.success) {
-        success("✅ Product created successfully!", 3000);
+        success("✅ Tạo sản phẩm thành công!", 3000);
         onSuccess();
         handleClose();
       } else {
-        error(result.error || "Failed to create product");
+        error(result.error || "Tạo sản phẩm thất bại");
       }
     } catch (err) {
-      error("An error occurred while creating the product");
+      error("Có lỗi xảy ra khi tạo sản phẩm");
     } finally {
       setIsLoading(false);
     }
   };
-  
 
   const handleClose = () => {
     // Clean up URL objects to prevent memory leaks
@@ -193,20 +143,9 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
       name: '',
       description: '',
       nation: '',
-      category: {
-        _id: '',
-        name: '',
-        description: ''
-      },
-      digitalPrice: 0,
-      physicalPrice: 0,
+      categoryId: '',
+      price: 0,
       quantity: 0,
-      currency: 'VND',
-      available: true,
-      material: [],
-      layerHeight: '',
-      printTime: '',
-      dimensions: { width: 0, height: 0, depth: 0 },
       urlImgs: [],
     });
     setImageFiles([]);
@@ -221,7 +160,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-900">Create New Product</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Tạo sản phẩm mới</h2>
           <button
             onClick={handleClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -234,11 +173,11 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Basic Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Basic Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Thông tin cơ bản</h3>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product Name *
+                  Tên sản phẩm *
                 </label>
                 <input
                   type="text"
@@ -247,58 +186,43 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
                   onChange={handleInputChange}
                   required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter product name"
+                  placeholder="Nhập tên sản phẩm"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nation *
+                  Xuất xứ
                 </label>
                 <input
                   type="text"
                   name="nation"
                   value={formData.nation || ''}
                   onChange={handleInputChange}
-                  required
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Vietnam, USA"
+                  placeholder="Ví dụ: Việt Nam, Trung Quốc, Nhật Bản"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Digital Price (VND) *
+                  Giá sản phẩm (VND) *
                 </label>
                 <input
                   type="number"
-                  name="digitalPrice"
-                  value={formData.digitalPrice || 0}
+                  name="price"
+                  value={formData.price || 0}
                   onChange={handleInputChange}
                   required
                   min="0"                  
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Physical Price (VND) *
-                </label>
-                <input
-                  type="number"
-                  name="physicalPrice"
-                  value={formData.physicalPrice || 0}
-                  onChange={handleInputChange}
-                  required
-                  min="0"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quantity *
+                  Số lượng *
                 </label>
                 <input
                   type="number"
@@ -308,33 +232,41 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
                   required
                   min="0"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Currency
+                  Danh mục *
                 </label>
                 <select
-                  name="currency"
-                  value={formData.currency || 'VND'}
+                  name="categoryId"
+                  value={formData.categoryId || ''}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  required
+                  disabled={categoriesLoading}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
                 >
-                  <option value="VND">VND</option>
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
+                  <option value="">
+                    {categoriesLoading ? 'Đang tải danh mục...' : 'Chọn danh mục'}
+                  </option>
+                  {categories.map((category) => (
+                    <option key={category._id} value={category._id}>
+                      {category.name}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
             {/* Image Upload */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Images</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Hình ảnh sản phẩm</h3>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Upload Images (Multiple)
+                  Tải lên hình ảnh (Nhiều ảnh)
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                   <input
@@ -351,7 +283,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
                   >
                     <Upload className="h-8 w-8 text-gray-400" />
                     <span className="text-sm text-gray-600">
-                      Click to upload or drag and drop multiple images
+                      Nhấp để tải lên hoặc kéo thả nhiều hình ảnh
                     </span>
                   </label>
                 </div>
@@ -360,7 +292,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
                   <div className="mt-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-700">
-                        Preview ({previewUrls.length} images)
+                        Xem trước ({previewUrls.length} ảnh)
                       </span>
                       <button
                         type="button"
@@ -368,7 +300,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
                         className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 text-sm"
                       >
                         <Eye className="h-4 w-4" />
-                        <span>View All</span>
+                        <span>Xem tất cả</span>
                       </button>
                     </div>
                     <div className="grid grid-cols-4 gap-2">
@@ -393,154 +325,21 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
                 )}
               </div>
             </div>
-
-            {/* Category and Technical Details */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Category & Technical Details</h3>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Category *
-                </label>
-                <select
-                  name="categoryId"
-                  value={formData.category?._id || ''}
-                  onChange={handleInputChange}
-                  required
-                  disabled={categoriesLoading}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
-                >
-                  <option value="">
-                    {categoriesLoading ? 'Loading categories...' : 'Select a category'}
-                  </option>
-                  {categories.map((category) => (
-                    <option key={category._id} value={category._id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-                {formData.category?.description && (
-                  <p className="mt-1 text-sm text-gray-500">
-                    {formData.category.description}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Print Time
-                </label>
-                <input
-                  type="text"
-                  name="printTime"
-                  value={formData.printTime || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., 12 hours, 2 days"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Layer Height
-                </label>
-                <input
-                  type="text"
-                  name="layerHeight"
-                  value={formData.layerHeight || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., 0.2mm, 0.3mm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Materials (comma separated)
-                </label>
-                <input
-                  type="text"
-                  name="material"
-                  value={formData.material?.join(', ') || ''}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="PLA, ABS, PETG"
-                />
-              </div>
-            </div>
           </div>
 
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description *
+              Mô tả sản phẩm
             </label>
             <textarea
               name="description"
               value={formData.description || ''}
               onChange={handleInputChange}
-              required
               rows={4}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Detailed product description"
+              placeholder="Mô tả chi tiết về sản phẩm phụ kiện thể thao..."
             />
-          </div>
-
-          {/* Dimensions */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Dimensions (cm)</h3>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Width</label>
-                <input
-                  type="number"
-                  name="dimensions.width"
-                  value={formData.dimensions?.width || 0}
-                  onChange={handleInputChange}
-                  min="0"
-                  step="0.1"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Height</label>
-                <input
-                  type="number"
-                  name="dimensions.height"
-                  value={formData.dimensions?.height || 0}
-                  onChange={handleInputChange}
-                  min="0"
-                  step="0.1"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Depth</label>
-                <input
-                  type="number"
-                  name="dimensions.depth"
-                  value={formData.dimensions?.depth || 0}
-                  onChange={handleInputChange}
-                  min="0"
-                  step="0.1"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Status */}
-          <div className="flex space-x-6">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                name="available"
-                checked={formData.available || false}
-                onChange={handleInputChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <span className="ml-2 text-sm text-gray-700">Available</span>
-            </label>
           </div>
 
           {/* Actions */}
@@ -550,7 +349,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
               onClick={handleClose}
               className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Cancel
+              Hủy
             </button>
             <button
               type="submit"
@@ -560,12 +359,12 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
               {isLoading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                  <span>Creating...</span>
+                  <span>Đang tạo...</span>
                 </>
               ) : (
                 <>
                   <Plus className="h-4 w-4" />
-                  <span>Create Product</span>
+                  <span>Tạo sản phẩm</span>
                 </>
               )}
             </button>
@@ -578,7 +377,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-60 p-4">
           <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-4 border-b">
-              <h3 className="text-lg font-semibold text-gray-900">Image Preview</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Xem trước hình ảnh</h3>
               <button
                 onClick={() => setShowPreview(false)}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -614,4 +413,3 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({ isOpen, onClose
 };
 
 export default CreateProductModal;
-
