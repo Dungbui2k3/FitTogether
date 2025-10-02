@@ -106,9 +106,7 @@ const ProductDetailPage: React.FC = () => {
       name: product.name,
       price: product.price,
       quantity: quantity,
-      version: 'physical', // Physical sports accessories
       image: product.urlImgs?.[0],
-      currency: 'VND', // Default currency
     });
 
     success(
@@ -471,23 +469,23 @@ const ProductDetailPage: React.FC = () => {
               {/* Add to Cart Button */}
                 <button
                   onClick={handleAddToCart}
-                disabled={isInCart(product.id, 'physical') || product.isDeleted || product.quantity <= 0}
+                disabled={isInCart(product.id) || product.isDeleted || product.quantity <= 0}
                 className={`w-full py-4 rounded-xl font-semibold transition-all flex items-center justify-center space-x-2 text-lg ${
-                  isInCart(product.id, 'physical')
+                  isInCart(product.id)
                   ? "bg-gray-400 text-gray-200 cursor-not-allowed"
                     : (product.isDeleted || product.quantity <= 0)
                     ? "bg-red-400 text-red-200 cursor-not-allowed"
                     : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-lg transform hover:-translate-y-0.5"
-              }`}
-                >
-                  <ShoppingCart className="h-5 w-5" />
-              <span>
+                }`}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                <span>
                   {(product.isDeleted || product.quantity <= 0)
                     ? "Hết hàng"
-                    : isInCart(product.id, 'physical')
+                    : isInCart(product.id)
                     ? "Đã có trong giỏ"
                     : "Thêm vào giỏ hàng"}
-              </span>
+                </span>
                 </button>
             </div>
           </div>

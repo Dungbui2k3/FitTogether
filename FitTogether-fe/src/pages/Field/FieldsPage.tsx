@@ -140,11 +140,11 @@ const FieldsPage: React.FC = () => {
               }>
                 {fields.map((field) => (
                   <FieldCard
-                    key={field._id}
+                    key={field.id}
                     field={field}
                     onClick={() => {
                       // Navigate to field detail page (to be implemented)
-                      console.log('Navigate to field:', field._id);
+                      console.log('Navigate to field:', field.id);
                     }}
                   />
                 ))}

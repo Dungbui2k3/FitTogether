@@ -37,31 +37,31 @@ const RegisterPage: React.FC = () => {
 
   const validateForm = () => {
     if (!formData.firstName.trim()) {
-      setError("First name is required");
+      setError("Họ là bắt buộc");
       return false;
     }
     if (!formData.lastName.trim()) {
-      setError("Last name is required");
+      setError("Tên là bắt buộc");
       return false;
     }
     if (!formData.email.trim()) {
-      setError("Email is required");
+      setError("Email là bắt buộc");
       return false;
     }
     if (!formData.password) {
-      setError("Password is required");
+      setError("Mật khẩu là bắt buộc");
       return false;
     }
     if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError("Mật khẩu phải có ít nhất 8 ký tự");
       return false;
     }
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setError("Mật khẩu xác nhận không khớp");
       return false;
     }
     if (!acceptTerms) {
-      setError("You must agree to the terms of use");
+      setError("Bạn phải đồng ý với điều khoản sử dụng");
       return false;
     }
     return true;
@@ -86,15 +86,15 @@ const RegisterPage: React.FC = () => {
       });
 
       if (!result.success) {
-        showError(result.error || "Registration failed. Please try again.");
+        showError(result.error || "Đăng ký thất bại. Vui lòng thử lại.");
       } else {
         // Navigate to home with success state
         navigate("/login", { replace: true, state: { registerSuccess: true } });
       }
     } catch (err) {
       console.error("Registration error:", err);
-      setError("An unexpected error occurred. Please try again.");
-      showError("An unexpected error occurred. Please try again.");
+      setError("Có lỗi không mong muốn xảy ra. Vui lòng thử lại.");
+      showError("Có lỗi không mong muốn xảy ra. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
     }
@@ -108,10 +108,10 @@ const RegisterPage: React.FC = () => {
             <UserPlus className="h-6 w-6 text-white" />
           </div>
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Create Account
+            Tạo Tài Khoản
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Join us and discover amazing 3D models
+            Tham gia cùng chúng tôi và khám phá các sản phẩm thể thao tuyệt vời
           </p>
         </div>
 
@@ -123,7 +123,7 @@ const RegisterPage: React.FC = () => {
                   htmlFor="firstName"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  First Name
+                  Họ
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -137,7 +137,7 @@ const RegisterPage: React.FC = () => {
                     value={formData.firstName}
                     onChange={handleInputChange}
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 transition-colors"
-                    placeholder="John"
+                    placeholder="Nguyễn"
                   />
                 </div>
               </div>
@@ -147,7 +147,7 @@ const RegisterPage: React.FC = () => {
                   htmlFor="lastName"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Last Name
+                  Tên
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -161,7 +161,7 @@ const RegisterPage: React.FC = () => {
                     value={formData.lastName}
                     onChange={handleInputChange}
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 transition-colors"
-                    placeholder="Doe"
+                    placeholder="Văn A"
                   />
                 </div>
               </div>
@@ -172,7 +172,7 @@ const RegisterPage: React.FC = () => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Email Address
+                Địa chỉ Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -187,7 +187,7 @@ const RegisterPage: React.FC = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 transition-colors"
-                  placeholder="john@example.com"
+                  placeholder="nguyenvana@example.com"
                 />
               </div>
             </div>
@@ -197,7 +197,7 @@ const RegisterPage: React.FC = () => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Password
+                Mật khẩu
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -212,7 +212,7 @@ const RegisterPage: React.FC = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 transition-colors"
-                  placeholder="Minimum 8 characters"
+                  placeholder="Tối thiểu 8 ký tự"
                 />
                 <button
                   type="button"
@@ -227,7 +227,7 @@ const RegisterPage: React.FC = () => {
                 </button>
               </div>
               <p className="mt-1 text-xs text-gray-500">
-                Must have at least 8 characters
+                Phải có ít nhất 8 ký tự
               </p>
             </div>
 
@@ -236,7 +236,7 @@ const RegisterPage: React.FC = () => {
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Confirm Password
+                Xác nhận mật khẩu
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -251,7 +251,7 @@ const RegisterPage: React.FC = () => {
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
                   className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 transition-colors"
-                  placeholder="Re-enter password"
+                  placeholder="Nhập lại mật khẩu"
                 />
                 <button
                   type="button"
@@ -312,13 +312,13 @@ const RegisterPage: React.FC = () => {
               htmlFor="accept-terms"
               className="ml-2 block text-sm text-gray-700"
             >
-              I agree to the{" "}
+              Tôi đồng ý với{" "}
               <a href="/terms" className="text-blue-600 hover:text-blue-500">
-                Terms of Service
+                Điều khoản dịch vụ
               </a>{" "}
-              and{" "}
+              và{" "}
               <a href="/privacy" className="text-blue-600 hover:text-blue-500">
-                Privacy Policy
+                Chính sách bảo mật
               </a>
             </label>
           </div>
@@ -332,12 +332,12 @@ const RegisterPage: React.FC = () => {
               {isLoading ? (
                 <div className="flex items-center">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Creating account...
+                  Đang tạo tài khoản...
                 </div>
               ) : (
                 <>
                   <UserPlus className="h-5 w-5 mr-2" />
-                  Create Account
+                  Tạo tài khoản
                 </>
               )}
             </button>
@@ -345,12 +345,12 @@ const RegisterPage: React.FC = () => {
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Already have an account?{" "}
+              Đã có tài khoản?{" "}
               <Link
                 to="/login"
                 className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
               >
-                Sign in here
+                Đăng nhập tại đây
               </Link>
             </p>
           </div>
@@ -409,7 +409,7 @@ const RegisterPage: React.FC = () => {
             to="/"
             className="text-sm text-blue-600 hover:text-blue-500 transition-colors"
           >
-            ← Back to home
+            ← Về trang chủ
           </Link>
         </div>
       </div>

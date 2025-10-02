@@ -50,4 +50,13 @@ export class CreateFieldDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @ApiProperty({
+    type: 'array',
+    items: { type: 'string', format: 'binary' },
+    description: 'Field images',
+    required: false,
+  })
+  @IsOptional()
+  images?: Express.Multer.File[];
 }

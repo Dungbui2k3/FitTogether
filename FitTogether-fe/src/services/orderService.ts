@@ -207,12 +207,11 @@ class OrderService {
    */
   convertCartItemsToOrderItems(cartItems: Array<{
     productId: string;
-    version: 'digital' | 'physical';
     quantity: number;
   }>): OrderItemDto[] {
     return cartItems.map(item => ({
       productId: item.productId,
-      type: item.version as 'digital' | 'physical',
+      type: 'physical' as 'digital' | 'physical', // All sports accessories are physical
       quantity: item.quantity,
     }));
   }

@@ -13,9 +13,9 @@ type CartAction =
 const cartReducer = (state: Cart, action: CartAction): Cart => {
   switch (action.type) {
     case 'ADD_ITEM': {
-      const { productId, version } = action.payload;
+      const { productId } = action.payload;
       const existingItemIndex = state.items.findIndex(
-        item => item.productId === productId && item.version === version
+        item => item.productId === productId
       );
 
       let newItems: CartItem[];
@@ -29,7 +29,7 @@ const cartReducer = (state: Cart, action: CartAction): Cart => {
       } else {
         // Add new item
         const newItem: CartItem = {
-          id: `${productId}-${version}-${Date.now()}`,
+          id: `${productId}-${Date.now()}`,
           ...action.payload,
         };
         newItems = [...state.items, newItem];
@@ -147,8 +147,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'CLEAR_CART' });
   };
 
-  const isInCart = (productId: string, version: 'digital' | 'physical') => {
-    return cart.items.some(item => item.productId === productId && item.version === version);
+  const isInCart = (productId: string) => {
+    return cart.items.some(item => item.productId === productId);
   };
 
   const value: CartContextType = {

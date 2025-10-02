@@ -120,10 +120,10 @@ const ProductManagement: React.FC = () => {
         if (response.success && response.data) {
           setCategories(response.data);
         } else {
-          error('Failed to load categories');
+          error('Không thể tải danh mục');
         }
       } catch (err) {
-        error('Error loading categories');
+        error('Lỗi khi tải danh mục');
       } finally {
         setCategoriesLoading(false);
       }
@@ -246,9 +246,9 @@ const ProductManagement: React.FC = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Product Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Quản Lý Sản Phẩm</h1>
           <p className="text-gray-600 mt-1">
-            Manage and track all 3D products
+            Quản lý và theo dõi tất cả sản phẩm thể thao
           </p>
         </div>
         <button
@@ -256,7 +256,7 @@ const ProductManagement: React.FC = () => {
           className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
         >
           <Plus className="h-5 w-5" />
-          <span>Create New Product</span>
+          <span>Tạo Sản Phẩm Mới</span>
         </button>
       </div>
 
@@ -269,7 +269,7 @@ const ProductManagement: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
-                placeholder="Search products..."
+                placeholder="Tìm kiếm sản phẩm..."
                 value={state.search}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -286,7 +286,7 @@ const ProductManagement: React.FC = () => {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100"
             >
               <option value="">
-                {categoriesLoading ? 'Loading categories...' : 'All Categories'}
+                {categoriesLoading ? 'Đang tải danh mục...' : 'Tất Cả Danh Mục'}
               </option>
               {categories.map((category) => (
                 <option key={category._id} value={category.name}>
@@ -302,7 +302,7 @@ const ProductManagement: React.FC = () => {
             className="px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2"
           >
             <Filter className="h-5 w-5" />
-            <span>Filters</span>
+            <span>Bộ Lọc</span>
           </button>
         </div>
       </div>
@@ -466,7 +466,7 @@ const ProductManagement: React.FC = () => {
                         <button
                           onClick={() => handleEditProduct(product)}
                           className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                          title="Chỉnh sửa"
+                          title="Chỉnh Sửa"
                         >
                           <Edit className="h-4 w-4" />
                         </button>

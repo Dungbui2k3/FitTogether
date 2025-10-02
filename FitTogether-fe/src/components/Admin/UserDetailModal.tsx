@@ -19,9 +19,9 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ user, isOpen, onClose
   const getStatusBadge = (user: UserType) => {
     const status = getUserStatus(user);
     const statusConfig = {
-      active: { bg: 'bg-green-100', text: 'text-green-800', label: 'Active', icon: Eye },
-      inactive: { bg: 'bg-red-100', text: 'text-red-800', label: 'Inactive', icon: EyeOff },
-      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending', icon: EyeOff }
+      active: { bg: 'bg-green-100', text: 'text-green-800', label: 'Hoạt Động', icon: Eye },
+      inactive: { bg: 'bg-red-100', text: 'text-red-800', label: 'Ngưng Hoạt Động', icon: EyeOff },
+      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Chờ Duyệt', icon: EyeOff }
     };
 
     const config = statusConfig[status];
@@ -42,7 +42,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ user, isOpen, onClose
         isAdmin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
       }`}>
         <Shield className="w-4 h-4 mr-2" />
-        {isAdmin ? 'Admin' : 'User'}
+        {isAdmin ? 'Quản Trị Viên' : 'Người Dùng'}
       </div>
     );
   };
@@ -60,7 +60,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ user, isOpen, onClose
             </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
-              <p className="text-gray-500">User Information Details</p>
+              <p className="text-gray-500">Thông Tin Chi Tiết Người Dùng</p>
             </div>
           </div>
           <button
@@ -76,12 +76,12 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ user, isOpen, onClose
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông Tin Cơ Bản</h3>
               
               <div className="flex items-center space-x-3">
                 <User className="w-5 h-5 text-gray-400" />
                 <div>
-                  <p className="text-sm text-gray-500">Full Name</p>
+                  <p className="text-sm text-gray-500">Họ và Tên</p>
                   <p className="font-medium text-gray-900">{user.name}</p>
                 </div>
               </div>
@@ -97,19 +97,19 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ user, isOpen, onClose
               <div className="flex items-center space-x-3">
                 <Shield className="w-5 h-5 text-gray-400" />
                 <div>
-                  <p className="text-sm text-gray-500">Role</p>
+                  <p className="text-sm text-gray-500">Vai Trò</p>
                   <div className="mt-1">{getRoleBadge(user.role)}</div>
                 </div>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Status</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Trạng Thái</h3>
               
               <div className="flex items-center space-x-3">
                 <Eye className="w-5 h-5 text-gray-400" />
                 <div>
-                  <p className="text-sm text-gray-500">Account Status</p>
+                  <p className="text-sm text-gray-500">Trạng Thái Tài Khoản</p>
                   <div className="mt-1">{getStatusBadge(user)}</div>
                 </div>
               </div>
@@ -117,7 +117,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ user, isOpen, onClose
               <div className="flex items-center space-x-3">
                 <Calendar className="w-5 h-5 text-gray-400" />
                 <div>
-                  <p className="text-sm text-gray-500">Created Date</p>
+                  <p className="text-sm text-gray-500">Ngày Tạo</p>
                   <p className="font-medium text-gray-900">
                     {new Date(user.createdAt).toLocaleDateString('en-US', {
                       year: 'numeric',
@@ -133,7 +133,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ user, isOpen, onClose
               <div className="flex items-center space-x-3">
                 <Calendar className="w-5 h-5 text-gray-400" />
                 <div>
-                  <p className="text-sm text-gray-500">Last Updated</p>
+                  <p className="text-sm text-gray-500">Cập Nhật Lần Cuối</p>
                   <p className="font-medium text-gray-900">
                     {new Date(user.updatedAt).toLocaleDateString('en-US', {
                       year: 'numeric',
@@ -156,7 +156,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ user, isOpen, onClose
             onClick={onClose}
             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Close
+Đóng
           </button>
           {/* <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
             Edit

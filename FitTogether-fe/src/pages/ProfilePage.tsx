@@ -3,9 +3,10 @@ import { User, Mail, Edit, Save, X } from 'lucide-react';
 import { useAuth, useToast } from '../hooks';
 import ToastContainer from '../components/ToastContainer';
 import type { UpdateProfileRequest } from '../types/auth';
+import { userService } from '../services/userService';
 
 const ProfilePage: React.FC = () => {
-  const { user, updateProfile, changePassword, isLoading, error, clearError } = useAuth();
+  const { user, changePassword, isLoading, error, clearError } = useAuth();
   const { success, toasts, removeToast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   
@@ -53,7 +54,7 @@ const ProfilePage: React.FC = () => {
     clearError();
 
     if (!profileData.name.trim()) {
-      setProfileError('Name cannot be empty');
+      setProfileError('Tên không được để trống');
       return;
     }
 
@@ -67,16 +68,16 @@ const ProfilePage: React.FC = () => {
         updates.email = profileData.email;
       }
 
-      const result = await updateProfile(updates);
+      const result = await userService.updateUser(user?.id?.toString() || '', updates);
       
       if (result.success) {
-        success('✅ Profile updated successfully!', 3000);
+        success('✅ Cập nhật hồ sơ thành công!', 3000);
         setIsEditing(false);
       } else {
-        setProfileError(result.error || 'Update failed');
+        setProfileError(result.error || 'Cập nhật thất bại');
       }
     } catch (err) {
-      setProfileError('An unexpected error occurred');
+      setProfileError('Có lỗi không mong muốn xảy ra');
     }
   };
 
@@ -86,17 +87,17 @@ const ProfilePage: React.FC = () => {
     clearError();
 
     if (!passwordData.currentPassword || !passwordData.newPassword) {
-      setPasswordError('Please fill in all information');
+      setPasswordError('Vui lòng điền đầy đủ thông tin');
       return;
     }
 
     if (passwordData.newPassword.length < 8) {
-      setPasswordError('New password must be at least 8 characters');
+      setPasswordError('Mật khẩu mới phải có ít nhất 8 ký tự');
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordError('Passwords do not match');
+      setPasswordError('Mật khẩu xác nhận không khớp');
       return;
     }
 
@@ -107,17 +108,17 @@ const ProfilePage: React.FC = () => {
       });
       
       if (result.success) {
-        success('🔐 Password changed successfully!', 3000);
+        success('🔐 Đổi mật khẩu thành công!', 3000);
         setPasswordData({
           currentPassword: '',
           newPassword: '',
           confirmPassword: '',
         });
       } else {
-        setPasswordError(result.error || 'Password change failed');
+        setPasswordError(result.error || 'Đổi mật khẩu thất bại');
       }
     } catch (err) {
-      setPasswordError('An unexpected error occurred');
+      setPasswordError('Có lỗi không mong muốn xảy ra');
     }
   };
 
@@ -145,7 +146,7 @@ const ProfilePage: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">Loading user information...</p>
+          <p className="text-gray-600">Đang tải thông tin người dùng...</p>
         </div>
       </div>
     );
@@ -155,8 +156,8 @@ const ProfilePage: React.FC = () => {
     <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Profile Information</h1>
-          <p className="text-gray-600 mt-2">Manage your account information</p>
+          <h1 className="text-3xl font-bold text-gray-900">Thông Tin Cá Nhân</h1>
+          <p className="text-gray-600 mt-2">Quản lý thông tin tài khoản của bạn</p>
         </div>
 
 
@@ -173,7 +174,7 @@ const ProfilePage: React.FC = () => {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900 flex items-center">
                 <User className="h-5 w-5 mr-2 text-blue-600" />
-                Basic Information
+                Thông Tin Cơ Bản
               </h2>
               {!isEditing && (
                 <button
@@ -181,7 +182,7 @@ const ProfilePage: React.FC = () => {
                   className="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
                 >
                   <Edit className="h-4 w-4 mr-1" />
-                  Edit
+                  Chỉnh sửa
                 </button>
               )}
             </div>
@@ -196,7 +197,7 @@ const ProfilePage: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name
+                    Họ và Tên
                   </label>
                   <input
                     type="text"
@@ -249,7 +250,7 @@ const ProfilePage: React.FC = () => {
                     className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    {isLoading ? 'Saving...' : 'Save Changes'}
+                      {isLoading ? 'Đang lưu...' : 'Lưu thay đổi'}
                   </button>
                   <button
                     type="button"
@@ -257,7 +258,7 @@ const ProfilePage: React.FC = () => {
                     className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-500 transition-colors"
                   >
                     <X className="h-4 w-4 mr-2" />
-                    Cancel
+                    Hủy
                   </button>
                 </div>
               )}
@@ -267,20 +268,14 @@ const ProfilePage: React.FC = () => {
           {/* Password Change */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">Change Password</h2>
+              <h2 className="text-xl font-semibold text-gray-900">Đổi Mật Khẩu</h2>
             </div>
               <>
-                {passwordError && (
-                  <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-red-600 text-sm">{passwordError}</p>
-                  </div>
-                )}
-
                 <form onSubmit={handleChangePassword}>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Current Password
+                        Mật khẩu hiện tại
                       </label>
                       <input
                         type="password"
@@ -288,13 +283,13 @@ const ProfilePage: React.FC = () => {
                         value={passwordData.currentPassword}
                         onChange={handlePasswordChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter current password"
+                        placeholder="Nhập mật khẩu hiện tại"
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        New Password
+                        Mật khẩu mới
                       </label>
                       <input
                         type="password"
@@ -302,13 +297,13 @@ const ProfilePage: React.FC = () => {
                         value={passwordData.newPassword}
                         onChange={handlePasswordChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Enter new password (minimum 8 characters)"
+                        placeholder="Nhập mật khẩu mới (tối thiểu 8 ký tự)"
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Confirm New Password
+                        Xác nhận mật khẩu mới
                       </label>
                       <input
                         type="password"
@@ -316,7 +311,7 @@ const ProfilePage: React.FC = () => {
                         value={passwordData.confirmPassword}
                         onChange={handlePasswordChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Re-enter new password"
+                        placeholder="Nhập lại mật khẩu mới"
                       />
                     </div>
                   </div>
@@ -328,7 +323,7 @@ const ProfilePage: React.FC = () => {
                       className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <Save className="h-4 w-4 mr-2" />
-                      {isLoading ? 'Updating...' : 'Update Password'}
+                      {isLoading ? 'Đang cập nhật...' : 'Cập nhật mật khẩu'}
                     </button>
                     <button
                       type="button"
@@ -336,7 +331,7 @@ const ProfilePage: React.FC = () => {
                       className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-gray-500 transition-colors"
                     >
                       <X className="h-4 w-4 mr-2" />
-                      Cancel
+                      Hủy
                     </button>
                   </div>
                 </form>

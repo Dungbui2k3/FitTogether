@@ -43,7 +43,7 @@ const LoginPage: React.FC = () => {
       });
 
       if (!result.success) {
-        setError("Login failed. Please try again.");
+        setError("Đăng nhập thất bại. Vui lòng thử lại.");
       } else {
         // Check user role and redirect accordingly
         const userData = result.data?.user;
@@ -55,8 +55,8 @@ const LoginPage: React.FC = () => {
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("An unexpected error occurred. Please try again.");
-      showError("An unexpected error occurred. Please try again.");
+      setError("Có lỗi không mong muốn xảy ra. Vui lòng thử lại.");
+      showError("Có lỗi không mong muốn xảy ra. Vui lòng thử lại.");
     } finally {
       setIsLoading(false);
     }
@@ -70,10 +70,10 @@ const LoginPage: React.FC = () => {
             <LogIn className="h-6 w-6 text-white" />
           </div> */}
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Chào Mừng Trở Lại
+            Fit Together
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Login to your account to continue shopping
+            Đăng nhập vào tài khoản của bạn để tiếp tục mua sắm
           </p>
         </div>
 
@@ -84,7 +84,7 @@ const LoginPage: React.FC = () => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Email Address
+                Địa chỉ Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -109,7 +109,7 @@ const LoginPage: React.FC = () => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Password
+                Mật khẩu
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -184,7 +184,7 @@ const LoginPage: React.FC = () => {
                 htmlFor="remember-me"
                 className="ml-2 block text-sm text-gray-700"
               >
-                Remember me
+                Ghi nhớ đăng nhập
               </label>
             </div>
 
@@ -193,7 +193,7 @@ const LoginPage: React.FC = () => {
                 to="/forgot-password"
                 className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
               >
-                Forgot password?
+                Quên mật khẩu?
               </Link>
             </div>
           </div>
@@ -207,12 +207,12 @@ const LoginPage: React.FC = () => {
               {isLoading ? (
                 <div className="flex items-center">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Loading...
+                  Đang đăng nhập...
                 </div>
               ) : (
                 <>
                   <LogIn className="h-5 w-5 mr-2" />
-                  Login
+                  Đăng nhập
                 </>
               )}
             </button>
@@ -220,12 +220,12 @@ const LoginPage: React.FC = () => {
 
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{" "}
+              Chưa có tài khoản?{" "}
               <Link
                 to="/register"
                 className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
               >
-                Sign up here
+                Đăng ký tại đây
               </Link>
             </p>
           </div>

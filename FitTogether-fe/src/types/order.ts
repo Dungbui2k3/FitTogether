@@ -1,4 +1,4 @@
-export type ProductType = 'physical' | 'digital';
+export type ProductType = 'physical'; // All sports accessories are physical products
 
 export interface OrderItemDto {
   productId: string;
@@ -11,8 +11,9 @@ export interface OrderItem {
   productId: {
     _id: string;
     name: string;
+    price: number;
+    urlImgs: string[];
   };
-  type: ProductType;
   quantity: number;
   price: number;
   createdAt: string;
@@ -25,11 +26,12 @@ export interface Order {
     _id: string;
     name: string;
     email: string;
-  };
+  } | null;
   items: OrderItem[];
   orderCode: string;
   status: 'pending' | 'success' | 'cancel';
   totalAmount: number;
+  paymentMethod?: 'payos' | 'cod';
   orderDate: string;
   notes?: string;
   createdAt: string;

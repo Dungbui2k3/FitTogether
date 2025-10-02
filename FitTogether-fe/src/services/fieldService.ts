@@ -75,9 +75,13 @@ class FieldService {
   /**
    * Tạo sân thể thao mới
    */
-  async createField(fieldData: CreateFieldRequest): Promise<ApiResponse<Field>> {
+  async createField(fieldData: CreateFieldRequest | FormData): Promise<ApiResponse<Field>> {
     try {
-      const response = await backendInstance.post<{ data: Field }>('/fields', fieldData);
+      const config = fieldData instanceof FormData 
+        ? { headers: { 'Content-Type': 'multipart/form-data' } }
+        : {};
+        
+      const response = await backendInstance.post<{ data: Field }>('/fields', fieldData, config);
       
       return {
         success: true,
@@ -101,9 +105,13 @@ class FieldService {
   /**
    * Cập nhật thông tin sân thể thao
    */
-  async updateField(id: string, fieldData: UpdateFieldRequest): Promise<ApiResponse<Field>> {
+  async updateField(id: string, fieldData: UpdateFieldRequest | FormData): Promise<ApiResponse<Field>> {
     try {
-      const response = await backendInstance.put<{ data: Field }>(`/fields/${id}`, fieldData);
+      const config = fieldData instanceof FormData 
+        ? { headers: { 'Content-Type': 'multipart/form-data' } }
+        : {};
+        
+      const response = await backendInstance.put<{ data: Field }>(`/fields/${id}`, fieldData, config);
       
       return {
         success: true,
@@ -150,9 +158,140 @@ class FieldService {
     }
   }
 
+  /**
+   * Khôi phục sân thể thao đã xóa
+   */
+  async restoreField(id: string): Promise<ApiResponse<Field>> {
+    try {
+      const response = await backendInstance.patch<{ data: Field }>(`/fields/${id}/restore`);
+      
+      return {
+        success: true,
+        data: response.data.data,
+        message: 'Khôi phục sân thể thao thành công',
+        status: response.status,
+      };
+    } catch (error: any) {
+      console.error('Restore field error:', error);
+      
+      const message = error.response?.data?.message || error.message || 'Không thể khôi phục sân thể thao';
+      return {
+        success: false,
+        data: null as any,
+        error: message,
+        status: error.response?.status || 500,
+      };
+    }
+  }
 
+  /**
+   * Xóa vĩnh viễn sân thể thao
+   */
+  async permanentDeleteField(id: string): Promise<ApiResponse<null>> {
+    try {
+      const response = await backendInstance.delete(`/fields/${id}/permanent`);
+      
+      return {
+        success: true,
+        data: null,
+        message: 'Xóa vĩnh viễn sân thể thao thành công',
+        status: response.status,
+      };
+    } catch (error: any) {
+      console.error('Permanent delete field error:', error);
+      
+      const message = error.response?.data?.message || error.message || 'Không thể xóa vĩnh viễn sân thể thao';
+      return {
+        success: false,
+        data: null,
+        error: message,
+        status: error.response?.status || 500,
+      };
+    }
+  }
 
+  /**
+   * Tìm kiếm sân thể thao
+   */
+  async searchFields(query: string): Promise<ApiResponse<Field[]>> {
+    try {
+      const response = await backendInstance.get<{ data: Field[] }>(`/fields/search?q=${encodeURIComponent(query)}`);
+      
+      return {
+        success: true,
+        data: response.data.data,
+        message: 'Tìm kiếm sân thể thao thành công',
+        status: response.status,
+      };
+    } catch (error: any) {
+      console.error('Search fields error:', error);
+      
+      const message = error.response?.data?.message || error.message || 'Không thể tìm kiếm sân thể thao';
+      return {
+        success: false,
+        data: null as any,
+        error: message,
+        status: error.response?.status || 500,
+      };
+    }
+  }
 
+  /**
+   * Lấy sân thể thao theo vị trí
+   */
+  async getFieldsByLocation(location: string): Promise<ApiResponse<Field[]>> {
+    try {
+      const response = await backendInstance.get<{ data: Field[] }>(`/fields/location?address=${encodeURIComponent(location)}`);
+      
+      return {
+        success: true,
+        data: response.data.data,
+        message: 'Lấy sân thể thao theo vị trí thành công',
+        status: response.status,
+      };
+    } catch (error: any) {
+      console.error('Get fields by location error:', error);
+      
+      const message = error.response?.data?.message || error.message || 'Không thể lấy sân thể thao theo vị trí';
+      return {
+        success: false,
+        data: null as any,
+        error: message,
+        status: error.response?.status || 500,
+      };
+    }
+  }
+
+  /**
+   * Lấy thống kê sân thể thao
+   */
+  async getFieldStats(): Promise<ApiResponse<{
+    total: number;
+    active: number;
+    deleted: number;
+    byLocation: { [key: string]: number };
+  }>> {
+    try {
+      const response = await backendInstance.get<{ data: any }>('/fields/stats');
+      
+      return {
+        success: true,
+        data: response.data.data,
+        message: 'Lấy thống kê sân thể thao thành công',
+        status: response.status,
+      };
+    } catch (error: any) {
+      console.error('Get field stats error:', error);
+      
+      const message = error.response?.data?.message || error.message || 'Không thể lấy thống kê sân thể thao';
+      return {
+        success: false,
+        data: null as any,
+        error: message,
+        status: error.response?.status || 500,
+      };
+    }
+  }
 }
 
 // Export singleton instance

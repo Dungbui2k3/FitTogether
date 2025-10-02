@@ -1,4 +1,3 @@
-import React from 'react';
 import { Dumbbell, Award, Truck, Shield } from 'lucide-react';
 
 const About = () => {

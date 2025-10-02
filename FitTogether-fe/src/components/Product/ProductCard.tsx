@@ -36,9 +36,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       name: product.name,
       price: product.price,
       quantity: 1,
-      version: 'digital',
       image: product.urlImgs?.[0],
-      currency: 'VND',
     });
 
     success(`${product.name} added to cart!`);
@@ -121,15 +119,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </button>
             <button 
               onClick={handleAddToCart}
-              disabled={isInCart(product.id, 'digital')}
+              disabled={isInCart(product.id)}
               className={`px-4 py-2 rounded-lg transition-colors flex items-center space-x-1 ${
-                isInCart(product.id, 'digital')
+                isInCart(product.id)
                   ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
                   : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
             >
               <ShoppingCart className="h-4 w-4" />
-              <span>{isInCart(product.id, 'digital') ? 'Added' : 'Add'}</span>
+              <span>{isInCart(product.id) ? 'Added' : 'Add'}</span>
             </button>
           </div>
         </div>

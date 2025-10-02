@@ -83,8 +83,8 @@ const UserManagement: React.FC = () => {
 //     }
 //   };
 
-  const handleDeleteUser = async (userId: number) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) {
+  const handleDeleteUser = async (userId: string) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa người dùng này không?')) {
       return;
     }
 
@@ -94,7 +94,7 @@ const UserManagement: React.FC = () => {
       if (response.success) {
         // Refresh data
         await fetchUsers();
-        console.log('User has been deleted');
+        console.log('Người dùng đã được xóa');
       } else {
         console.error(response.error);
       }
@@ -124,9 +124,9 @@ const UserManagement: React.FC = () => {
   const getStatusBadge = (user: User) => {
     const status = getUserStatus(user);
     const statusConfig = {
-      active: { bg: 'bg-green-100', text: 'text-green-800', label: 'Active' },
-      inactive: { bg: 'bg-red-100', text: 'text-red-800', label: 'Inactive' },
-      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending' }
+      active: { bg: 'bg-green-100', text: 'text-green-800', label: 'Hoạt Động' },
+      inactive: { bg: 'bg-red-100', text: 'text-red-800', label: 'Ngưng Hoạt Động' },
+      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Chờ Duyệt' }
     };
 
     const config = statusConfig[status];
@@ -144,7 +144,7 @@ const UserManagement: React.FC = () => {
       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
         isAdmin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
       }`}>
-        {isAdmin ? 'Admin' : 'User'}
+        {isAdmin ? 'Quản Trị Viên' : 'Người Dùng'}
       </span>
     );
   };
@@ -165,8 +165,8 @@ const UserManagement: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-            <p className="text-gray-600 mt-1">Manage user accounts in the system</p>
+            <h1 className="text-3xl font-bold text-gray-900">Quản Lý Người Dùng</h1>
+            <p className="text-gray-600 mt-1">Quản lý tài khoản người dùng trong hệ thống</p>
           </div>
         </div>
 
@@ -178,7 +178,7 @@ const UserManagement: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <input
                 type="text"
-                placeholder="Search by name or email..."
+                placeholder="Tìm kiếm theo tên hoặc email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -193,9 +193,9 @@ const UserManagement: React.FC = () => {
                 onChange={(e) => setFilterRole(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
               >
-                <option value="all">All Roles</option>
-                <option value="admin">Admin</option>
-                <option value="user">User</option>
+                <option value="all">Tất Cả Vai Trò</option>
+                <option value="admin">Quản Trị Viên</option>
+                <option value="user">Người Dùng</option>
               </select>
             </div>
 
@@ -221,7 +221,7 @@ const UserManagement: React.FC = () => {
           {loading && (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-              <span className="ml-2 text-gray-600">Loading data...</span>
+              <span className="ml-2 text-gray-600">Đang tải dữ liệu...</span>
             </div>
           )}
 
@@ -229,7 +229,7 @@ const UserManagement: React.FC = () => {
             <div className="flex items-center justify-center py-12">
               <AlertCircle className="h-8 w-8 text-red-600 mr-2" />
               <div className="text-center">
-                <h3 className="text-lg font-medium text-red-900 mb-2">An error occurred</h3>
+                <h3 className="text-lg font-medium text-red-900 mb-2">Đã xảy ra lỗi</h3>
                 <p className="text-red-600 mb-4">{error}</p>
                 <button 
                   onClick={() => fetchUsers()}
@@ -247,22 +247,22 @@ const UserManagement: React.FC = () => {
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    User
+                    Người Dùng
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Email
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Role
+                    Vai Trò
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    Trạng Thái
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Join Date
+                    Ngày Tham Gia
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    Hành Động
                   </th>
                 </tr>
               </thead>
@@ -306,7 +306,7 @@ const UserManagement: React.FC = () => {
                       <div className="flex items-center justify-end space-x-2">
                         <button 
                           className="p-1 text-blue-600 hover:text-blue-900 transition-colors" 
-                          title="View Details"
+                          title="Xem Chi Tiết"
                           onClick={() => handleViewUserDetails(user)}
                         >
                           <Eye className="h-4 w-4" />
@@ -326,7 +326,7 @@ const UserManagement: React.FC = () => {
                         </button> */}
                         <button 
                           className="p-1 text-red-600 hover:text-red-900 transition-colors" 
-                          title="Delete"
+                          title="Xóa"
                           onClick={() => handleDeleteUser(user._id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -348,10 +348,10 @@ const UserManagement: React.FC = () => {
               <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="h-12 w-12 text-gray-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
-              <p className="text-gray-500 mb-4">Try changing filters or search with different keywords.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Không tìm thấy người dùng</h3>
+              <p className="text-gray-500 mb-4">Thử thay đổi bộ lọc hoặc tìm kiếm với từ khóa khác.</p>
               <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                Add New User
+                Thêm Người Dùng Mới
               </button>
             </div>
           )}       
@@ -361,7 +361,7 @@ const UserManagement: React.FC = () => {
         {!loading && !error && filteredUsers.length > 0 && (
           <div className="mt-6 flex items-center justify-between">
             <div className="text-sm text-gray-700">
-              Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredUsers.length}</span> of <span className="font-medium">{totalUsers}</span> users
+              Hiển thị <span className="font-medium">1</span> đến <span className="font-medium">{filteredUsers.length}</span> trong tổng số <span className="font-medium">{totalUsers}</span> người dùng
             </div>
             <div className="flex items-center space-x-2">
               <button 
@@ -369,7 +369,7 @@ const UserManagement: React.FC = () => {
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(currentPage - 1)}
               >
-                Previous
+                Trước
               </button>
               <button className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors">
                 {currentPage}
@@ -379,7 +379,7 @@ const UserManagement: React.FC = () => {
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(currentPage + 1)}
               >
-                Next
+                Tiếp
               </button>
             </div>
           </div>

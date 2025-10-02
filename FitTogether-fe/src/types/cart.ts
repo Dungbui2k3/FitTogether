@@ -4,9 +4,7 @@ export interface CartItem {
   name: string;
   price: number;
   quantity: number;
-  version: 'digital' | 'physical';
   image?: string;
-  currency: string;
 }
 
 export interface Cart {
@@ -21,5 +19,5 @@ export interface CartContextType {
   removeFromCart: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
-  isInCart: (productId: string, version: 'digital' | 'physical') => boolean;
+  isInCart: (productId: string) => boolean;
 }

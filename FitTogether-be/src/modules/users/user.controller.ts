@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Put,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -115,18 +116,18 @@ export class UserController {
     );
   }
 
-  @Patch('me')
+  @Put(':id')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update current user profile' })
   @ApiResponse({ status: 200, description: 'Profile updated successfully' })
   async updateProfile(
-    @GetUser() currentUser: any,
+    @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto
   ) {
     // Remove role and isActive from update data for regular users
     const { role, isActive, ...allowedUpdates } = updateUserDto;
     
-    const user = await this.usersService.update(currentUser._id, allowedUpdates);
+    const user = await this.usersService.update(id, allowedUpdates);
     return ResponseUtil.success(
       {
         id: (user as any)._id,

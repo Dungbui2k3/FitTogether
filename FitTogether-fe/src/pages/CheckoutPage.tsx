@@ -49,13 +49,9 @@ const CheckoutPage: React.FC = () => {
     }
   }, [user]);
 
-  // Check if cart has digital products
-  const hasDigitalProducts = cart.items.some(
-    (item) => item.version === "digital"
-  );
-  const hasPhysicalProducts = cart.items.some(
-    (item) => item.version === "physical"
-  );
+  // All products are physical sports accessories
+  const hasDigitalProducts = false;
+  const hasPhysicalProducts = cart.items.length > 0;
 
   const formatPrice = (price: number, currency: string) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -93,7 +89,6 @@ const CheckoutPage: React.FC = () => {
       const orderItems = orderService.convertCartItemsToOrderItems(
         cart.items.map(item => ({
           productId: item.productId,
-          version: item.version,
           quantity: item.quantity,
         }))
       );
@@ -447,11 +442,11 @@ const CheckoutPage: React.FC = () => {
                       <h3 className="text-sm font-medium text-gray-900 truncate">
                         {item.name}
                       </h3>
-                      <p className="text-xs text-gray-500 capitalize">
-                        {item.version} Version
+                      <p className="text-xs text-gray-500">
+                        Sản phẩm thể thao
                       </p>
                       <p className="text-sm font-semibold text-blue-600">
-                        {formatPrice(item.price * item.quantity, item.currency)}
+                        {formatPrice(item.price * item.quantity, "VND")}
                       </p>
                     </div>
                     <div className="text-sm text-gray-500">
@@ -468,7 +463,7 @@ const CheckoutPage: React.FC = () => {
                     Items ({cart.itemCount})
                   </span>
                   <span className="font-medium">
-                    {formatPrice(cart.total, cart.items[0]?.currency || "VND")}
+                    {formatPrice(cart.total, "VND")}
                   </span>
                 </div>
 
@@ -476,7 +471,7 @@ const CheckoutPage: React.FC = () => {
                   <span className="text-gray-600">Shipping</span>
                   <span className="font-medium">
                     {hasPhysicalProducts ? (
-                      formatPrice(30000, cart.items[0]?.currency || "VND")
+                      formatPrice(30000, "VND")
                     ) : (
                       <span className="text-green-600">Free</span>
                     )}
@@ -491,7 +486,7 @@ const CheckoutPage: React.FC = () => {
                     <span className="text-xl font-bold text-blue-600">
                       {formatPrice(
                         cart.total + (hasPhysicalProducts ? 30000 : 0),
-                        cart.items[0]?.currency || "VND"
+                        "VND"
                       )}
                     </span>
                   </div>

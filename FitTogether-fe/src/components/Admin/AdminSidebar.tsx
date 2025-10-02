@@ -5,6 +5,7 @@ import {
   Package, 
   ShoppingCart, 
   Tag,
+  MapPin,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -57,22 +58,27 @@ const AdminSidebar: React.FC = () => {
   const menuItems = [
     {
       icon: <Users className="h-5 w-5" />,
-      label: 'User Management',
+      label: 'Quản Lý Người Dùng',
       to: '/admin/users'
     },
     {
       icon: <Package className="h-5 w-5" />,
-      label: 'Product Management',
+      label: 'Quản Lý Sản Phẩm',
       to: '/admin/products'
     },
     {
       icon: <Tag className="h-5 w-5" />,
-      label: 'Category Management',
+      label: 'Quản Lý Danh Mục',
       to: '/admin/categories'
     },
     {
+      icon: <MapPin className="h-5 w-5" />,
+      label: 'Quản Lý Sân Thể Thao',
+      to: '/admin/fields'
+    },
+    {
       icon: <ShoppingCart className="h-5 w-5" />,
-      label: 'Order Management',
+      label: 'Quản Lý Đơn Hàng',
       to: '/admin/orders'
     }
   ];
@@ -87,7 +93,7 @@ const AdminSidebar: React.FC = () => {
           <div className="flex items-center justify-between">
             {!isCollapsed && (
               <div>
-                <h1 className="text-xl font-bold text-gray-800">Admin Panel</h1>
+                <h1 className="text-xl font-bold text-gray-800">Bảng Quản Trị</h1>
               </div>
             )}
             <button
@@ -140,10 +146,10 @@ const AdminSidebar: React.FC = () => {
           <button
             onClick={handleLogout}
             className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors w-full"
-            title={isCollapsed ? 'Logout' : ''}
+            title={isCollapsed ? 'Đăng Xuất' : ''}
           >
             <LogOut className="h-5 w-5" />
-            {!isCollapsed && <span className="font-medium">Logout</span>}
+            {!isCollapsed && <span className="font-medium">Đăng Xuất</span>}
           </button>
         </div>
       </div>

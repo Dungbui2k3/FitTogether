@@ -4,6 +4,8 @@ import { FieldsService } from './fields.service';
 import { FieldsController } from './fields.controller';
 import { FieldsRepository } from './fields.repository';
 import { Field, FieldSchema } from 'src/schemas/field.schema';
+import { CloudinaryService } from '../../common/services/cloudinary.service';
+import { CloudinaryProvider } from '../products/cloudinary/cloudinary.provider';
 
 @Module({
   imports: [
@@ -15,7 +17,9 @@ import { Field, FieldSchema } from 'src/schemas/field.schema';
   providers: [
     FieldsService, 
     FieldsRepository,
+    CloudinaryProvider,
+    CloudinaryService,
   ],
-  exports: [FieldsService, FieldsRepository]
+  exports: [FieldsService, FieldsRepository, CloudinaryService]
 })
 export class FieldsModule {}

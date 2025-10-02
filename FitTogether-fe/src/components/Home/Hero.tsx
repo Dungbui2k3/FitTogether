@@ -32,7 +32,7 @@ const Hero = () => {
       product: {
         name: "Áo Thể Thao Adidas",
         price: "899.000₫",
-        image: "https://images.unsplash.com/photo-1556302332-4d3b57b11f75?w=400&h=400&fit=crop",
+        image: "https://product.hstatic.net/200000142885/product/z4121570251442_1ea4dad0962c57799e2306bf9b6cfe76_90c1420390b94518b2c2b45936bfbb88_master.jpg",
         description: "Vải thể thao cao cấp"
       },
       bgGradient: "from-orange-600 via-red-600 to-pink-800"

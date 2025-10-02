@@ -80,7 +80,7 @@ export class CreateProductDto {
   @IsNumber()
   @Min(0)
   @Type(() => Number)
-  physicalPrice: number;
+  price: number;
 
   @ApiProperty({
     description: 'Price of the 3D model',

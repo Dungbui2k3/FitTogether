@@ -11,6 +11,8 @@ import {
   HttpCode,
   HttpStatus,
   Put,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,7 +21,9 @@ import {
   ApiBearerAuth,
   ApiQuery,
   ApiParam,
+  ApiConsumes,
 } from '@nestjs/swagger';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { FieldsService } from './fields.service';
 import { CreateFieldDto } from './dto/create-field.dto';
 import { UpdateFieldDto } from './dto/update-field.dto';
@@ -33,6 +37,8 @@ export class FieldsController {
   constructor(private readonly fieldsService: FieldsService) {}
 
   @Post()
+  @UseInterceptors(FilesInterceptor('images', 10))
+  @ApiConsumes('multipart/form-data')
   @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create a new field (Admin only)' })
@@ -40,7 +46,14 @@ export class FieldsController {
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 409, description: 'Field name or phone already exists' })
   @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
-  async create(@Body() createFieldDto: CreateFieldDto) {
+  async create(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() createFieldDto: CreateFieldDto,
+  ) {
+    if (files?.length > 0) {
+      createFieldDto.images = files;
+    }
+
     return this.fieldsService.create(createFieldDto);
   }
 
@@ -106,6 +119,8 @@ export class FieldsController {
   }
 
   @Put(':id')
+  @UseInterceptors(FilesInterceptor('images', 10))
+  @ApiConsumes('multipart/form-data')
   @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update field by ID (Admin only)' })
@@ -118,7 +133,12 @@ export class FieldsController {
   async update(
     @Param('id') id: string,
     @Body() updateFieldDto: UpdateFieldDto,
+    @UploadedFiles() files: Express.Multer.File[],
   ) {
+    if (files?.length > 0) {
+      updateFieldDto.images = files;
+    }
+
     return this.fieldsService.update(id, updateFieldDto);
   }
 

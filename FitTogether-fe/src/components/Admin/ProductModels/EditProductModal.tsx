@@ -61,7 +61,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({ isOpen, onClose, on
         name: product.name,
         description: product.description,
         nation: product.nation,
-        categoryId: product.categoryId,
+        categoryId: product.category?._id,
         price: product.price,
         quantity: product.quantity,
         urlImgs: product.urlImgs,

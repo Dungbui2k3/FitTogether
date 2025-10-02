@@ -40,10 +40,10 @@ const AdminCategoryManagement: React.FC = () => {
       if (response.success) {
         setCategories(response.data || []);
       } else {
-        showError(response.message || 'Failed to load categories');
+        showError(response.message || 'Không thể tải danh mục');
       }
     } catch (error) {
-      showError('Failed to load categories');
+      showError('Không thể tải danh mục');
     } finally {
       setLoading(false);
     }
@@ -51,44 +51,44 @@ const AdminCategoryManagement: React.FC = () => {
 
   const handleCreateCategory = async () => {
     if (!formData.name.trim()) {
-      showError('Category name is required');
+      showError('Tên danh mục là bắt buộc');
       return;
     }
 
     try {
       const response = await categoryService.createCategory(formData);
       if (response.success) {
-        success('Category created successfully');
+        success('Tạo danh mục thành công');
         setShowCreateModal(false);
         setFormData({ name: '', description: '' });
         fetchCategories();
       } else {
-        showError(response.message || 'Failed to create category');
+        showError(response.message || 'Không thể tạo danh mục');
       }
     } catch (error) {
-      showError('Failed to create category');
+      showError('Không thể tạo danh mục');
     }
   };
 
   const handleUpdateCategory = async () => {
     if (!editingCategory || !formData.name.trim()) {
-      showError('Category name is required');
+      showError('Tên danh mục là bắt buộc');
       return;
     }
 
     try {
       const response = await categoryService.updateCategory(editingCategory._id, formData);
       if (response.success) {
-        success('Category updated successfully');
+        success('Cập nhật danh mục thành công');
         setShowEditModal(false);
         setEditingCategory(null);
         setFormData({ name: '', description: '' });
         fetchCategories();
       } else {
-        showError(response.message || 'Failed to update category');
+        showError(response.message || 'Không thể cập nhật danh mục');
       }
     } catch (error) {
-      showError('Failed to update category');
+      showError('Không thể cập nhật danh mục');
     }
   };
 
@@ -98,15 +98,15 @@ const AdminCategoryManagement: React.FC = () => {
     try {
       const response = await categoryService.deleteCategory(deletingCategory._id);
       if (response.success) {
-        success('Category deleted successfully');
+        success('Xóa danh mục thành công');
         setShowDeleteModal(false);
         setDeletingCategory(null);
         fetchCategories();
       } else {
-        showError(response.message || 'Failed to delete category');
+        showError(response.message || 'Không thể xóa danh mục');
       }
     } catch (error) {
-      showError('Failed to delete category');
+      showError('Không thể xóa danh mục');
     }
   };
 
@@ -152,7 +152,7 @@ const AdminCategoryManagement: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading categories...</p>
+          <p className="text-gray-600">Đang tải danh mục...</p>
         </div>
       </div>
     );
@@ -164,9 +164,9 @@ const AdminCategoryManagement: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Category Management</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Quản Lý Danh Mục</h1>
             <p className="text-gray-600 mt-1">
-              Manage product categories and their settings
+              Quản lý danh mục sản phẩm và cài đặt của chúng
             </p>
           </div>
           <button
@@ -174,7 +174,7 @@ const AdminCategoryManagement: React.FC = () => {
             className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Plus className="h-5 w-5 mr-2" />
-            Add Category
+            Thêm Danh Mục
           </button>
         </div>
 
@@ -186,7 +186,7 @@ const AdminCategoryManagement: React.FC = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Search categories..."
+                  placeholder="Tìm kiếm danh mục..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -204,16 +204,16 @@ const AdminCategoryManagement: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category name
+                    Tên danh mục
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Description
+                    Mô tả
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Created
+                    Ngày tạo
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
+                    Hành động
                   </th>
                 </tr>
               </thead>
@@ -238,7 +238,7 @@ const AdminCategoryManagement: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900 max-w-xs truncate">
-                        {category.description || 'No description'}
+                        {category.description || 'Không có mô tả'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -249,7 +249,7 @@ const AdminCategoryManagement: React.FC = () => {
                         <button
                           onClick={() => setSelectedCategory(category)}
                           className="text-blue-600 hover:text-blue-900 p-1 rounded"
-                          title="View Details"
+                          title="Xem Chi Tiết"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
@@ -257,7 +257,7 @@ const AdminCategoryManagement: React.FC = () => {
                         <button
                           onClick={() => openEditModal(category)}
                           className="text-yellow-600 hover:text-yellow-900 p-1 rounded"
-                          title="Edit Category"
+                          title="Chỉnh Sửa Danh Mục"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
@@ -265,7 +265,7 @@ const AdminCategoryManagement: React.FC = () => {
                         <button
                           onClick={() => openDeleteModal(category)}
                           className="text-red-600 hover:text-red-900 p-1 rounded"
-                          title="Delete Category"
+                          title="Xóa Danh Mục"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -282,42 +282,42 @@ const AdminCategoryManagement: React.FC = () => {
           <div className="text-center py-12">
             <Tag className="mx-auto h-12 w-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No categories found
+              Không tìm thấy danh mục
             </h3>
             <p className="text-gray-600 mb-6">
               {searchTerm
-                ? 'Try adjusting your search criteria.'
-                : 'Get started by creating your first category.'}
+                ? 'Thử điều chỉnh tiêu chí tìm kiếm của bạn.'
+                : 'Bắt đầu bằng cách tạo danh mục đầu tiên của bạn.'}
             </p>
             {!searchTerm && (
               <button
                 onClick={openCreateModal}
                 className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
               >
-                Create Category
+                Tạo Danh Mục
               </button>
             )}
           </div>
         )}
       </div>
 
-      {/* Create Category Modal */}
+      {/* Tạo Danh Mục Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Create New Category</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Tạo Danh Mục Mới</h2>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category Name *
+                  Tên Danh Mục *
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter category name"
+                  placeholder="Nhập tên danh mục"
                 />
               </div>
               
@@ -330,7 +330,7 @@ const AdminCategoryManagement: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Enter category description"
+                  placeholder="Nhập mô tả danh mục"
                 />
               </div>
             </div>
@@ -340,13 +340,13 @@ const AdminCategoryManagement: React.FC = () => {
                 onClick={() => setShowCreateModal(false)}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                Cancel
+                Hủy
               </button>
               <button
                 onClick={handleCreateCategory}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Create Category
+                Tạo Danh Mục
               </button>
             </div>
           </div>
@@ -357,19 +357,19 @@ const AdminCategoryManagement: React.FC = () => {
       {showEditModal && editingCategory && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Edit Category</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Chỉnh Sửa Danh Mục</h2>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category Name *
+                  Tên Danh Mục *
                 </label>
                 <input
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter category name"
+                  placeholder="Nhập tên danh mục"
                 />
               </div>
               
@@ -382,7 +382,7 @@ const AdminCategoryManagement: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   rows={3}
-                  placeholder="Enter category description"
+                  placeholder="Nhập mô tả danh mục"
                 />
               </div>
             </div>
@@ -392,13 +392,13 @@ const AdminCategoryManagement: React.FC = () => {
                 onClick={() => setShowEditModal(false)}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                Cancel
+                Hủy
               </button>
               <button
                 onClick={handleUpdateCategory}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Update Category
+                Cập Nhật Danh Mục
               </button>
             </div>
           </div>
@@ -413,12 +413,12 @@ const AdminCategoryManagement: React.FC = () => {
               <div className="p-2 bg-red-100 rounded-lg mr-3">
                 <Trash2 className="h-6 w-6 text-red-600" />
               </div>
-              <h2 className="text-xl font-bold text-gray-900">Delete Category</h2>
+              <h2 className="text-xl font-bold text-gray-900">Xóa Danh Mục</h2>
             </div>
             
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete the category "{deletingCategory.name}"? 
-              This action cannot be undone and may affect products in this category.
+              Bạn có chắc chắn muốn xóa danh mục "{deletingCategory.name}" không? 
+              Hành động này không thể hoàn tác và có thể ảnh hưởng đến các sản phẩm trong danh mục này.
             </p>
             
             <div className="flex justify-end space-x-3">
@@ -426,13 +426,13 @@ const AdminCategoryManagement: React.FC = () => {
                 onClick={() => setShowDeleteModal(false)}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                Cancel
+                Hủy
               </button>
               <button
                 onClick={handleDeleteCategory}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
-                Delete Category
+                Xóa Danh Mục
               </button>
             </div>
           </div>
@@ -444,7 +444,7 @@ const AdminCategoryManagement: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-gray-900">Category Details</h2>
+              <h2 className="text-xl font-bold text-gray-900">Chi Tiết Danh Mục</h2>
               <button
                 onClick={() => setSelectedCategory(null)}
                 className="text-gray-400 hover:text-gray-600"
@@ -473,14 +473,14 @@ const AdminCategoryManagement: React.FC = () => {
               </div>
               
               <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-1">Description</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-1">Mô Tả</h4>
                 <p className="text-gray-900">
-                  {selectedCategory.description || 'No description provided'}
+                  {selectedCategory.description || 'Không có mô tả'}
                 </p>
               </div>
               
               <div className="text-left">
-                <h4 className="text-sm font-medium text-gray-700 mb-1">Created</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-1">Ngày Tạo</h4>
                 <p className="text-sm text-gray-900">
                   {formatDate(selectedCategory.createdAt)}
                 </p>
@@ -492,7 +492,7 @@ const AdminCategoryManagement: React.FC = () => {
                 onClick={() => setSelectedCategory(null)}
                 className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               >
-                Close
+                Đóng
               </button>
             </div>
           </div>

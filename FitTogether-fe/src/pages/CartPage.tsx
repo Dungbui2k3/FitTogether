@@ -22,23 +22,19 @@ const CartPage: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const formatPrice = (price: number, currency: string) => {
+  const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
-      currency: currency,
+      currency: 'VND',
     }).format(price);
   };
 
   const handleQuantityChange = (
     itemId: string,
-    newQuantity: number,
-    version: "digital" | "physical"
+    newQuantity: number
   ) => {
     if (newQuantity < 1) {
       return;
-    } else if (version === "digital" && newQuantity > 1) {
-      // Digital products can only have quantity 1
-      success("Digital products can only have quantity 1");
     } else {
       updateQuantity(itemId, newQuantity);
     }
@@ -46,7 +42,7 @@ const CartPage: React.FC = () => {
 
   const handleRemoveItem = (itemId: string, itemName: string) => {
     removeFromCart(itemId);
-    success(`${itemName} removed from cart`);
+    success(`${itemName} đã được xóa khỏi giỏ hàng`);
   };
 
 
@@ -60,24 +56,23 @@ const CartPage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="flex items-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Giỏ Hàng</h1>
           </div>
 
           {/* Empty Cart */}
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
             <ShoppingCart className="h-24 w-24 text-gray-300 mx-auto mb-6" />
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Your cart is empty
+              Giỏ hàng của bạn đang trống
             </h2>
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              Looks like you haven't added any items to your cart yet. Start
-              shopping to fill it up!
+              Có vẻ như bạn chưa thêm sản phẩm nào vào giỏ hàng. Hãy bắt đầu mua sắm ngay!
             </p>
             <button
               onClick={() => navigate("/")}
               className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all"
             >
-              Start Shopping
+              Bắt Đầu Mua Sắm
             </button>
           </div>
         </div>
@@ -91,7 +86,7 @@ const CartPage: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Giỏ Hàng</h1>
           </div>
         </div>
 
@@ -113,25 +108,25 @@ const CartPage: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-8">
               <h2 className="text-xl font-bold text-gray-900 mb-6">
-                Order Summary
+                Tóm Tắt Đơn Hàng
               </h2>
 
               {/* Items Count */}
               <div className="flex justify-between items-center mb-4">
-                <span className="text-gray-600">Items ({cart.itemCount})</span>
+                <span className="text-gray-600">Sản phẩm ({cart.itemCount})</span>
                 <span className="font-medium">
-                  {formatPrice(cart.total, cart.items[0]?.currency || "VND")}
+                  {formatPrice(cart.total)}
                 </span>
               </div>
 
               {/* Shipping */}
               <div className="flex justify-between items-center mb-6">
-                <span className="text-gray-600">Shipping</span>
+                <span className="text-gray-600">Phí vận chuyển</span>
                 <span className="font-medium">
-                  {cart.items.some((item) => item.version === "physical") ? (
-                    formatPrice(30000, cart.items[0]?.currency || "VND")
+                  {cart.items.length > 0 ? (
+                    formatPrice(30000)
                   ) : (
-                    <span className="text-green-600">Free</span>
+                    <span className="text-green-600">Miễn phí</span>
                   )}
                 </span>
               </div>
@@ -141,14 +136,10 @@ const CartPage: React.FC = () => {
 
               {/* Total */}
               <div className="flex justify-between items-center mb-6">
-                <span className="text-lg font-bold text-gray-900">Total</span>
+                <span className="text-lg font-bold text-gray-900">Tổng cộng</span>
                 <span className="text-2xl font-bold text-blue-600">
                   {formatPrice(
-                    cart.total +
-                      (cart.items.some((item) => item.version === "physical")
-                        ? 30000
-                        : 0),
-                    cart.items[0]?.currency || "VND"
+                    cart.total + (cart.items.length > 0 ? 30000 : 0)
                   )}
                 </span>
               </div>
@@ -159,14 +150,14 @@ const CartPage: React.FC = () => {
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all flex items-center justify-center space-x-2 mb-4"
               >
                 <CreditCard className="h-5 w-5" />
-                <span>Proceed to Checkout</span>
+                <span>Tiến Hành Thanh Toán</span>
               </button>
 
               {/* Security Info */}
               <div className="text-center text-sm text-gray-500">
                 <p className="flex items-center justify-center space-x-1">
                   <Package className="h-4 w-4" />
-                  <span>Secure checkout</span>
+                  <span>Thanh toán an toàn</span>
                 </p>
               </div>
             </div>
@@ -181,11 +172,10 @@ interface CartItemCardProps {
   item: CartItem;
   onQuantityChange: (
     itemId: string,
-    quantity: number,
-    version: "digital" | "physical"
+    quantity: number
   ) => void;
   onRemove: (itemId: string, itemName: string) => void;
-  formatPrice: (price: number, currency: string) => string;
+  formatPrice: (price: number) => string;
 }
 
 const CartItemCard: React.FC<CartItemCardProps> = ({
@@ -207,7 +197,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
             />
           ) : (
             <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-400 text-xs">No Image</span>
+              <span className="text-gray-400 text-xs">Không có ảnh</span>
             </div>
           )}
         </div>
@@ -218,13 +208,12 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
             {item.name}
           </h3>
           <div className="flex items-center space-x-4 mb-3">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 capitalize">
-              {item.version} Version
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              Sản phẩm thể thao
             </span>
-            <span className="text-sm text-gray-500">{item.currency}</span>
           </div>
           <p className="text-xl font-bold text-blue-600">
-            {formatPrice(item.price, item.currency)}
+            {formatPrice(item.price)}
           </p>
         </div>
 
@@ -234,7 +223,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
           <div className="flex items-center space-x-3">
             <button
               onClick={() =>
-                onQuantityChange(item.id, item.quantity - 1, item.version)
+                onQuantityChange(item.id, item.quantity - 1)
               }
               className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
             >
@@ -245,14 +234,9 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
             </span>
             <button
               onClick={() =>
-                onQuantityChange(item.id, item.quantity + 1, item.version)
+                onQuantityChange(item.id, item.quantity + 1)
               }
-              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                item.version === "digital"
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-100 hover:bg-gray-200"
-              }`}
-              disabled={item.version === "digital"}
+              className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
             >
               <Plus className="h-4 w-4" />
             </button>
@@ -260,9 +244,9 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
 
           {/* Item Total */}
           <div className="flex justify-end items-center">
-            <p className="text-lg text-gray-500">Total:</p>
+            <p className="text-lg text-gray-500">Tổng:</p>
             <p className="text-lg font-bold text-gray-900 ml-2">
-              {formatPrice(item.price * item.quantity, item.currency)}
+              {formatPrice(item.price * item.quantity)}
             </p>
           </div>
 
@@ -272,7 +256,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
             className="flex items-center space-x-1 text-red-500 hover:text-red-700 transition-colors"
           >
             <Trash2 className="h-4 w-4" />
-            <span className="text-sm font-medium">Remove</span>
+            <span className="text-sm font-medium">Xóa</span>
           </button>
         </div>
       </div>

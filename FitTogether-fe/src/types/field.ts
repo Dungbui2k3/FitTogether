@@ -1,12 +1,12 @@
 export interface Field {
-  _id: string;
+  id: string;
   name: string;
   address: string;
   phone: string;
   facilities: string[];
   description?: string;
   images?: string[];
-  isDeleted: boolean;
+  isDeleted?: boolean;
   createdAt: string;
   updatedAt: string;
   __v?: number;

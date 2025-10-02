@@ -82,11 +82,11 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    return user;
+    return user as unknown as UserDocument;
   }
 
   async findByEmail(email: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({ email }).exec();
+    return this.userModel.findOne({ email }).exec() as Promise<UserDocument | null>;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
@@ -142,6 +142,6 @@ export class UsersService {
 
   // Helper method for authentication (includes password)
   async findByEmailForAuth(email: string): Promise<UserDocument | null> {
-    return this.userModel.findOne({ email }).exec();
+    return this.userModel.findOne({ email }).exec() as Promise<UserDocument | null> ;
   }
 }

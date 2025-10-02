@@ -45,11 +45,11 @@ const AdminOrderManagement: React.FC = () => {
         setTotalOrders(response.data.total);
         setTotalPages(Math.ceil(response.data.total / limit));
       } else {
-        showError(response.message || "Failed to load orders");
+        showError(response.message || "Không thể tải đơn hàng");
         setOrders([]);
       }
     } catch (error) {
-      showError("Failed to load orders");
+      showError("Không thể tải đơn hàng");
       setOrders([]);
     } finally {
       setLoading(false);
@@ -60,13 +60,14 @@ const AdminOrderManagement: React.FC = () => {
     try {
       const response = await orderService.updateOrderStatus(orderId, newStatus);
       if (response.success) {
-        success(`Order status updated to ${newStatus}`);
+        const statusText = newStatus === 'pending' ? 'Đang Xử Lý' : newStatus === 'success' ? 'Hoàn Thành' : 'Đã Hủy';
+        success(`Trạng thái đơn hàng đã được cập nhật thành ${statusText}`);
         fetchOrders();
       } else {
-        showError(response.message || "Failed to update order status");
+        showError(response.message || "Không thể cập nhật trạng thái đơn hàng");
       }
     } catch (error) {
-      showError("Failed to update order status");
+      showError("Không thể cập nhật trạng thái đơn hàng");
     }
   };
 
@@ -82,8 +83,8 @@ const AdminOrderManagement: React.FC = () => {
 
   const filteredOrders = orders.filter(order =>
     order.orderCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.userId.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    order.userId.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (order.userId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+    (order.userId?.email?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
   );
 
   const formatPrice = (price: number) => {
@@ -104,9 +105,9 @@ const AdminOrderManagement: React.FC = () => {
   };
 
   const truncateItems = (items: any[], maxLength: number = 18) => {
-    if (!items || items.length === 0) return 'No items';
+    if (!items || items.length === 0) return 'Không có sản phẩm';
     
-    const itemsText = items.map(item => item.productId.name).join(', ');
+    const itemsText = items.map(item => item.productId?.name || 'Sản phẩm không xác định').join(', ');
     if (itemsText.length <= maxLength) {
       return itemsText;
     }
@@ -139,11 +140,11 @@ const AdminOrderManagement: React.FC = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case "pending":
-        return "Processing";
+        return "Đang Xử Lý";
       case "success":
-        return "Completed";
+        return "Hoàn Thành";
       case "cancel":
-        return "Cancelled";
+        return "Đã Hủy";
       default:
         return status;
     }
@@ -167,7 +168,7 @@ const AdminOrderManagement: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading orders...</p>
+          <p className="text-gray-600">Đang tải đơn hàng...</p>
         </div>
       </div>
     );
@@ -183,8 +184,8 @@ const AdminOrderManagement: React.FC = () => {
               <Package className="h-6 w-6 text-blue-600" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Order Management</h1>
-              <p className="text-gray-600">Manage and track all orders</p>
+              <h1 className="text-3xl font-bold text-gray-900">Quản Lý Đơn Hàng</h1>
+              <p className="text-gray-600">Quản lý và theo dõi tất cả đơn hàng</p>
             </div>
           </div>
         </div>
@@ -197,7 +198,7 @@ const AdminOrderManagement: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                 placeholder="Search by order code, customer name or email..."
+                 placeholder="Tìm kiếm theo mã đơn hàng, tên khách hàng hoặc email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -212,17 +213,17 @@ const AdminOrderManagement: React.FC = () => {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
               >
-                <option value="all">All Status</option>
-                <option value="pending">Processing</option>
-                <option value="success">Completed</option>
-                <option value="cancel">Cancelled</option>
+                <option value="all">Tất Cả Trạng Thái</option>
+                <option value="pending">Đang Xử Lý</option>
+                <option value="success">Hoàn Thành</option>
+                <option value="cancel">Đã Hủy</option>
               </select>
             </div>
 
             {/* Stats */}
             <div className="flex items-center justify-center">
               <span className="text-sm text-gray-600">
-                Total: {totalOrders} orders
+                Tổng cộng: {totalOrders} đơn hàng
               </span>
             </div>
           </div>
@@ -233,8 +234,8 @@ const AdminOrderManagement: React.FC = () => {
           {filteredOrders.length === 0 ? (
             <div className="text-center py-12">
               <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
-              <p className="text-gray-500">No orders match your current filters.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Không tìm thấy đơn hàng</h3>
+              <p className="text-gray-500">Không có đơn hàng nào phù hợp với bộ lọc hiện tại.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -242,25 +243,25 @@ const AdminOrderManagement: React.FC = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Order
+                      Đơn Hàng
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Customer
+                      Khách Hàng
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Items
+                      Sản Phẩm
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Total
+                      Tổng Tiền
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
+                      Trạng Thái
                     </th>
                     {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
                     </th> */}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
+                      Hành Động
                     </th>
                   </tr>
                 </thead>
@@ -277,16 +278,16 @@ const AdminOrderManagement: React.FC = () => {
                        <td className="px-6 py-4 whitespace-nowrap">
                          <div>
                            <div className="text-sm font-medium text-gray-900">
-                             {order.userId.name}
+                             {order.userId?.name || 'Khách vãng lai'}
                            </div>
                            <div className="text-sm text-gray-500">
-                             {order.userId.email}
+                             {order.userId?.email || 'Không có email'}
                            </div>
                          </div>
                        </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
-                          {order.items.length} item{order.items.length !== 1 ? 's' : ''}
+                          {order.items.length} sản phẩm
                         </div>
                         <div className="text-sm text-gray-500 w-30">
                           {truncateItems(order.items)}
@@ -315,7 +316,7 @@ const AdminOrderManagement: React.FC = () => {
                              className="group relative px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-all duration-200 flex items-center space-x-1.5 shadow-sm hover:shadow-md"
                            >
                              <Eye className="h-3.5 w-3.5" />
-                             <span className="text-xs font-medium">View</span>
+                             <span className="text-xs font-medium">Xem</span>
                            </button>
                            
                            {order.status === 'pending' && (
@@ -325,14 +326,14 @@ const AdminOrderManagement: React.FC = () => {
                                  className="group relative px-3 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-all duration-200 flex items-center space-x-1.5 shadow-sm hover:shadow-md"
                                >
                                  <CheckCircle className="h-3.5 w-3.5" />
-                                 <span className="text-xs font-medium">Complete</span>
+                                 <span className="text-xs font-medium">Hoàn Thành</span>
                                </button>
                                <button
                                  onClick={() => handleStatusChange(order._id, 'cancel')}
                                  className="group relative px-3 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all duration-200 flex items-center space-x-1.5 shadow-sm hover:shadow-md"
                                >
                                  <XCircle className="h-3.5 w-3.5" />
-                                 <span className="text-xs font-medium">Cancel</span>
+                                 <span className="text-xs font-medium">Hủy</span>
                                </button>
                              </>
                            )}
@@ -350,7 +351,7 @@ const AdminOrderManagement: React.FC = () => {
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-6">
             <div className="text-sm text-gray-700">
-              Showing {((currentPage - 1) * limit) + 1} to {Math.min(currentPage * limit, totalOrders)} of {totalOrders} results
+              Hiển thị {((currentPage - 1) * limit) + 1} đến {Math.min(currentPage * limit, totalOrders)} trong tổng số {totalOrders} kết quả
             </div>
             <div className="flex items-center space-x-2">
               <button
@@ -359,7 +360,7 @@ const AdminOrderManagement: React.FC = () => {
                 className="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
-                Previous
+                Trước
               </button>
               
               <div className="flex items-center space-x-1">
@@ -386,7 +387,7 @@ const AdminOrderManagement: React.FC = () => {
                 disabled={currentPage === totalPages}
                 className="flex items-center px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next
+                Tiếp
                 <ChevronRight className="h-4 w-4 ml-1" />
               </button>
             </div>
@@ -406,7 +407,7 @@ const AdminOrderManagement: React.FC = () => {
                  </div>
                  <div>
                    <h2 className="text-2xl font-bold text-gray-900">
-                     Order Details
+                     Chi Tiết Đơn Hàng
                    </h2>
                    <p className="text-gray-600">{selectedOrder.orderCode}</p>
                  </div>
@@ -434,7 +435,7 @@ const AdminOrderManagement: React.FC = () => {
                      {formatPrice(selectedOrder.totalAmount)}
                    </p>
                    <p className="text-sm text-gray-500">
-                     Order Date: {formatDate(selectedOrder.orderDate)}
+                     Ngày đặt hàng: {formatDate(selectedOrder.orderDate)}
                    </p>
                  </div>
                </div>
@@ -443,20 +444,20 @@ const AdminOrderManagement: React.FC = () => {
                <div className="bg-gray-50 rounded-lg p-4">
                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
                    <User className="h-5 w-5 mr-2" />
-                   Customer Information
+                   Thông Tin Khách Hàng
                  </h3>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                    <div>
-                     <p className="text-sm text-gray-500">Name</p>
-                     <p className="font-medium text-gray-900">{selectedOrder.userId.name}</p>
+                     <p className="text-sm text-gray-500">Tên</p>
+                     <p className="font-medium text-gray-900">{selectedOrder.userId?.name || 'Khách vãng lai'}</p>
                    </div>
                    <div>
                      <p className="text-sm text-gray-500">Email</p>
-                     <p className="font-medium text-gray-900">{selectedOrder.userId.email}</p>
+                     <p className="font-medium text-gray-900">{selectedOrder.userId?.email || 'Không có email'}</p>
                    </div>
                    <div>
-                     <p className="text-sm text-gray-500">Customer ID</p>
-                     <p className="font-medium text-gray-900">{selectedOrder.userId._id}</p>
+                     <p className="text-sm text-gray-500">Mã Khách Hàng</p>
+                     <p className="font-medium text-gray-900">{selectedOrder.userId?._id || 'N/A'}</p>
                    </div>
                  </div>
                </div>
@@ -465,7 +466,7 @@ const AdminOrderManagement: React.FC = () => {
                <div>
                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center">
                    <Package className="h-5 w-5 mr-2" />
-                   Order Items ({selectedOrder.items.length})
+                   Sản Phẩm Trong Đơn Hàng ({selectedOrder.items.length})
                  </h3>
                  <div className="space-y-3">
                    {selectedOrder.items.map((item, index) => (
@@ -473,18 +474,14 @@ const AdminOrderManagement: React.FC = () => {
                        <div className="flex items-center justify-between">
                          <div className="flex-1">
                            <h4 className="font-medium text-gray-900">
-                             {item.productId.name}
+                             {item.productId?.name || 'Sản phẩm không xác định'}
                            </h4>
                            <div className="flex items-center space-x-4 mt-2">
-                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                               item.type === "digital"
-                                 ? "bg-blue-100 text-blue-800"
-                                 : "bg-green-100 text-green-800"
-                             }`}>
-                               {item.type === "digital" ? "Digital" : "Physical"}
+                             <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                               Phụ Kiện Thể Thao
                              </span>
                              <span className="text-sm text-gray-500">
-                               Quantity: {item.quantity}
+                               Số lượng: {item.quantity}
                              </span>
                            </div>
                          </div>
@@ -493,7 +490,7 @@ const AdminOrderManagement: React.FC = () => {
                              {formatPrice(item.price * item.quantity)}
                            </p>
                            <p className="text-sm text-gray-500">
-                             {formatPrice(item.price)} each
+                             {formatPrice(item.price)} mỗi sản phẩm
                            </p>
                          </div>
                        </div>
@@ -507,7 +504,7 @@ const AdminOrderManagement: React.FC = () => {
                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                    <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center">
                      <Calendar className="h-5 w-5 mr-2" />
-                     Order Notes
+                     Ghi Chú Đơn Hàng
                    </h3>
                    <p className="text-gray-700">{selectedOrder.notes}</p>
                  </div>
@@ -515,26 +512,26 @@ const AdminOrderManagement: React.FC = () => {
 
                {/* Order Summary */}
                <div className="bg-gray-50 rounded-lg p-4">
-                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Order Summary</h3>
+                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Tóm Tắt Đơn Hàng</h3>
                  <div className="space-y-2">
                    <div className="flex justify-between">
-                     <span className="text-gray-600">Items ({selectedOrder.items.length})</span>
+                     <span className="text-gray-600">Sản phẩm ({selectedOrder.items.length})</span>
                      <span className="font-medium">
-                       {formatPrice(selectedOrder.items.reduce((sum, item) => sum + (item.price * item.quantity), 0))}
+                       {formatPrice(selectedOrder.items?.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 0)), 0) || 0)}
                      </span>
                    </div>
                    <div className="flex justify-between">
-                     <span className="text-gray-600">Shipping</span>
+                     <span className="text-gray-600">Phí vận chuyển</span>
                      <span className="font-medium">
-                       {selectedOrder.items.some(item => item.type === 'physical') 
+                       {selectedOrder.items.length > 0 
                          ? formatPrice(30000) 
-                         : 'Free'
+                         : 'Miễn phí'
                        }
                      </span>
                    </div>
                    <div className="border-t border-gray-300 pt-2">
                      <div className="flex justify-between">
-                       <span className="text-lg font-bold text-gray-900">Total</span>
+                       <span className="text-lg font-bold text-gray-900">Tổng cộng</span>
                        <span className="text-xl font-bold text-blue-600">
                          {formatPrice(selectedOrder.totalAmount)}
                        </span>
@@ -552,13 +549,13 @@ const AdminOrderManagement: React.FC = () => {
                    <div className="flex items-center space-x-2">
                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                      <span className="text-sm text-gray-600">
-                       Order ID: {selectedOrder._id.slice(-8).toUpperCase()}
+                       Mã đơn hàng: {selectedOrder._id.slice(-8).toUpperCase()}
                      </span>
                    </div>
                    <div className="flex items-center space-x-2">
                      <Calendar className="h-4 w-4 text-gray-400" />
                      <span className="text-sm text-gray-600">
-                       Created: {formatDate(selectedOrder.createdAt)}
+                       Ngày tạo: {formatDate(selectedOrder.createdAt)}
                      </span>
                    </div>
                  </div>
@@ -575,7 +572,7 @@ const AdminOrderManagement: React.FC = () => {
                          className="group relative px-6 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center space-x-2"
                        >
                          <CheckCircle className="h-4 w-4" />
-                         <span className="font-medium">Complete Order</span>
+                         <span className="font-medium">Hoàn Thành Đơn Hàng</span>
                          <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-xl transition-opacity duration-200"></div>
                        </button>
                        <button
@@ -586,7 +583,7 @@ const AdminOrderManagement: React.FC = () => {
                          className="group relative px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center space-x-2"
                        >
                          <XCircle className="h-4 w-4" />
-                         <span className="font-medium">Cancel Order</span>
+                         <span className="font-medium">Hủy Đơn Hàng</span>
                          <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-xl transition-opacity duration-200"></div>
                        </button>
                      </>
@@ -599,7 +596,7 @@ const AdminOrderManagement: React.FC = () => {
                      className="group relative px-6 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 flex items-center space-x-2"
                    >
                      <X className="h-4 w-4" />
-                     <span className="font-medium">Close</span>
+                     <span className="font-medium">Đóng</span>
                    </button>
                  </div>
                </div>

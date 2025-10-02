@@ -20,6 +20,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import UserManagement from "./pages/Admin/UserManagement";
 import OrderManagement from "./pages/Admin/OrderManagement";
 import AdminCategoryManagement from "./pages/Admin/CategoryManagement";
+import FieldManagement from "./pages/Admin/FieldManagement";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/Admin/AdminRoute";
 import AdminLayout from "./components/Admin/AdminLayout";
@@ -91,8 +92,9 @@ function App() {
           }>
             <Route path="users" element={<UserManagement />} />
             <Route path="products" element={<ProductManagement />} />
-            <Route path="orders" element={<OrderManagement />} />
             <Route path="categories" element={<AdminCategoryManagement />} />
+            <Route path="fields" element={<FieldManagement />} />
+            <Route path="orders" element={<OrderManagement />} />
           </Route>
           
           <Route path="/login" element={<LoginPage />} />

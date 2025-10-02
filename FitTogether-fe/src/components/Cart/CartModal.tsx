@@ -64,7 +64,7 @@ const CartModal: React.FC<CartModalProps> = ({ isOpen, onClose }) => {
             <div className="flex justify-between items-center mb-4">
               <span className="text-lg font-semibold text-gray-900">Total:</span>
               <span className="text-2xl font-bold text-blue-600">
-                {formatPrice(cart.total, cart.items[0]?.currency || 'VND')}
+                {formatPrice(cart.total, 'VND')}
               </span>
             </div>
             

@@ -47,6 +47,16 @@ export class Field {
   @Prop()
   description?: string;
 
+  @ApiProperty({
+    description: 'Array of image URLs for the field',
+    example: [
+      'https://example.com/images/field-main.jpg',
+      'https://example.com/images/field-facilities.jpg',
+    ],
+  })
+  @Prop({ type: [String], default: [] })
+  images: string[];
+
   // === Soft Delete ===
   @ApiProperty({ description: 'Soft delete flag', example: false })
   @Prop({ default: false })
