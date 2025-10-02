@@ -92,6 +92,7 @@ export interface ProductListParams {
   category?: string;
   priceMin?: number;
   priceMax?: number;
+  categoryId?: string;
   sortBy?: 'name' | 'price' | 'rating' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
   featured?: boolean;

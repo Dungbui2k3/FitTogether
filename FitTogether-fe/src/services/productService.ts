@@ -21,6 +21,7 @@ class ProductService {
       if (params.featured !== undefined) queryParams.append('featured', params.featured.toString());
       if (params.inStock !== undefined) queryParams.append('inStock', params.inStock.toString());
       if (params.difficulty) queryParams.append('difficulty', params.difficulty);
+      if (params.categoryId) queryParams.append('categoryId', params.categoryId);
 
       const response = await backendInstance.get<{ data: ProductListResponse }>(
         `/products?${queryParams.toString()}`
