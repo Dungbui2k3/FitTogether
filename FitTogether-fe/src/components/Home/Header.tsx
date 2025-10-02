@@ -101,12 +101,12 @@ const Header = () => {
             >
               Trang Chủ
             </button>
-            <button
-              onClick={() => handleNavClick("products")}
+            <Link
+              to="/products"
               className="text-gray-700 hover:text-blue-600 transition-colors font-medium"
             >
               Sản Phẩm
-            </button>
+            </Link>
 
             <button
               onClick={() => handleNavClick("contact")}

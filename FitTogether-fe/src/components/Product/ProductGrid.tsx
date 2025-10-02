@@ -1,21 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ProductCard from './ProductCard';
 import { productService } from '../../services/productService';
 import type { Product } from '../../types/product';
 
 
 const ProductGrid: React.FC = () => {
+  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleViewAllProducts = () => {
+    navigate('/products');
+  };
 
   useEffect(() => {
     const loadProducts = async () => {
       try {
         setLoading(true);
+
         const response = await productService.getProducts({
           page: 1,
-          limit: 6, // Show 6 featured products
+          limit: 6, 
         });
 
         if (response.success && response.data) {
@@ -111,11 +118,14 @@ const ProductGrid: React.FC = () => {
           </div>
         )}
         
-        {/* <div className="text-center mt-12">
-          <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold hover:from-blue-700 hover:to-purple-700 transition-all">
+        <div className="text-center mt-12">
+          <button 
+            onClick={handleViewAllProducts}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-full font-semibold hover:from-blue-700 hover:to-purple-700 transition-all"
+          >
             Xem tất cả sản phẩm
           </button>
-        </div> */}
+        </div>
       </div>
     </section>
   );

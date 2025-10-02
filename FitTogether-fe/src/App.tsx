@@ -5,6 +5,7 @@ import {
   Outlet,
 } from "react-router-dom";
 import HomePage from "./pages/HomePage";
+import ProductsPage from "./pages/ProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import FieldsPage from "./pages/Field/FieldsPage";
 import CartPage from "./pages/CartPage";
@@ -62,6 +63,7 @@ function App() {
           {/* Routes với Header/Footer */}
             <Route path="/" element={<MainLayout />}>
               <Route index element={<HomePage />} />
+              <Route path="products" element={<ProductsPage />} />
               <Route path="product/:id" element={<ProductDetailPage />} />
               <Route path="fields" element={<FieldsPage />} />
               <Route path="cart" element={<CartPage />} />
