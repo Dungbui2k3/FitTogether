@@ -91,7 +91,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             {product.name}
           </h3>
           <p className="text-gray-600 text-sm">{product.nation}</p>
-          <p className="text-gray-700 text-sm leading-relaxed">{product.description}</p>
+          <p className="text-gray-700 text-sm leading-relaxed">
+            {product.description && product.description.length > 80 
+              ? `${product.description.substring(0, 80)}...` 
+              : product.description}
+          </p>
         </div>
         
         <div className="flex items-center justify-between">
