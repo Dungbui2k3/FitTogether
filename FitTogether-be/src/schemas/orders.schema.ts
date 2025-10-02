@@ -88,6 +88,22 @@ export class Orders {
   notes: string;
 
   @ApiProperty({
+    description: 'Phone number for the order',
+    example: '1234567890',
+    required: false,
+  })
+  @Prop({ type: String, default: '' })
+  phone: string;
+
+  @ApiProperty({
+    description: 'Shipping address for the order',
+    example: '123 Main St, City, Country',
+    required: false,
+  })
+  @Prop({ type: String, default: '' })
+  address: string;
+
+  @ApiProperty({
     description: 'Date when the order was created',
     example: '2025-09-26T10:00:00Z',
   })

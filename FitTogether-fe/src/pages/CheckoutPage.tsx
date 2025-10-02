@@ -26,6 +26,7 @@ import { validateCheckoutForm, validateOrderItems } from "../utils/validation";
 interface CheckoutFormData {
   fullName: string;
   email: string;
+  phone: string;
   address: string;
   paymentMethod: "payos" | "cod";
   notes: string;
@@ -40,6 +41,7 @@ const CheckoutPage: React.FC = () => {
   const [formData, setFormData] = useState<CheckoutFormData>({
     fullName: user?.name || "",
     email: user?.email || "",
+    phone: "",
     address: "",
     paymentMethod: "cod",
     notes: "",
@@ -115,6 +117,7 @@ const CheckoutPage: React.FC = () => {
         paymentMethod: formData.paymentMethod,
         totalAmount: cart.total + (hasPhysicalProducts ? 30000 : 0),
         notes: formData.notes || "",
+        phone: formData.phone,
         address: formData.address,      
       };
 
@@ -123,7 +126,7 @@ const CheckoutPage: React.FC = () => {
 
       if (response.success) {
         if (formData.paymentMethod === "cod") {
-          success("Order placed successfully! You will pay when you receive the product.");
+          success("Đặt hàng thành công! Bạn sẽ thanh toán khi nhận được sản phẩm.");
           clearCart();
           // Redirect to success page with order data
           navigate("/order-success", { 
@@ -134,12 +137,12 @@ const CheckoutPage: React.FC = () => {
           });
         } else if (formData.paymentMethod === "payos") {
           // PayOS payment - TEMPORARILY DISABLED (under development)
-          showError("PayOS payment is currently under development. Please use Cash on Delivery.");
+          showError("Thanh toán PayOS hiện đang được phát triển. Vui lòng chọn thanh toán khi nhận hàng.");
           return;
           
           // COMMENTED OUT - PayOS payment code (keep for future use)
           /*
-          success("Order placed successfully! Redirecting to PayOS for payment...");
+          success("Đặt hàng thành công! Đang chuyển hướng đến PayOS để thanh toán...");
           clearCart();
           
           // Check if payment URL exists
@@ -147,17 +150,17 @@ const CheckoutPage: React.FC = () => {
             // Redirect to PayOS checkout URL
             window.location.href = response.data.payment.checkoutUrl;
           } else {
-            showError("Payment URL not found. Please contact support.");
+            showError("Không tìm thấy URL thanh toán. Vui lòng liên hệ hỗ trợ.");
             navigate("/");
           }
           */
         }
       } else {
-        showError(response.error || "Failed to place order. Please try again.");
+        showError(response.error || "Không thể đặt hàng. Vui lòng thử lại.");
       }
     } catch (error) {
       console.error("Order creation error:", error);
-      showError("Failed to place order. Please try again.");
+      showError("Không thể đặt hàng. Vui lòng thử lại.");
     } finally {
       setIsSubmitting(false);
     }
@@ -169,16 +172,16 @@ const CheckoutPage: React.FC = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Your cart is empty
+              Giỏ hàng của bạn đang trống
             </h1>
             <p className="text-gray-600 mb-8">
-              Please add some products before checkout.
+              Vui lòng thêm sản phẩm trước khi thanh toán.
             </p>
             <button
               onClick={() => navigate("/")}
               className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
-              Continue Shopping
+              Tiếp tục mua sắm
             </button>
           </div>
         </div>
@@ -191,7 +194,7 @@ const CheckoutPage: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Thanh toán</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -202,13 +205,13 @@ const CheckoutPage: React.FC = () => {
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
                   <User className="h-5 w-5 mr-2" />
-                  Contact Information
+                  Thông tin liên hệ
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name *
+                      Họ và tên *
                     </label>
                     <input
                       type="text"
@@ -217,13 +220,13 @@ const CheckoutPage: React.FC = () => {
                       onChange={handleInputChange}
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter your full name"
+                      placeholder="Nhập họ và tên của bạn"
                     />
                   </div>
 
-                  {/* <div>
+                  <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Phone Number *
+                      Số điện thoại *
                     </label>
                     <input
                       type="tel"
@@ -232,13 +235,13 @@ const CheckoutPage: React.FC = () => {
                       onChange={handleInputChange}
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter your phone number"
+                      placeholder="Nhập số điện thoại của bạn"
                     />
-                  </div> */}
+                  </div>
 
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email Address
+                      Địa chỉ email
                     </label>
                     <input
                       type="email"
@@ -246,14 +249,14 @@ const CheckoutPage: React.FC = () => {
                       value={formData.email}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter your email address"
+                      placeholder="Nhập địa chỉ email của bạn"
                     />
                   </div>
                 </div>
 
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Address *
+                    Địa chỉ *
                   </label>
                   <textarea
                     name="address"
@@ -262,7 +265,7 @@ const CheckoutPage: React.FC = () => {
                     required
                     rows={3}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your full address"
+                    placeholder="Nhập địa chỉ đầy đủ của bạn"
                   />
                 </div>
               </div>
@@ -271,12 +274,12 @@ const CheckoutPage: React.FC = () => {
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
                   <MapPin className="h-5 w-5 mr-2" />
-                  Additional Information
+                  Thông tin bổ sung
                 </h2>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Order Notes
+                    Ghi chú đơn hàng
                   </label>
                   <textarea
                     name="notes"
@@ -284,7 +287,7 @@ const CheckoutPage: React.FC = () => {
                     onChange={handleInputChange}
                     rows={4}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Any special instructions for your order..."
+                    placeholder="Các yêu cầu đặc biệt cho đơn hàng của bạn..."
                   />
                 </div>
               </div>
@@ -293,7 +296,7 @@ const CheckoutPage: React.FC = () => {
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
                   <CreditCard className="h-5 w-5 mr-2" />
-                  Payment Method
+                  Phương thức thanh toán
                 </h2>
 
                 {/* Digital Products Warning */}
@@ -303,11 +306,11 @@ const CheckoutPage: React.FC = () => {
                       <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" />
                       <div>
                         <h3 className="text-sm font-medium text-yellow-800">
-                          Digital Products Detected
+                          Phát hiện sản phẩm số
                         </h3>
                         <p className="text-sm text-yellow-700 mt-1">
-                          Your cart contains digital products. PayOS payment is
-                          required for digital product purchases.
+                          Giỏ hàng của bạn có chứa sản phẩm số. Cần thanh toán PayOS
+                          cho việc mua sản phẩm số.
                         </p>
                       </div>
                     </div>
@@ -332,7 +335,7 @@ const CheckoutPage: React.FC = () => {
                       <div className="flex items-center">
                         <CreditCard className="h-5 w-5 text-gray-400 mr-2" />
                         <span className="text-sm font-medium text-gray-500">
-                          PayOS Payment
+                          Thanh toán PayOS
                         </span>
                         <span className="ml-2 px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
                           Đang phát triển
@@ -366,17 +369,17 @@ const CheckoutPage: React.FC = () => {
                       <div className="flex items-center">
                         <Smartphone className="h-5 w-5 text-green-600 mr-2" />
                         <span className="text-sm font-medium text-gray-900">
-                          Cash on Delivery
+                          Thanh toán khi nhận hàng
                         </span>
                         {hasDigitalProducts && (
                           <span className="ml-2 px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
-                            Not Available
+                            Không khả dụng
                           </span>
                         )}
                       </div>
                       <p className="text-sm text-gray-500 mt-1">
-                        Pay when you receive the product. Only available for
-                        physical products.
+                        Thanh toán khi bạn nhận được sản phẩm. Chỉ khả dụng cho
+                        sản phẩm vật lý.
                       </p>
                     </div>
                   </label>
@@ -395,7 +398,7 @@ const CheckoutPage: React.FC = () => {
                     className="flex-1 bg-gray-100 text-gray-700 py-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2"
                   >
                     <ArrowLeft className="h-5 w-5" />
-                    <span>Back to Cart</span>
+                    <span>Quay lại giỏ hàng</span>
                   </button>
                   <button
                     type="submit"
@@ -405,12 +408,12 @@ const CheckoutPage: React.FC = () => {
                     {isSubmitting ? (
                       <>
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        <span>Processing Order...</span>
+                        <span>Đang xử lý đơn hàng...</span>
                       </>
                     ) : (
                       <>
                         <CreditCard className="h-5 w-5" />
-                        <span>Place Order</span>
+                        <span>Đặt hàng</span>
                       </>
                     )}
                   </button>
@@ -423,7 +426,7 @@ const CheckoutPage: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-8">
               <h2 className="text-xl font-bold text-gray-900 mb-6">
-                Order Summary
+                Tóm tắt đơn hàng
               </h2>
 
               {/* Order Items */}

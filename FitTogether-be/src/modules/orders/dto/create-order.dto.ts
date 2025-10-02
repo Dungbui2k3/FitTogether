@@ -64,6 +64,11 @@ export class CreateOrderDto {
   @IsString()
   notes?: string;
 
+  @ApiProperty({ example: '1234567890', description: 'Shipping phone number for physical products', required: false })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
   @ApiProperty({ example: '123 Main St, City, Country', description: 'Shipping address for physical products', required: false })
   @IsOptional()
   @IsString()

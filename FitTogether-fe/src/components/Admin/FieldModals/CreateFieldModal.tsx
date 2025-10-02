@@ -120,9 +120,7 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
       formDataToSend.append('phone', formData.phone.trim());
       formDataToSend.append('description', formData.description?.trim() || '');
 
-      facilities.forEach(facility => {
-        formDataToSend.append('facilities', facility);
-      });
+      formDataToSend.append("facilities", JSON.stringify(facilities));
 
       // Append image files
       imageFiles.forEach(file => {
@@ -136,10 +134,29 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
         onSuccess();
         handleClose();
       } else {
-        error(response.error || 'Không thể tạo sân thể thao');
+        // Hiển thị lỗi từ response
+        const errorMessage = response.error || response.message || 'Không thể tạo sân thể thao';
+        error(errorMessage);
       }
-    } catch (err) {
-      error('Có lỗi xảy ra khi tạo sân thể thao');
+    } catch (err: any) {
+      console.error('Error creating field:', err);
+      
+      // Xử lý các loại lỗi khác nhau
+      let errorMessage = 'Có lỗi xảy ra khi tạo sân thể thao';
+      
+      if (err?.response?.data) {
+        // Lỗi từ API response với cấu trúc {status, code, message}
+        const data = err.response.data;
+        errorMessage = data.message || data.error || errorMessage;
+      } else if (err?.message) {
+        // Lỗi JavaScript general  
+        errorMessage = err.message;
+      } else if (typeof err === 'object' && err.message) {
+        // Lỗi object trực tiếp với message
+        errorMessage = err.message;
+      }
+      
+      error(errorMessage);
     } finally {
       setLoading(false);
     }

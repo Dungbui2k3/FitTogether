@@ -53,12 +53,12 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: 'Product not found or unavailable' })
   async create(
     @GetUser('_id') userId: string,
-    @Body() createOrderDto: CreateOrderDto
+    @Body() createOrderDto: CreateOrderDto,
   ) {
     const order = await this.ordersService.create(createOrderDto, userId);
-    
+
     let paymentInfo: any = null;
-    
+
     if (createOrderDto.paymentMethod === PaymentMethod.PAYOS) {
       try {
         const createPaymentDto = {
@@ -66,8 +66,11 @@ export class OrdersController {
           orderCode: order.orderCode,
         };
 
-        const paymentResult = await this.paymentsService.createPayment(userId, createPaymentDto);
-        
+        const paymentResult = await this.paymentsService.createPayment(
+          userId,
+          createPaymentDto,
+        );
+
         if (paymentResult.status === 'success') {
           paymentInfo = paymentResult.data;
         }
@@ -84,6 +87,8 @@ export class OrdersController {
       totalAmount: order.totalAmount,
       paymentMethod: (order as any).paymentMethod,
       note: (order as any).note,
+      phone: (order as any).phone,
+      address: (order as any).address,
       orderDate: order.orderDate,
       createdAt: (order as any).createdAt,
     };
@@ -104,7 +109,7 @@ export class OrdersController {
       responseData,
       createOrderDto.paymentMethod === PaymentMethod.PAYOS && paymentInfo
         ? 'Order created successfully with PayOS payment link'
-        : 'Order created successfully'
+        : 'Order created successfully',
     );
   }
 
@@ -112,23 +117,72 @@ export class OrdersController {
   @Roles(Role.ADMIN)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get all orders with pagination and filtering (Admin only)' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
-  @ApiQuery({ name: 'status', required: false, enum: OrderStatus, description: 'Filter by order status' })
-  @ApiQuery({ name: 'userId', required: false, type: String, description: 'Filter by user ID' })
-  @ApiQuery({ name: 'search', required: false, type: String, description: 'Search by order code' })
-  @ApiQuery({ name: 'fromDate', required: false, type: String, description: 'Filter orders from date' })
-  @ApiQuery({ name: 'toDate', required: false, type: String, description: 'Filter orders to date' })
-  @ApiQuery({ name: 'minAmount', required: false, type: Number, description: 'Minimum order amount' })
-  @ApiQuery({ name: 'maxAmount', required: false, type: Number, description: 'Maximum order amount' })
+  @ApiOperation({
+    summary: 'Get all orders with pagination and filtering (Admin only)',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: OrderStatus,
+    description: 'Filter by order status',
+  })
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    type: String,
+    description: 'Filter by user ID',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Search by order code',
+  })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    description: 'Filter orders from date',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    description: 'Filter orders to date',
+  })
+  @ApiQuery({
+    name: 'minAmount',
+    required: false,
+    type: Number,
+    description: 'Minimum order amount',
+  })
+  @ApiQuery({
+    name: 'maxAmount',
+    required: false,
+    type: Number,
+    description: 'Maximum order amount',
+  })
   async findAll(@Query() query: GetOrdersQueryDto) {
     // Additional validation for userId if provided
     if (query.userId && !Types.ObjectId.isValid(query.userId)) {
       console.error('Invalid userId in query parameters:', query.userId);
-      throw new BadRequestException(`Invalid user ID format in query parameter: ${query.userId}`);
+      throw new BadRequestException(
+        `Invalid user ID format in query parameter: ${query.userId}`,
+      );
     }
-    
+
     const result = await this.ordersService.findAll(query);
     return ResponseUtil.success(result, 'Orders retrieved successfully');
   }
@@ -136,13 +190,31 @@ export class OrdersController {
   @Get('my-orders')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get current user orders' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
-  @ApiQuery({ name: 'status', required: false, enum: OrderStatus, description: 'Filter by order status' })
-  @ApiResponse({ status: 200, description: 'User orders retrieved successfully' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: OrderStatus,
+    description: 'Filter by order status',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User orders retrieved successfully',
+  })
   async getMyOrders(
     @GetUser('_id') userId: string,
-    @Query() query: GetOrdersQueryDto
+    @Query() query: GetOrdersQueryDto,
   ) {
     const result = await this.ordersService.getOrdersByUserId(userId, query);
     return ResponseUtil.success(result, 'Your orders retrieved successfully');
@@ -151,16 +223,19 @@ export class OrdersController {
   @Get('code/:orderCode')
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get order by order code' })
-  @ApiParam({ name: 'orderCode', description: 'Order code (e.g., #12345678ABCD)' })
+  @ApiParam({
+    name: 'orderCode',
+    description: 'Order code (e.g., #12345678ABCD)',
+  })
   @ApiResponse({ status: 200, description: 'Order retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Order not found' })
   async findByOrderCode(
     @Param('orderCode') orderCode: string,
     @GetUser('_id') userId: string,
-    @GetUser() user: any
+    @GetUser() user: any,
   ) {
     const order = await this.ordersService.findByOrderCode(orderCode);
-    
+
     // Check if user can access this order (admin or order owner)
     if (user.role !== Role.ADMIN && order.userId.toString() !== userId) {
       throw new ForbiddenException('Access denied');
@@ -175,12 +250,14 @@ export class OrdersController {
         totalAmount: order.totalAmount,
         paymentMethod: (order as any).paymentMethod,
         note: (order as any).note,
+        phone: (order as any).phone,
+        address: (order as any).address,
         orderDate: order.orderDate,
         user: order.userId,
         createdAt: (order as any).createdAt,
         updatedAt: (order as any).updatedAt,
       },
-      'Order retrieved successfully'
+      'Order retrieved successfully',
     );
   }
 
@@ -188,14 +265,32 @@ export class OrdersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get orders by user ID (Admin only)' })
   @ApiParam({ name: 'userId', description: 'User ID' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
-  @ApiQuery({ name: 'status', required: false, enum: OrderStatus, description: 'Filter by order status' })
-  @ApiResponse({ status: 200, description: 'User orders retrieved successfully' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: OrderStatus,
+    description: 'Filter by order status',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'User orders retrieved successfully',
+  })
   @ApiResponse({ status: 400, description: 'Invalid user ID format' })
   async getOrdersByUserId(
     @Param('userId') userId: string,
-    @Query() query: GetOrdersQueryDto
+    @Query() query: GetOrdersQueryDto,
   ) {
     const result = await this.ordersService.getOrdersByUserId(userId, query);
     return ResponseUtil.success(result, 'User orders retrieved successfully');
@@ -210,11 +305,10 @@ export class OrdersController {
   async findOne(
     @Param('id') id: string,
     @GetUser('_id') userId: string,
-    @GetUser() user: any
+    @GetUser() user: any,
   ) {
-
     const order = await this.ordersService.findById(id);
-    
+
     // Check if user can access this order (admin or order owner)
     if (user.role !== Role.ADMIN && order.userId.toString() !== userId) {
       throw new ForbiddenException('Access denied');
@@ -229,12 +323,14 @@ export class OrdersController {
         totalAmount: order.totalAmount,
         paymentMethod: (order as any).paymentMethod,
         note: (order as any).note,
+        phone: (order as any).phone,
+        address: (order as any).address,
         orderDate: order.orderDate,
         user: order.userId,
         createdAt: (order as any).createdAt,
         updatedAt: (order as any).updatedAt,
       },
-      'Order retrieved successfully'
+      'Order retrieved successfully',
     );
   }
 
@@ -246,7 +342,10 @@ export class OrdersController {
   @ApiResponse({ status: 200, description: 'Order updated successfully' })
   @ApiResponse({ status: 404, description: 'Order not found' })
   @ApiResponse({ status: 400, description: 'Invalid status transition' })
-  async update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() updateOrderDto: UpdateOrderDto,
+  ) {
     const order = await this.ordersService.update(id, updateOrderDto);
     return ResponseUtil.success(
       {
@@ -257,11 +356,13 @@ export class OrdersController {
         totalAmount: order.totalAmount,
         paymentMethod: (order as any).paymentMethod,
         note: (order as any).note,
+        phone: (order as any).phone,
+        address: (order as any).address,
         orderDate: order.orderDate,
         user: order.userId,
         updatedAt: (order as any).updatedAt,
       },
-      'Order updated successfully'
+      'Order updated successfully',
     );
   }
 
@@ -270,12 +371,15 @@ export class OrdersController {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update order status (Admin only)' })
   @ApiParam({ name: 'id', description: 'Order ID' })
-  @ApiResponse({ status: 200, description: 'Order status updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Order status updated successfully',
+  })
   @ApiResponse({ status: 404, description: 'Order not found' })
   @ApiResponse({ status: 400, description: 'Invalid status transition' })
   async updateStatus(
     @Param('id') id: string,
-    @Body('status') status: OrderStatus
+    @Body('status') status: OrderStatus,
   ) {
     const order = await this.ordersService.updateStatus(id, status);
     return ResponseUtil.success(
@@ -285,7 +389,7 @@ export class OrdersController {
         status: order.status,
         updatedAt: (order as any).updatedAt,
       },
-      `Order status updated to ${status} successfully`
+      `Order status updated to ${status} successfully`,
     );
   }
 

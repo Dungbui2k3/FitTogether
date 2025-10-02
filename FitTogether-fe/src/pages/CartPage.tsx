@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ShoppingCart,
@@ -10,17 +10,52 @@ import {
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import { useToast } from "../hooks";
+import { productService } from "../services/productService";
 import type { CartItem } from "../types/cart";
+import type { Product } from "../types/product";
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
   const { cart, updateQuantity, removeFromCart } = useCart();
-  const { success } = useToast();
+  const { success, error: showError } = useToast();
+  const [productData, setProductData] = useState<{ [key: string]: Product }>({});
+  const [loadingProducts, setLoadingProducts] = useState(false);
 
   // Scroll to top when component mounts
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
+  // Fetch product data for stock validation
+  useEffect(() => {
+    const fetchProductData = async () => {
+      if (cart.items.length === 0) return;
+      
+      setLoadingProducts(true);
+      const productMap: { [key: string]: Product } = {};
+      
+      try {
+        await Promise.all(
+          cart.items.map(async (item) => {
+            if (!productData[item.productId]) {
+              const response = await productService.getProductById(item.productId);
+              if (response.success && response.data) {
+                productMap[item.productId] = response.data;
+              }
+            }
+          })
+        );
+        
+        setProductData(prev => ({ ...prev, ...productMap }));
+      } catch (error) {
+        console.error('Error fetching product data:', error);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    fetchProductData();
+  }, [cart.items]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -31,13 +66,21 @@ const CartPage: React.FC = () => {
 
   const handleQuantityChange = (
     itemId: string,
-    newQuantity: number
+    newQuantity: number,
+    productId: string,
+    productName: string
   ) => {
     if (newQuantity < 1) {
       return;
-    } else {
-      updateQuantity(itemId, newQuantity);
     }
+    
+    const product = productData[productId];
+    if (product && newQuantity > product.quantity) {
+      showError(`Số lượng không thể vượt quá ${product.quantity} sản phẩm có sẵn cho ${productName}`);
+      return;
+    }
+    
+    updateQuantity(itemId, newQuantity);
   };
 
   const handleRemoveItem = (itemId: string, itemName: string) => {
@@ -97,9 +140,11 @@ const CartPage: React.FC = () => {
               <CartItemCard
                 key={item.id}
                 item={item}
+                product={productData[item.productId]}
                 onQuantityChange={handleQuantityChange}
                 onRemove={handleRemoveItem}
                 formatPrice={formatPrice}
+                loadingProducts={loadingProducts}
               />
             ))}
           </div>
@@ -124,7 +169,7 @@ const CartPage: React.FC = () => {
                 <span className="text-gray-600">Phí vận chuyển</span>
                 <span className="font-medium">
                   {cart.items.length > 0 ? (
-                    formatPrice(30000)
+                    formatPrice(0)
                   ) : (
                     <span className="text-green-600">Miễn phí</span>
                   )}
@@ -170,20 +215,28 @@ const CartPage: React.FC = () => {
 
 interface CartItemCardProps {
   item: CartItem;
+  product?: Product;
   onQuantityChange: (
     itemId: string,
-    quantity: number
+    quantity: number,
+    productId: string,
+    productName: string
   ) => void;
   onRemove: (itemId: string, itemName: string) => void;
   formatPrice: (price: number) => string;
+  loadingProducts: boolean;
 }
 
 const CartItemCard: React.FC<CartItemCardProps> = ({
   item,
+  product,
   onQuantityChange,
   onRemove,
   formatPrice,
+  loadingProducts,
 }) => {
+  const isAtMaxQuantity = product ? item.quantity >= product.quantity : false;
+  const isOutOfStock = product ? product.quantity <= 0 || product.isDeleted : false;
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6">
       <div className="flex items-start space-x-4">
@@ -223,24 +276,52 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
           <div className="flex items-center space-x-3">
             <button
               onClick={() =>
-                onQuantityChange(item.id, item.quantity - 1)
+                onQuantityChange(item.id, item.quantity - 1, item.productId, item.name)
               }
-              className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+              disabled={item.quantity <= 1}
+              className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Minus className="h-4 w-4" />
             </button>
-            <span className="w-12 text-center text-lg font-medium">
-              {item.quantity}
-            </span>
+            <div className="flex flex-col items-center">
+              <span className="w-12 text-center text-lg font-medium">
+                {item.quantity}
+              </span>
+              {product && (
+                <span className="text-xs text-gray-500">
+                  /{product.quantity}
+                </span>
+              )}
+            </div>
             <button
               onClick={() =>
-                onQuantityChange(item.id, item.quantity + 1)
+                onQuantityChange(item.id, item.quantity + 1, item.productId, item.name)
               }
-              className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+              disabled={isAtMaxQuantity || isOutOfStock || loadingProducts}
+              className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="h-4 w-4" />
             </button>
           </div>
+          
+          {/* Stock Status */}
+          {product && (
+            <div className="text-center">
+              {isOutOfStock ? (
+                <span className="text-xs text-red-600 font-medium">
+                  Hết hàng
+                </span>
+              ) : isAtMaxQuantity ? (
+                <span className="text-xs text-orange-600 font-medium">
+                  Đã đạt tối đa
+                </span>
+              ) : (
+                <span className="text-xs text-gray-500">
+                  Còn {product.quantity} sản phẩm
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Item Total */}
           <div className="flex justify-end items-center">

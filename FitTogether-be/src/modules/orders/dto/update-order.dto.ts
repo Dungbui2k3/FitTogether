@@ -21,6 +21,22 @@ export class UpdateOrderDto {
   note?: string;
 
   @ApiPropertyOptional({ 
+    example: '1234567890',
+    description: 'Shipping phone number for physical products'
+  })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiPropertyOptional({ 
+    example: '123 Main St, City, Country',
+    description: 'Shipping address for physical products'
+  })
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @ApiPropertyOptional({ 
     example: 299.99,
     description: 'Update total amount if needed'
   })

@@ -28,6 +28,8 @@ import Header from "./components/Home/Header";
 import Footer from "./components/Home/Footer";
 import ProductManagement from "./pages/Admin/ProductManagement";
 import { CartProvider } from "./contexts/CartContext";
+import { ToastProvider } from "./contexts/ToastContext";
+import GlobalToastContainer from "./components/GlobalToastContainer";
 
 // Layout có Header/Footer
 const MainLayout = () => {
@@ -53,8 +55,9 @@ const AdminLayoutWrapper = () => {
 
 function App() {
   return (
-    <CartProvider>
-      <Router>
+    <ToastProvider>
+      <CartProvider>
+        <Router>
         <Routes>
           {/* Routes với Header/Footer */}
             <Route path="/" element={<MainLayout />}>
@@ -102,8 +105,12 @@ function App() {
 
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        
+        {/* Global Toast Container */}
+        <GlobalToastContainer />
       </Router>
-    </CartProvider>
+      </CartProvider>
+    </ToastProvider>
   );
 }
 

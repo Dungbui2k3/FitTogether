@@ -101,6 +101,11 @@ const ProductDetailPage: React.FC = () => {
       return;
     }
 
+    if (quantity > product.quantity) {
+      showError(`Số lượng không thể vượt quá ${product.quantity} sản phẩm có sẵn`);
+      return;
+    }
+
     addToCart({
       productId: product.id,
       name: product.name,
@@ -430,15 +435,23 @@ const ProductDetailPage: React.FC = () => {
                     {quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="p-3 hover:bg-gray-50 transition-colors rounded-r-lg"
+                    onClick={() => setQuantity(Math.min(product.quantity, quantity + 1))}
+                    disabled={quantity >= product.quantity}
+                    className="p-3 hover:bg-gray-50 transition-colors rounded-r-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Plus className="h-4 w-4" />
                   </button>
                 </div>
-                <span className="text-sm text-gray-600">
-                  {product.quantity} có sẵn
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-sm text-gray-600">
+                    {product.quantity} có sẵn
+                  </span>
+                  {quantity >= product.quantity && (
+                    <span className="text-xs text-orange-600 font-medium">
+                      Đã đạt số lượng tối đa
+                    </span>
+                  )}
+                </div>
                 </div>
               </div>
 

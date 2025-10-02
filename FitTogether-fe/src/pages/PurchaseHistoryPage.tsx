@@ -34,12 +34,13 @@ const PurchaseHistoryPage: React.FC = () => {
       const response = await orderService.getOrdersByUserId(user.id.toString());
       if (response.data) {
         setOrders(response.data?.orders || []);
+        console.log("Fetched orders:", response.data?.orders);
       } else {
-        showError(response.message || "Failed to load orders");
+        showError(response.message || "Không thể tải danh sách đơn hàng");
         setOrders([]);
       }
     } catch (error) {
-      showError("Failed to load orders");
+      showError("Không thể tải danh sách đơn hàng");
       setOrders([]);
     } finally {
       setLoading(false);
@@ -50,7 +51,7 @@ const PurchaseHistoryPage: React.FC = () => {
     setRefreshing(true);
     await fetchOrders();
     setRefreshing(false);
-    success("Orders refreshed successfully");
+        success("Danh sách đơn hàng đã được cập nhật");
   };
 
   const formatPrice = (price: number, currency: string = "VND") => {
@@ -61,7 +62,7 @@ const PurchaseHistoryPage: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("vi-VN", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -86,11 +87,11 @@ const PurchaseHistoryPage: React.FC = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case "pending":
-        return "Processing";
+        return "Đang xử lý";
       case "success":
-        return "Completed";
+        return "Hoàn thành";
       case "cancel":
-        return "Cancelled";
+        return "Đã hủy";
       default:
         return status;
     }
@@ -101,12 +102,12 @@ const PurchaseHistoryPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your orders...</p>
+          <p className="text-gray-600">Đang tải danh sách đơn hàng...</p>
           <button
             onClick={() => fetchOrders()}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            Manual Refresh
+            Tải lại thủ công
           </button>
         </div>
       </div>
@@ -121,10 +122,10 @@ const PurchaseHistoryPage: React.FC = () => {
           <div className="flex items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                Purchase History
+                Lịch sử mua hàng
               </h1>
               <p className="text-gray-600 mt-1">
-                {orders.length} order{orders.length !== 1 ? "s" : ""} found
+                Tìm thấy {orders.length} đơn hàng
               </p>
             </div>
           </div>
@@ -136,7 +137,7 @@ const PurchaseHistoryPage: React.FC = () => {
             <RefreshCw
               className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
             />
-            Refresh
+            Cập nhật
           </button>
         </div>
 
@@ -146,16 +147,16 @@ const PurchaseHistoryPage: React.FC = () => {
               <Package className="h-8 w-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No orders found
+              Không tìm thấy đơn hàng nào
             </h3>
             <p className="text-gray-600 mb-6">
-              You haven't placed any orders yet.
+              Bạn chưa đặt đơn hàng nào.
             </p>
             <button
               onClick={() => navigate("/")}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
-              Start Shopping
+              Bắt đầu mua sắm
             </button>
           </div>
         ) : (
@@ -200,7 +201,7 @@ const PurchaseHistoryPage: React.FC = () => {
                 {/* Order Items */}
                 <div className="p-6">
                   <h4 className="font-semibold text-gray-900 mb-4">
-                    Ordered Items
+                    Sản phẩm đã đặt
                   </h4>
                   <div className="space-y-3">
                     {order.items.map((item, index) => (
@@ -210,20 +211,14 @@ const PurchaseHistoryPage: React.FC = () => {
                       >
                         <div className="flex-1">
                           <p className="font-medium text-gray-900">
-                            {item.productId.name}
+                            {item.productId?.name || `Mã sản phẩm: ${item.productId}`}
                           </p>
                           <div className="flex items-center space-x-3 mt-1">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                item.type === "digital"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : "bg-green-100 text-green-800"
-                              }`}
-                            >
-                              {item.type === "digital" ? "Digital" : "Physical"}
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Sản phẩm thể thao
                             </span>
                             <span className="text-sm text-gray-500">
-                              Quantity: {item.quantity}
+                              Số lượng: {item.quantity}
                             </span>
                           </div>
                         </div>
@@ -237,14 +232,48 @@ const PurchaseHistoryPage: React.FC = () => {
                   </div>
                 </div>
 
+                {/* Customer Information */}
+                {order.userId && (
+                  <div className="px-6 py-4 border-t border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-3">
+                      Thông tin khách hàng
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                      {order.userId.name && (
+                        <div>
+                          <span className="text-gray-500">Họ và tên:</span>
+                          <p className="font-medium text-gray-900">{order.userId.name}</p>
+                        </div>
+                      )}
+                      {order.phone && (
+                        <div>
+                          <span className="text-gray-500">Số điện thoại:</span>
+                          <p className="font-medium text-gray-900">{order.phone}</p>
+                        </div>
+                      )}
+                      {order.userId.email && (
+                        <div>
+                          <span className="text-gray-500">Email:</span>
+                          <p className="font-medium text-gray-900">{order.userId.email}</p>
+                        </div>
+                      )}
+                      {order.address && (
+                        <div className="md:col-span-2 lg:col-span-4">
+                          <span className="text-gray-500">Địa chỉ giao hàng:</span>
+                          <p className="font-medium text-gray-900">{order.address}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Order Footer */}
                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-6">
                       <div className="flex items-center text-sm text-gray-600">
                         <Truck className="h-4 w-4 mr-2" />
-                        {order.items.length} item
-                        {order.items.length !== 1 ? "s" : ""}
+                        {order.items.length} sản phẩm
                       </div>
                     </div>
                   </div>

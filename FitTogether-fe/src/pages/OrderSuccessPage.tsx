@@ -38,7 +38,7 @@ const OrderSuccessPage: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("vi-VN", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -63,11 +63,11 @@ const OrderSuccessPage: React.FC = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case "pending":
-        return "Processing";
+        return "Đang xử lý";
       case "success":
-        return "Success";
+        return "Thành công";
       case "cancel":
-        return "Cancelled";
+        return "Đã hủy";
       default:
         return status;
     }
@@ -86,13 +86,13 @@ const OrderSuccessPage: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Order Not Found
+            Không tìm thấy đơn hàng
           </h1>
           <button
             onClick={() => navigate("/")}
             className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
           >
-            Go to Home
+            Về trang chủ
           </button>
         </div>
       </div>
@@ -108,11 +108,10 @@ const OrderSuccessPage: React.FC = () => {
             <CheckCircle className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-            Order Placed Successfully!
+            Đặt hàng thành công!
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Thank you for your order. We will process your order as soon as
-            possible.
+            Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ xử lý đơn hàng của bạn trong thời gian sớm nhất.
           </p>
         </div>
 
@@ -125,13 +124,13 @@ const OrderSuccessPage: React.FC = () => {
                 <div className="p-2 bg-blue-100 rounded-lg mr-3">
                   <Package className="h-5 w-5 text-blue-600" />
                 </div>
-                Order Information
+                Thông tin đơn hàng
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 gap-x-16 mb-6">
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                    Order ID
+                    Mã đơn hàng
                   </label>
                   <p className="text-2xl font-bold text-blue-600">
                     {/* #{order._id.slice(-8).toUpperCase()} */}
@@ -140,7 +139,7 @@ const OrderSuccessPage: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                    Status
+                    Trạng thái
                   </label>
                   <span
                     className={`inline-flex px-4 py-2 rounded-full text-sm font-semibold ${getStatusColor(
@@ -152,7 +151,7 @@ const OrderSuccessPage: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                    Order Date
+                    Ngày đặt hàng
                   </label>
                   <p className="text-lg text-gray-900 flex items-center">
                     <Calendar className="h-5 w-5 mr-2 text-gray-400" />
@@ -161,7 +160,7 @@ const OrderSuccessPage: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                    Total Amount
+                    Tổng tiền
                   </label>
                   <p className="text-2xl font-bold text-green-600">
                     {formatPrice(order.totalAmount)}
@@ -172,7 +171,7 @@ const OrderSuccessPage: React.FC = () => {
               {/* Order Items */}
               <div className="border-t border-gray-200 pt-6">
                 <h3 className="text-lg font-bold text-gray-900 mb-4">
-                  Ordered Items
+                  Sản phẩm đã đặt
                 </h3>
                 <div className="space-y-4">
                   {order.items.map((item, index) => (
@@ -182,20 +181,14 @@ const OrderSuccessPage: React.FC = () => {
                     >
                       <div className="flex-1">
                         <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                          Product ID: {item.productId}
+                          {item.productId?.name || `Mã sản phẩm: ${item.productId}`}
                         </h4>
                         <div className="flex items-center space-x-4">
-                          <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              item.type === "digital"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-green-100 text-green-800"
-                            }`}
-                          >
-                            {item.type === "digital" ? "Digital" : "Physical"}
+                          <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            Sản phẩm thể thao
                           </span>
                           <span className="text-sm text-gray-600">
-                            Qty: {item.quantity}
+                            SL: {item.quantity}
                           </span>
                         </div>
                       </div>
@@ -219,22 +212,22 @@ const OrderSuccessPage: React.FC = () => {
                 <div className="p-2 bg-green-100 rounded-lg mr-3">
                   <CreditCard className="h-5 w-5 text-green-600" />
                 </div>
-                Payment Information
+                Thông tin thanh toán
               </h2>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="font-medium text-gray-700">
-                    Payment Method:
+                    Phương thức thanh toán:
                   </span>
                   <span className="font-bold text-gray-900 flex items-center">
                     <Truck className="h-4 w-4 mr-2 text-green-600" />
-                    Cash on Delivery (COD)
+                    Thanh toán khi nhận hàng (COD)
                   </span>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="font-medium text-gray-700">
-                    Order Total:
+                    Tổng đơn hàng:
                   </span>
                   <span className="text-lg font-bold text-gray-900">
                     {formatPrice(order.totalAmount)}
@@ -243,7 +236,7 @@ const OrderSuccessPage: React.FC = () => {
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
                     <span className="text-lg font-bold text-gray-900">
-                      Total Amount:
+                      Tổng cộng:
                     </span>
                     <span className="text-xl font-bold text-green-600">
                       {formatPrice(order.totalAmount)}
@@ -258,7 +251,7 @@ const OrderSuccessPage: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 sticky top-8">
               <h2 className="text-xl font-bold text-gray-900 mb-6">
-                What's Next
+                Tiếp theo
               </h2>
 
               <div className="space-y-4">
@@ -267,23 +260,22 @@ const OrderSuccessPage: React.FC = () => {
                   className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 rounded-xl font-bold hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl"
                 >
                   <ArrowLeft className="h-5 w-5 mr-2" />
-                  Continue Shopping
+                  Tiếp tục mua sắm
                 </button>
 
                 <button
                   onClick={() => navigate("/purchase-history")}
                   className="w-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 py-3 px-4 rounded-xl font-bold hover:from-gray-200 hover:to-gray-300 transition-all duration-300 shadow-md hover:shadow-lg"
                 >
-                  View My Orders
+                  Xem đơn hàng của tôi
                 </button>
 
                 <div className="pt-6 border-t border-gray-200">
                   <h3 className="font-bold text-gray-900 mb-3">
-                    Need Support?
+                    Cần hỗ trợ?
                   </h3>
                   <p className="text-gray-600 mb-4 text-sm">
-                    If you have any questions about your order, please contact
-                    us:
+                    Nếu bạn có bất kỳ câu hỏi nào về đơn hàng của mình, vui lòng liên hệ chúng tôi:
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-center p-2 bg-gray-50 rounded-lg">
@@ -295,7 +287,7 @@ const OrderSuccessPage: React.FC = () => {
                     <div className="flex items-center p-2 bg-gray-50 rounded-lg">
                       <Mail className="h-4 w-4 mr-2 text-blue-600" />
                       <span className="font-medium text-gray-800 text-sm">
-                        support@childes3d.com
+                        support@fittogether.vn
                       </span>
                     </div>
                   </div>

@@ -22,11 +22,6 @@ export interface OrderItem {
 
 export interface Order {
   _id: string;
-  userId: {
-    _id: string;
-    name: string;
-    email: string;
-  } | null;
   items: OrderItem[];
   orderCode: string;
   status: 'pending' | 'success' | 'cancel';
@@ -34,6 +29,12 @@ export interface Order {
   paymentMethod?: 'payos' | 'cod';
   orderDate: string;
   notes?: string;
+  phone?: string;
+  address?: string;
+  userId?: {
+    name?: string;
+    email?: string;
+  };
   createdAt: string;
   updatedAt: string;
   __v: number;

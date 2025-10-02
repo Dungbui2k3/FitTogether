@@ -75,7 +75,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </button>
         </div>
         <div className="absolute top-4 left-4 bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-          3D Printed
+          {product.category?.name || 'Uncategorized'}
         </div>
         <div className="absolute top-4 right-4 flex text-yellow-400 text-sm">
           {'★'.repeat(4)} {/* Default rating since we don't have rating in new API */}

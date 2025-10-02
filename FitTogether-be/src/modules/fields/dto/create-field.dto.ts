@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsString, IsNotEmpty, IsArray, IsOptional, IsPhoneNumber } from 'class-validator';
 
 export class CreateFieldDto {
@@ -36,6 +37,16 @@ export class CreateFieldDto {
       'Căng tin phục vụ đồ uống'
     ],
     type: [String],
+  })
+   @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return [value]; 
+      }
+    }
+    return value;
   })
   @IsArray()
   @IsString({ each: true })

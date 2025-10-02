@@ -84,7 +84,8 @@ const AdminOrderManagement: React.FC = () => {
   const filteredOrders = orders.filter(order =>
     order.orderCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (order.userId?.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
-    (order.userId?.email?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
+    (order.userId?.email?.toLowerCase().includes(searchTerm.toLowerCase()) || false) ||
+    (order.phone?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
   );
 
   const formatPrice = (price: number) => {
@@ -198,7 +199,7 @@ const AdminOrderManagement: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                 placeholder="Tìm kiếm theo mã đơn hàng, tên khách hàng hoặc email..."
+                 placeholder="Tìm kiếm theo mã đơn hàng, tên khách hàng, email hoặc số điện thoại..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -283,6 +284,11 @@ const AdminOrderManagement: React.FC = () => {
                            <div className="text-sm text-gray-500">
                              {order.userId?.email || 'Không có email'}
                            </div>
+                           {order.phone && (
+                             <div className="text-sm text-gray-500">
+                               {order.phone}
+                             </div>
+                           )}
                          </div>
                        </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -446,19 +452,35 @@ const AdminOrderManagement: React.FC = () => {
                    <User className="h-5 w-5 mr-2" />
                    Thông Tin Khách Hàng
                  </h3>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                   {selectedOrder.userId?.name && (
+                     <div>
+                       <p className="text-sm text-gray-500">Họ và tên</p>
+                       <p className="font-medium text-gray-900">{selectedOrder.userId.name}</p>
+                     </div>
+                   )}
+                   {selectedOrder.phone && (
+                     <div>
+                       <p className="text-sm text-gray-500">Số điện thoại</p>
+                       <p className="font-medium text-gray-900">{selectedOrder.phone}</p>
+                     </div>
+                   )}
+                   {selectedOrder.userId?.email && (
+                     <div>
+                       <p className="text-sm text-gray-500">Email</p>
+                       <p className="font-medium text-gray-900">{selectedOrder.userId.email}</p>
+                     </div>
+                   )}
                    <div>
-                     <p className="text-sm text-gray-500">Tên</p>
-                     <p className="font-medium text-gray-900">{selectedOrder.userId?.name || 'Khách vãng lai'}</p>
+                     <p className="text-sm text-gray-500">Mã Đơn Hàng</p>
+                     <p className="font-medium text-gray-900">{selectedOrder._id.slice(-8).toUpperCase()}</p>
                    </div>
-                   <div>
-                     <p className="text-sm text-gray-500">Email</p>
-                     <p className="font-medium text-gray-900">{selectedOrder.userId?.email || 'Không có email'}</p>
-                   </div>
-                   <div>
-                     <p className="text-sm text-gray-500">Mã Khách Hàng</p>
-                     <p className="font-medium text-gray-900">{selectedOrder.userId?._id || 'N/A'}</p>
-                   </div>
+                   {selectedOrder.address && (
+                     <div className="md:col-span-2 lg:col-span-4">
+                       <p className="text-sm text-gray-500">Địa chỉ giao hàng</p>
+                       <p className="font-medium text-gray-900">{selectedOrder.address}</p>
+                     </div>
+                   )}
                  </div>
                </div>
 
@@ -524,7 +546,7 @@ const AdminOrderManagement: React.FC = () => {
                      <span className="text-gray-600">Phí vận chuyển</span>
                      <span className="font-medium">
                        {selectedOrder.items.length > 0 
-                         ? formatPrice(30000) 
+                         ? formatPrice(0) 
                          : 'Miễn phí'
                        }
                      </span>

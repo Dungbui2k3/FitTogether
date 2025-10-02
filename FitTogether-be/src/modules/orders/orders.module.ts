@@ -5,6 +5,7 @@ import { Product, ProductSchema } from '../../schemas/product.schema';
 import { User, UserSchema } from '../../schemas/user.schema';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
+import { OrdersRepository } from './orders.repository';
 import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
@@ -17,7 +18,7 @@ import { PaymentsModule } from '../payments/payments.module';
     PaymentsModule,
   ],
   controllers: [OrdersController],
-  providers: [OrdersService],
-  exports: [OrdersService],
+  providers: [OrdersService, OrdersRepository],
+  exports: [OrdersService, OrdersRepository],
 })
 export class OrdersModule {}
