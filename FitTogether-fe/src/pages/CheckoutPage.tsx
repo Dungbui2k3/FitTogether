@@ -1,3 +1,12 @@
+/**
+ * CheckoutPage Component
+ * 
+ * NOTE: PayOS payment method is currently DISABLED (under development)
+ * - PayOS UI is shown as disabled with "Đang phát triển" status
+ * - PayOS payment logic is commented out but preserved for future use
+ * - Only COD (Cash on Delivery) payment is currently functional
+ */
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -32,7 +41,7 @@ const CheckoutPage: React.FC = () => {
     fullName: user?.name || "",
     email: user?.email || "",
     address: "",
-    paymentMethod: "payos",
+    paymentMethod: "cod",
     notes: "",
   });
 
@@ -123,8 +132,13 @@ const CheckoutPage: React.FC = () => {
               paymentMethod: "cod"
             } 
           });
-        } else {
-          // PayOS payment - redirect to checkout URL
+        } else if (formData.paymentMethod === "payos") {
+          // PayOS payment - TEMPORARILY DISABLED (under development)
+          showError("PayOS payment is currently under development. Please use Cash on Delivery.");
+          return;
+          
+          // COMMENTED OUT - PayOS payment code (keep for future use)
+          /*
           success("Order placed successfully! Redirecting to PayOS for payment...");
           clearCart();
           
@@ -136,6 +150,7 @@ const CheckoutPage: React.FC = () => {
             showError("Payment URL not found. Please contact support.");
             navigate("/");
           }
+          */
         }
       } else {
         showError(response.error || "Failed to place order. Please try again.");
@@ -300,36 +315,31 @@ const CheckoutPage: React.FC = () => {
                 )}
 
                 <div className="space-y-4">
+                  {/* PayOS Payment - TEMPORARILY DISABLED */}
                   <label
-                    className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
-                      formData.paymentMethod === "payos"
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    } ${hasDigitalProducts ? "opacity-100" : ""}`}
+                    className={`flex items-center p-4 border-2 rounded-lg transition-colors opacity-50 cursor-not-allowed border-gray-200`}
                   >
                     <input
                       type="radio"
                       name="paymentMethod"
                       value="payos"
-                      checked={formData.paymentMethod === "payos"}
+                      checked={false}
                       onChange={handleInputChange}
-                      disabled={hasDigitalProducts}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                      disabled={true}
+                      className="h-4 w-4 text-gray-400 focus:ring-gray-400"
                     />
                     <div className="ml-4">
                       <div className="flex items-center">
-                        <CreditCard className="h-5 w-5 text-blue-600 mr-2" />
-                        <span className="text-sm font-medium text-gray-900">
+                        <CreditCard className="h-5 w-5 text-gray-400 mr-2" />
+                        <span className="text-sm font-medium text-gray-500">
                           PayOS Payment
                         </span>
-                        {hasDigitalProducts && (
-                          <span className="ml-2 px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-                            Required
-                          </span>
-                        )}
+                        <span className="ml-2 px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
+                          Đang phát triển
+                        </span>
                       </div>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Pay securely with PayOS. You'll be redirected to complete your payment.
+                      <p className="text-sm text-gray-400 mt-1">
+                        Tính năng thanh toán PayOS đang được phát triển. Vui lòng chọn thanh toán khi nhận hàng.
                       </p>
                     </div>
                   </label>
