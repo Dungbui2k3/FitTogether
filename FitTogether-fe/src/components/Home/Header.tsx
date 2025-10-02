@@ -17,29 +17,18 @@ import CartIcon from "../Cart/CartIcon";
 const FitTogetherLogo = () => {
   return (
     <div className="flex items-center space-x-3">
-      <div className="relative">
-        {/* Sports equipment icon effect */}
-        <div className="w-10 h-10 relative transform rotate-12">
-          {/* Main icon */}
-          <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg shadow-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">F</span>
-          </div>
-          {/* Secondary element */}
-          <div className="absolute -top-1 -right-1 w-10 h-10 bg-gradient-to-br from-blue-400 to-green-500 rounded-lg transform -rotate-12 opacity-80 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">T</span>
-          </div>
-        </div>
-        {/* Floating particles effect */}
-        <div className="absolute -top-1 -left-1 w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-        <div className="absolute -bottom-1 -right-2 w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse delay-300"></div>
-        <div className="absolute top-2 -right-3 w-1 h-1 bg-pink-400 rounded-full animate-pulse delay-700"></div>
-      </div>
+      <img 
+        src="/logo.jpg" 
+        alt="FitTogether Logo" 
+        className="h-16 w-auto object-contain"
+        onError={(e) => {
+          // Fallback to placeholder if logo fails to load
+          (e.target as HTMLImageElement).src = "/placeholder-image.svg";
+        }}
+      />
       <div className="flex flex-col">
         <span className="text-2xl font-bold bg-gradient-to-r from-green-600 via-blue-600 to-purple-800 bg-clip-text text-transparent">
           FitTogether
-        </span>
-        <span className="text-xs text-gray-500 font-medium -mt-1">
-          PHỤ KIỆN THỂ THAO
         </span>
       </div>
     </div>
