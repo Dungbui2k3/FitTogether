@@ -31,6 +31,8 @@ import ProductManagement from "./pages/Admin/ProductManagement";
 import { CartProvider } from "./contexts/CartContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import GlobalToastContainer from "./components/GlobalToastContainer";
+import BookingPage from "./components/Field/BookingPage";
+import BookingHistoryPage from "./pages/BookingHistoryPage";
 
 // Layout có Header/Footer
 const MainLayout = () => {
@@ -66,6 +68,7 @@ function App() {
               <Route path="products" element={<ProductsPage />} />
               <Route path="product/:id" element={<ProductDetailPage />} />
               <Route path="fields" element={<FieldsPage />} />
+              <Route path="booking/:fieldId" element={<BookingPage />} />
               <Route path="cart" element={<CartPage />} />
               <Route path="checkout" element={<CheckoutPage />} />
               <Route path="order-success" element={<OrderSuccessPage />} />
@@ -76,6 +79,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <PurchaseHistoryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="booking-history"
+                element={
+                  <ProtectedRoute>
+                    <BookingHistoryPage />
                   </ProtectedRoute>
                 }
               />

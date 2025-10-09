@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { MapPin, Phone, Clock, Users, Star } from 'lucide-react';
-import type { Field } from '../../types/field';
+import React, { useState } from "react";
+import { MapPin, Phone, Clock, Users, Star } from "lucide-react";
+import type { Field } from "../../types/field";
+import { useNavigate } from "react-router-dom";
 
 interface FieldCardProps {
   field: Field;
@@ -9,29 +10,35 @@ interface FieldCardProps {
 
 const FieldCard: React.FC<FieldCardProps> = ({ field, onClick }) => {
   const [imageError, setImageError] = useState(false);
-  
+  const navigate = useNavigate();
+
   // Default placeholder images for different types of sports fields
   const getPlaceholderImage = (fieldName: string) => {
     const name = fieldName.toLowerCase();
-    if (name.includes('bóng đá') || name.includes('football')) {
-      return 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=250&fit=crop&crop=center';
-    } else if (name.includes('cầu lông') || name.includes('badminton')) {
-      return 'https://images.unsplash.com/photo-1544717297-fa95b6ee9643?w=400&h=250&fit=crop&crop=center';
-    } else if (name.includes('tennis')) {
-      return 'https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=400&h=250&fit=crop&crop=center';
-    } else if (name.includes('bóng rổ') || name.includes('basketball')) {
-      return 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&h=250&fit=crop&crop=center';
+    if (name.includes("bóng đá") || name.includes("football")) {
+      return "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=400&h=250&fit=crop&crop=center";
+    } else if (name.includes("cầu lông") || name.includes("badminton")) {
+      return "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?w=400&h=250&fit=crop&crop=center";
+    } else if (name.includes("tennis")) {
+      return "https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=400&h=250&fit=crop&crop=center";
+    } else if (name.includes("bóng rổ") || name.includes("basketball")) {
+      return "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=400&h=250&fit=crop&crop=center";
     } else {
-      return 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop&crop=center';
+      return "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=250&fit=crop&crop=center";
     }
   };
 
-  const fieldImage = field.images && field.images.length > 0 && !imageError 
-    ? field.images[0] 
-    : getPlaceholderImage(field.name);
+  const fieldImage =
+    field.images && field.images.length > 0 && !imageError
+      ? field.images[0]
+      : getPlaceholderImage(field.name);
+
+  const handleBooking = () => {
+    navigate(`/booking/${field.id}`);
+  };
 
   return (
-    <div 
+    <div
       className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer transform hover:-translate-y-1"
       onClick={onClick}
     >
@@ -45,15 +52,17 @@ const FieldCard: React.FC<FieldCardProps> = ({ field, onClick }) => {
         />
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-        
+
         {/* Status badge */}
         <div className="absolute top-4 right-4">
-          <span className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
-            field.isDeleted 
-              ? 'bg-red-500/90 text-white' 
-              : 'bg-green-500/90 text-white'
-          }`}>
-            {field.isDeleted ? 'Tạm đóng' : 'Hoạt động'}
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
+              field.isDeleted
+                ? "bg-red-500/90 text-white"
+                : "bg-green-500/90 text-white"
+            }`}
+          >
+            {field.isDeleted ? "Tạm đóng" : "Hoạt động"}
           </span>
         </div>
 
@@ -109,13 +118,15 @@ const FieldCard: React.FC<FieldCardProps> = ({ field, onClick }) => {
             <Clock className="h-4 w-4" />
             <span>Mở cửa hàng ngày</span>
           </div>
-          <div className="flex items-center space-x-2 text-sm text-gray-500">
+          <button
+            onClick={handleBooking}
+            className="flex items-center space-x-2 text-white bg-green-600 hover:bg-green-700 font-medium px-4 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+          >
             <Users className="h-4 w-4" />
             <span>Đặt sân ngay</span>
-          </div>
+          </button>
         </div>
       </div>
-
     </div>
   );
 };

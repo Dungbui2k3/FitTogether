@@ -10,6 +10,7 @@ import {
   UserCircle,
   ShoppingBag,
   LogOut,
+  Grid,
 } from "lucide-react";
 import { useAuth } from "../../hooks";
 import CartIcon from "../Cart/CartIcon";
@@ -173,6 +174,15 @@ const Header = () => {
                       >
                         <ShoppingBag className="h-4 w-4 mr-3" />
                         Lịch Sử Mua Hàng
+                      </Link>
+
+                      <Link
+                        to="/booking-history"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                        onClick={() => setIsDropdownOpen(false)}
+                      >
+                        <Grid className="h-4 w-4 mr-3" />
+                        Lịch Sử Đặt sân
                       </Link>
 
                       <div className="border-t border-gray-100 my-1"></div>
