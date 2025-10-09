@@ -139,6 +139,7 @@ export class BookingService {
         select: 'name -_id',
       },
     })
+    .sort({ createdAt: -1 })
     .lean() 
     .exec();
 

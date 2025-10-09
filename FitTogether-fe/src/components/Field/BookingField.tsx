@@ -20,7 +20,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
   const fieldId = field?.id;
 
   const [selectedSlots, setSelectedSlots] = useState<
-    { time: string; field: string; date: string }[]
+    { time: string; field: string; date: string; pricePerHour: number }[]
   >([]);
   const [weekIndex, setWeekIndex] = useState(0);
   const [subFields, setSubFields] = useState<any[]>([]);
@@ -100,7 +100,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
     selectedSlots[0].field === field &&
     selectedSlots[0].date === selectedDate;
 
-  const toggleSlot = (time: string, field: string) => {
+  const toggleSlot = (time: string, field: string, pricePerHour: number) => {
     if (!selectedDate) return;
     if (isBooked(time, field)) return;
 
@@ -108,12 +108,13 @@ const BookingField: React.FC<BookingFieldProps> = ({
       selectedSlots.length > 0 &&
       selectedSlots[0].time === time &&
       selectedSlots[0].field === field &&
+      selectedSlots[0].pricePerHour === pricePerHour &&
       selectedSlots[0].date === selectedDate;
 
     if (isSameSlot) {
       setSelectedSlots([]);
     } else {
-      setSelectedSlots([{ time, field, date: selectedDate }]);
+      setSelectedSlots([{ time, field, pricePerHour, date: selectedDate }]);
     }
   };
 
@@ -121,7 +122,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
   const getSubFieldsByFieldId = async (fieldId: string) => {
     try {
       const response = await subFieldService.getSubFieldsByFieldId(fieldId);
-      
+
       if (response.success) {
         setSubFields(response.data || []);
       } else {
@@ -157,7 +158,9 @@ const BookingField: React.FC<BookingFieldProps> = ({
     }
 
     if (subFields.length === 0) {
-      alert("Sub-fields are still loading. Please wait a moment and try again.");
+      alert(
+        "Sub-fields are still loading. Please wait a moment and try again."
+      );
       return;
     }
 
@@ -165,7 +168,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
 
     // Tìm subFieldId dựa vào tên sân
     const subField = subFields.find((f) => f.name === selectedSlot.field);
-    
+
     if (!subField) {
       alert("Cannot find sub-field for selected slot.");
       return;
@@ -222,7 +225,10 @@ const BookingField: React.FC<BookingFieldProps> = ({
       }
 
       console.log("Fetching bookings for date:", selectedDate);
-      console.log("SubFields:", subFields.map(f => ({ id: f.id, name: f.name })));
+      console.log(
+        "SubFields:",
+        subFields.map((f) => ({ id: f.id, name: f.name }))
+      );
 
       const allBookingsPromises = subFields.map((subField) =>
         getBookings(subField.id, selectedDate).then((subFieldBookings) =>
@@ -250,11 +256,10 @@ const BookingField: React.FC<BookingFieldProps> = ({
         {/* Header */}
         <div className="bg-blue-600 text-white p-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Đặt Sân {field?.name || "ACE Pickleball Club"}</h2>
-            <button
-              onClick={onClose}
-              className="p-1 hover:bg-blue-700 rounded"
-            >
+            <h2 className="text-xl font-semibold">
+              Đặt Sân {field?.name || "ACE Pickleball Club"}
+            </h2>
+            <button onClick={onClose} className="p-1 hover:bg-blue-700 rounded">
               <X className="h-5 w-5" />
             </button>
           </div>
@@ -263,16 +268,28 @@ const BookingField: React.FC<BookingFieldProps> = ({
         <div className="p-4 space-y-6">
           {/* Date Selection */}
           <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Chọn Ngày</h3>
-            
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">
+              Chọn Ngày
+            </h3>
+
             <div className="flex items-center justify-center space-x-2">
               <button
                 onClick={handlePrev}
                 disabled={weekIndex === 0}
                 className="p-2 rounded bg-white shadow hover:bg-gray-50 disabled:opacity-40"
               >
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <svg
+                  className="w-4 h-4 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
                 </svg>
               </button>
 
@@ -299,8 +316,18 @@ const BookingField: React.FC<BookingFieldProps> = ({
                 disabled={end >= allDates.length}
                 className="p-2 rounded bg-white shadow hover:bg-gray-50 disabled:opacity-40"
               >
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <svg
+                  className="w-4 h-4 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </button>
             </div>
@@ -308,17 +335,24 @@ const BookingField: React.FC<BookingFieldProps> = ({
 
           {/* Time Slot Selection */}
           <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Chọn Khung Giờ</h3>
-            
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Chọn Khung Giờ
+            </h3>
+
             <div className="overflow-x-auto">
               <div className="min-w-full bg-white rounded-lg shadow overflow-hidden">
                 <table className="w-full">
                   <thead className="bg-gray-100">
                     <tr>
-                      <th className="px-4 py-3 text-left font-semibold text-gray-700">Khung Giờ</th>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-700">
+                        Khung Giờ
+                      </th>
                       {subFields && subFields.length > 0 ? (
                         subFields.map((f) => (
-                          <th key={f._id} className="px-4 py-3 text-center font-semibold text-gray-700">
+                          <th
+                            key={f._id}
+                            className="px-4 py-3 text-center font-semibold text-gray-700"
+                          >
                             {f.name}
                           </th>
                         ))
@@ -333,28 +367,41 @@ const BookingField: React.FC<BookingFieldProps> = ({
                     {fieldSlots && fieldSlots.length > 0 ? (
                       fieldSlots.map((t) => (
                         <tr key={t} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 font-medium text-gray-800">{t}</td>
-                          {subFields && subFields.length > 0 ? subFields.map((f) => {
-                            const booked = isBooked(t, f.name);
-                            const selected = isSelected(t, f.name);
-                            return (
-                              <td key={f._id} className="px-4 py-3 text-center">
-                                <button
-                                  onClick={() => toggleSlot(t, f.name)}
-                                  disabled={booked}
-                                  className={`px-3 py-2 rounded font-medium transition-colors ${
-                                    booked
-                                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                      : selected
-                                      ? "bg-blue-600 text-white"
-                                      : "bg-green-100 text-green-700 border border-green-300 hover:bg-green-200"
-                                  }`}
+                          <td className="px-4 py-3 font-medium text-gray-800">
+                            {t}
+                          </td>
+                          {subFields && subFields.length > 0 ? (
+                            subFields.map((f) => {
+                              const booked = isBooked(t, f.name);
+                              const selected = isSelected(t, f.name);
+                              return (
+                                <td
+                                  key={f._id}
+                                  className="px-4 py-3 text-center"
                                 >
-                                  {booked ? "Đã Đặt" : selected ? "Đã Chọn" : "Trống"}
-                                </button>
-                              </td>
-                            );
-                          }) : (
+                                  <button
+                                    onClick={() =>
+                                      toggleSlot(t, f.name, f.pricePerHour)
+                                    }
+                                    disabled={booked}
+                                    className={`px-3 py-2 rounded font-medium transition-colors ${
+                                      booked
+                                        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                        : selected
+                                        ? "bg-blue-600 text-white"
+                                        : "bg-green-100 text-green-700 border border-green-300 hover:bg-green-200"
+                                    }`}
+                                  >
+                                    {booked
+                                      ? "Đã Đặt"
+                                      : selected
+                                      ? "Đã Chọn"
+                                      : "Trống"}
+                                  </button>
+                                </td>
+                              );
+                            })
+                          ) : (
                             <td className="px-4 py-3 text-center text-gray-400">
                               Đang tải...
                             </td>
@@ -363,10 +410,23 @@ const BookingField: React.FC<BookingFieldProps> = ({
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={(subFields?.length || 0) + 1} className="px-4 py-8 text-center text-gray-500">
+                        <td
+                          colSpan={(subFields?.length || 0) + 1}
+                          className="px-4 py-8 text-center text-gray-500"
+                        >
                           <div className="flex flex-col items-center space-y-2">
-                            <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            <svg
+                              className="w-8 h-8 text-gray-300"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
                             </svg>
                             <p>Đang tải khung giờ...</p>
                           </div>
@@ -381,12 +441,16 @@ const BookingField: React.FC<BookingFieldProps> = ({
 
           {/* Selected Slots Summary */}
           <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Tóm Tắt Đặt Sân</h3>
-            
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">
+              Tóm Tắt Đặt Sân
+            </h3>
+
             {selectedSlots.length === 0 ? (
               <div className="text-center py-6">
                 <p className="text-gray-500">Chưa chọn khung giờ nào</p>
-                <p className="text-gray-400 text-sm">Vui lòng chọn ngày và khung giờ để tiếp tục</p>
+                <p className="text-gray-400 text-sm">
+                  Vui lòng chọn ngày và khung giờ để tiếp tục
+                </p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -400,13 +464,19 @@ const BookingField: React.FC<BookingFieldProps> = ({
                             {day}
                           </div>
                           <div>
-                            <p className="font-medium text-gray-800">{s.field}</p>
-                            <p className="text-gray-600 text-sm">{day}/{month}/{year}</p>
+                            <p className="font-medium text-gray-800">
+                              {s.field}
+                            </p>
+                            <p className="text-gray-600 text-sm">
+                              {day}/{month}/{year}
+                            </p>
                             <p className="text-xs text-gray-500">{s.time}</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-blue-600">220.000 ₫</p>
+                          <p className="font-semibold text-blue-600">
+                            {s.pricePerHour} VND
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -421,9 +491,6 @@ const BookingField: React.FC<BookingFieldProps> = ({
         <div className="bg-white border-t border-gray-200 p-4">
           <div className="flex justify-between items-center">
             <div className="text-sm text-gray-600">
-              {selectedSlots.length > 0 && (
-                <span>Tổng: {(selectedSlots.length * 220000).toLocaleString()} ₫</span>
-              )}
             </div>
             <div className="flex space-x-3">
               <button
