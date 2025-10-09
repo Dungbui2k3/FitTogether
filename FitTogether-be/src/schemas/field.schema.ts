@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
+import { SubField } from './subField.schema';
 
 export type FieldDocument = Field & Document;
 
@@ -34,7 +35,7 @@ export class Field {
       'Hệ thống đèn chiếu sáng hiện đại',
       'Phòng thay đồ rộng rãi',
       'Bãi đậu xe miễn phí',
-      'Căng tin phục vụ đồ uống'
+      'Căng tin phục vụ đồ uống',
     ],
   })
   @Prop({ type: [String], default: [] })
@@ -42,7 +43,8 @@ export class Field {
 
   @ApiProperty({
     description: 'Thông điệp giới thiệu / kêu gọi',
-    example: 'Sân bóng đá hiện đại với cỏ nhân tạo chất lượng cao, phù hợp cho các trận đấu giao hữu và thi đấu chuyên nghiệp. Hãy đến và trải nghiệm không gian thể thao tuyệt vời!',
+    example:
+      'Sân bóng đá hiện đại với cỏ nhân tạo chất lượng cao, phù hợp cho các trận đấu giao hữu và thi đấu chuyên nghiệp. Hãy đến và trải nghiệm không gian thể thao tuyệt vời!',
   })
   @Prop()
   description?: string;
@@ -56,6 +58,14 @@ export class Field {
   })
   @Prop({ type: [String], default: [] })
   images: string[];
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: SubField.name }], default: [] })
+  @ApiProperty({
+    description: 'Danh sách các sân con thuộc sân chính',
+    type: [String],
+    example: ['652abc12345...', '652def67890...'],
+  })
+  subFields: Types.ObjectId[];
 
   // === Soft Delete ===
   @ApiProperty({ description: 'Soft delete flag', example: false })

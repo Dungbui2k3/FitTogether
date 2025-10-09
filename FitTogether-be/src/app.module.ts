@@ -14,6 +14,8 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { ProductsModule } from './modules/products/products.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { FieldsModule } from './modules/fields/fields.module';
+import { SubFieldsModule } from './modules/subFields/subFields.module';
+import { BookingModule } from './modules/booking/booking.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { FieldsModule } from './modules/fields/fields.module';
     ProductsModule,
     OrdersModule,
     FieldsModule,
+    SubFieldsModule,
+    BookingModule,
   ],
   controllers: [AppController],
   providers: [
