@@ -18,12 +18,6 @@ export class Booking {
 
   @Prop({
     required: true,
-    enum: [
-      "5:00 - 6:30",
-      "6:40 - 8:10",
-      "8:20 - 9:50",
-      "10:00 - 11:30",
-    ],
   })
   duration: string;
 

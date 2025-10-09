@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsString, IsNotEmpty, IsArray, IsOptional, IsPhoneNumber } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsArray,
+  IsOptional,
+  IsPhoneNumber,
+} from 'class-validator';
 
 export class CreateFieldDto {
   @ApiProperty({
@@ -34,16 +40,16 @@ export class CreateFieldDto {
       'Hệ thống đèn chiếu sáng hiện đại',
       'Phòng thay đồ rộng rãi',
       'Bãi đậu xe miễn phí',
-      'Căng tin phục vụ đồ uống'
+      'Căng tin phục vụ đồ uống',
     ],
     type: [String],
   })
-   @Transform(({ value }) => {
+  @Transform(({ value }) => {
     if (typeof value === 'string') {
       try {
         return JSON.parse(value);
       } catch {
-        return [value]; 
+        return [value];
       }
     }
     return value;
@@ -54,8 +60,29 @@ export class CreateFieldDto {
   facilities?: string[];
 
   @ApiProperty({
+    description: 'Danh sách các khung h',
+    example: ['5:00 - 6:30', '6:40 - 8:10	', '8:20 - 9:50	', '10:00 - 11:30	'],
+    type: [String],
+  })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return [value];
+      }
+    }
+    return value;
+  })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  slots?: string[];
+
+  @ApiProperty({
     description: 'Thông điệp giới thiệu / kêu gọi',
-    example: 'Sân bóng đá hiện đại với cỏ nhân tạo chất lượng cao, phù hợp cho các trận đấu giao hữu và thi đấu chuyên nghiệp. Hãy đến và trải nghiệm không gian thể thao tuyệt vời!',
+    example:
+      'Sân bóng đá hiện đại với cỏ nhân tạo chất lượng cao, phù hợp cho các trận đấu giao hữu và thi đấu chuyên nghiệp. Hãy đến và trải nghiệm không gian thể thao tuyệt vời!',
     required: false,
   })
   @IsString()

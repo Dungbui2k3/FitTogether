@@ -5,7 +5,6 @@ import { IsNotEmpty, IsString, IsMongoId, IsEnum, IsNumber, Min } from 'class-va
 export class CreateBookingDto {
   @ApiProperty({ description: 'Thời gian đặt sân', example: '5:00 - 6:30' })
   @IsNotEmpty()
-  @IsEnum(["5:00 - 6:30", "6:40 - 8:10", "8:20 - 9:50", "10:00 - 11:30"])
   duration: string;
 
   @ApiProperty({ description: 'Ngày đặt sân (YYYY-MM-DD)', example: '2025-10-10' })

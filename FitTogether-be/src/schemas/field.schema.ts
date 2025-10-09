@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { SubField } from './subField.schema';
+import { User } from './user.schema';
 
 export type FieldDocument = Field & Document;
 
@@ -13,6 +14,14 @@ export class Field {
   })
   @Prop({ required: true })
   name: string;
+
+  @Prop({ type: Types.ObjectId, ref: User.name, required: true })
+  @ApiProperty({
+    description: 'ID người dùng',
+    type: String,
+    example: '652abc12345...', // chỉ 1 ví dụ
+  })
+  userId: Types.ObjectId;
 
   @ApiProperty({
     description: 'Địa chỉ sân',
@@ -40,6 +49,13 @@ export class Field {
   })
   @Prop({ type: [String], default: [] })
   facilities: string[];
+
+  @ApiProperty({
+    description: 'Danh sách các khung h',
+    example: ['5:00 - 6:30', '6:40 - 8:10	', '8:20 - 9:50	', '10:00 - 11:30	'],
+  })
+  @Prop({ type: [String], default: [] })
+  slots: string[];
 
   @ApiProperty({
     description: 'Thông điệp giới thiệu / kêu gọi',

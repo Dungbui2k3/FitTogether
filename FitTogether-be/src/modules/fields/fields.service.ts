@@ -23,7 +23,7 @@ export class FieldsService {
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
-  async create(createFieldDto: CreateFieldDto): Promise<any> {
+  async create(createFieldDto: CreateFieldDto, userId: string): Promise<any> {
     try {
       // Check if field name already exists
       const existingField = await this.fieldModel.findOne({
@@ -64,6 +64,7 @@ export class FieldsService {
       const fieldData = {
         ...createFieldDto,
         images: uploadedUrls,
+        userId: new Types.ObjectId(userId), 
       };
 
       const newField = new this.fieldModel(fieldData);
@@ -344,6 +345,7 @@ export class FieldsService {
       address: field.address,
       phone: field.phone,
       facilities: field.facilities,
+      slots: field.slots,
       description: field.description,
       images: field.images,
       createdAt: field.createdAt,

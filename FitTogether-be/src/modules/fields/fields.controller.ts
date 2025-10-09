@@ -28,7 +28,7 @@ import { FieldsService } from './fields.service';
 import { CreateFieldDto } from './dto/create-field.dto';
 import { UpdateFieldDto } from './dto/update-field.dto';
 import { GetFieldsQueryDto } from './dto/get-fields-query.dto';
-import { Public, Roles } from 'src/decorators';
+import { GetUser, Public, Roles } from 'src/decorators';
 import { JwtAuthGuard, Role } from 'src/guards';
 
 @ApiTags('Fields')
@@ -49,12 +49,13 @@ export class FieldsController {
   async create(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() createFieldDto: CreateFieldDto,
+    @GetUser('_id') userId: string,
   ) {
     if (files?.length > 0) {
       createFieldDto.images = files;
     }
 
-    return this.fieldsService.create(createFieldDto);
+    return this.fieldsService.create(createFieldDto, userId);
   }
 
   @Public()
