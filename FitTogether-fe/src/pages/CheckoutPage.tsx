@@ -1,10 +1,9 @@
 /**
  * CheckoutPage Component
  * 
- * NOTE: PayOS payment method is currently DISABLED (under development)
- * - PayOS UI is shown as disabled with "Đang phát triển" status
- * - PayOS payment logic is commented out but preserved for future use
- * - Only COD (Cash on Delivery) payment is currently functional
+ * Payment methods available:
+ * - PayOS: Online payment gateway
+ * - COD: Cash on Delivery
  */
 
 import React, { useState, useEffect } from "react";
@@ -15,7 +14,6 @@ import {
   Smartphone,
   MapPin,
   User,
-  AlertTriangle,
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import { useToast } from "../hooks";
@@ -43,7 +41,7 @@ const CheckoutPage: React.FC = () => {
     email: user?.email || "",
     phone: "",
     address: "",
-    paymentMethod: "cod",
+    paymentMethod: "payos",
     notes: "",
   });
 
@@ -136,12 +134,7 @@ const CheckoutPage: React.FC = () => {
             } 
           });
         } else if (formData.paymentMethod === "payos") {
-          // PayOS payment - TEMPORARILY DISABLED (under development)
-          showError("Thanh toán PayOS hiện đang được phát triển. Vui lòng chọn thanh toán khi nhận hàng.");
-          return;
-          
-          // COMMENTED OUT - PayOS payment code (keep for future use)
-          /*
+          // PayOS payment
           success("Đặt hàng thành công! Đang chuyển hướng đến PayOS để thanh toán...");
           clearCart();
           
@@ -153,7 +146,6 @@ const CheckoutPage: React.FC = () => {
             showError("Không tìm thấy URL thanh toán. Vui lòng liên hệ hỗ trợ.");
             navigate("/");
           }
-          */
         }
       } else {
         showError(response.error || "Không thể đặt hàng. Vui lòng thử lại.");
@@ -299,50 +291,35 @@ const CheckoutPage: React.FC = () => {
                   Phương thức thanh toán
                 </h2>
 
-                {/* Digital Products Warning */}
-                {hasDigitalProducts && (
-                  <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                    <div className="flex items-start">
-                      <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" />
-                      <div>
-                        <h3 className="text-sm font-medium text-yellow-800">
-                          Phát hiện sản phẩm số
-                        </h3>
-                        <p className="text-sm text-yellow-700 mt-1">
-                          Giỏ hàng của bạn có chứa sản phẩm số. Cần thanh toán PayOS
-                          cho việc mua sản phẩm số.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
                 <div className="space-y-4">
-                  {/* PayOS Payment - TEMPORARILY DISABLED */}
+                  {/* PayOS Payment */}
                   <label
-                    className={`flex items-center p-4 border-2 rounded-lg transition-colors opacity-50 cursor-not-allowed border-gray-200`}
+                    className={`flex items-center p-4 border-2 rounded-lg transition-colors ${
+                      formData.paymentMethod === "payos"
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
                   >
                     <input
                       type="radio"
                       name="paymentMethod"
                       value="payos"
-                      checked={false}
+                      checked={formData.paymentMethod === "payos"}
                       onChange={handleInputChange}
-                      disabled={true}
-                      className="h-4 w-4 text-gray-400 focus:ring-gray-400"
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                     />
                     <div className="ml-4">
                       <div className="flex items-center">
-                        <CreditCard className="h-5 w-5 text-gray-400 mr-2" />
-                        <span className="text-sm font-medium text-gray-500">
+                        <CreditCard className="h-5 w-5 text-blue-600 mr-2" />
+                        <span className="text-sm font-medium text-gray-900">
                           Thanh toán PayOS
                         </span>
-                        <span className="ml-2 px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded-full">
-                          Đang phát triển
+                        <span className="ml-2 px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+                          Khả dụng
                         </span>
                       </div>
-                      <p className="text-sm text-gray-400 mt-1">
-                        Tính năng thanh toán PayOS đang được phát triển. Vui lòng chọn thanh toán khi nhận hàng.
+                      <p className="text-sm text-gray-600 mt-1">
+                        Thanh toán trực tuyến an toàn và nhanh chóng qua PayOS
                       </p>
                     </div>
                   </label>
@@ -362,7 +339,6 @@ const CheckoutPage: React.FC = () => {
                       value="cod"
                       checked={formData.paymentMethod === "cod"}
                       onChange={handleInputChange}
-                      disabled={hasDigitalProducts}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                     />
                     <div className="ml-4">
