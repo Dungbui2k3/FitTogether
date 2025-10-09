@@ -185,18 +185,7 @@ const Header = () => {
                         <Grid className="h-4 w-4 mr-3" />
                         Lịch Sử Đặt sân
                       </Link>
-
-                      {/* Field Owner Management Link */}
-                      {user?.role === 'field_owner' && (
-                        <Link
-                          to="/field-owner/fields"
-                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <MapPin className="h-4 w-4 mr-3" />
-                          Quản Lý Sân Thể Thao
-                        </Link>
-                      )}
+                     
 
                       <div className="border-t border-gray-100 my-1"></div>
 
@@ -307,18 +296,6 @@ const Header = () => {
                       <ShoppingBag className="h-4 w-4" />
                       <span>Lịch sử mua hàng</span>
                     </Link>
-
-                    {/* Field Owner Management Link */}
-                    {user?.role === 'field_owner' && (
-                      <Link
-                        to="/field-owner/fields"
-                        className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors font-medium px-2 py-1 rounded hover:bg-white"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        <MapPin className="h-4 w-4" />
-                        <span>Quản lý sân thể thao</span>
-                      </Link>
-                    )}
 
                     <button
                       onClick={() => {
