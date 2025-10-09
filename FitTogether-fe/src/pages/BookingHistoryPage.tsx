@@ -208,7 +208,8 @@ const BookingHistoryPage: React.FC = () => {
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div>
                       <p className="font-medium text-gray-900">
-                        Tên sân: {order.subFieldId?.fieldId?.name} - {order.subFieldId?.name} 
+                        Tên sân: {order.subFieldId?.fieldId?.name} -{" "}
+                        {order.subFieldId?.name}
                       </p>
                       <p className="font-medium text-gray-900">
                         Loại sân: {order.subFieldId?.type}
@@ -226,6 +227,33 @@ const BookingHistoryPage: React.FC = () => {
                       </p>
                     </div>
                   </div>
+
+                  {/* Customer Information */}
+                  {order.userId && (
+                    <div className="px-6 py-4 border-t border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-3">
+                        Thông tin khách hàng
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                        {order.userId.name && (
+                          <div>
+                            <span className="text-gray-500">Họ và tên:</span>
+                            <p className="font-medium text-gray-900">
+                              {order.userId.name}
+                            </p>
+                          </div>
+                        )}
+                        {order.userId.email && (
+                          <div>
+                            <span className="text-gray-500">Email:</span>
+                            <p className="font-medium text-gray-900">
+                              {order.userId.email}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
