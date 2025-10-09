@@ -129,15 +129,18 @@ export class BookingService {
     }
 
     const bookings = await this.bookingModel
-      .find({ userId: new Types.ObjectId(userId) })
-      .populate({
-        path: 'subFieldId', // populate subField
-        populate: {
-          path: 'fieldId', // trong subField populate tiếp fieldId
-          select: 'name -_id', // chỉ lấy field name
-        },
-      })
-      .exec();
+    .find({ userId: new Types.ObjectId(userId) })
+    .populate('userId', 'name email -_id')
+    .populate({
+      path: 'subFieldId',
+      select: 'name type pricePerHour fieldId -_id', 
+      populate: {
+        path: 'fieldId',
+        select: 'name -_id',
+      },
+    })
+    .lean() 
+    .exec();
 
     return bookings;
   }
