@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { X, Plus, Trash2, Upload } from "lucide-react";
+import { X, Plus, Trash2, Upload, AlertTriangle } from "lucide-react";
 import { fieldService } from "../../../services/fieldService";
 import { useToast } from "../../../hooks";
 import type { CreateFieldRequest } from "../../../types/field";
-import { SubField } from "../../../types/subField";
+import { CreateSubFieldRequest } from "../../../types/subField";
 
 interface CreateFieldModalProps {
   isOpen: boolean;
@@ -26,9 +26,8 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({
     slots: [""],
     description: "",
     images: [],
+    subFields: [],
   });
-
-  const [subFields, setSubFields] = useState<SubField[]>([]);
 
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
@@ -69,6 +68,45 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({
         facilities: newFacilities,
       }));
     }
+  };
+
+  // SubFields management
+  const handleSubFieldChange = (index: number, field: keyof CreateSubFieldRequest, value: string | number) => {
+    const newSubFields = [...(formData.subFields || [])];
+    if (!newSubFields[index]) {
+      newSubFields[index] = {
+        name: '',
+        type: '',
+        pricePerHour: 0,
+        status: 'available'
+      };
+    }
+    newSubFields[index] = { ...newSubFields[index], [field]: value };
+    setFormData((prev) => ({
+      ...prev,
+      subFields: newSubFields,
+    }));
+  };
+
+  const addSubField = () => {
+    const newSubField: CreateSubFieldRequest = {
+      name: '',
+      type: '',
+      pricePerHour: 0,
+      status: 'available'
+    };
+    setFormData((prev) => ({
+      ...prev,
+      subFields: [...(prev.subFields || []), newSubField],
+    }));
+  };
+
+  const removeSubField = (index: number) => {
+    const newSubFields = (formData.subFields || []).filter((_, i) => i !== index);
+    setFormData((prev) => ({
+      ...prev,
+      subFields: newSubFields,
+    }));
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,6 +158,13 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({
       return;
     }
 
+    // Validate time slots
+    const invalidSlots = formData.slots.filter(slot => !isValidSlot(slot));
+    if (invalidSlots.length > 0) {
+      error("Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc trong tất cả các khung giờ");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -132,12 +177,43 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({
       formDataToSend.append("description", formData.description?.trim() || "");
 
       formDataToSend.append("facilities", JSON.stringify(facilities));
+      formDataToSend.append("slots", JSON.stringify(formData.slots));
+
+      // Append subFields if any (try as individual form fields)
+      if (formData.subFields && formData.subFields.length > 0) {
+        // Filter out empty subFields
+        const validSubFields = formData.subFields.filter(subField => 
+          subField.name && subField.name.trim() !== ''
+        );
+        
+        if (validSubFields.length > 0) {
+          // Try sending each subField as individual form fields
+          validSubFields.forEach((subField, index) => {
+            formDataToSend.append(`subFields[${index}][name]`, subField.name);
+            formDataToSend.append(`subFields[${index}][type]`, subField.type || '');
+            formDataToSend.append(`subFields[${index}][pricePerHour]`, subField.pricePerHour.toString());
+            formDataToSend.append(`subFields[${index}][status]`, subField.status || 'available');
+          });
+        }
+      }
 
       // Append image files
       imageFiles.forEach((file) => {
         formDataToSend.append("images", file);
       });
 
+      // Debug: Log what we're sending
+      console.log("Form data being sent:");
+      console.log("subFields:", formData.subFields);
+      
+      // Log FormData contents for debugging
+      console.log("FormData contents:");
+      for (let [key, value] of formDataToSend.entries()) {
+        if (key.startsWith('subFields')) {
+          console.log(`${key}:`, value);
+        }
+      }
+      
       const response = await fieldService.createField(formDataToSend as any);
 
       if (response.success) {
@@ -194,24 +270,6 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({
     onClose();
   };
 
-  const addSubField = () => {
-    setSubFields([
-      ...subFields,
-      { name: "", type: "", pricePerHour: 0 } as SubField,
-    ]);
-  };
-
-  // Hàm chỉnh sửa SubField
-  const handleSubFieldChange = (index: number, newSubField: SubField) => {
-    const updated = [...subFields];
-    updated[index] = newSubField;
-    setSubFields(updated);
-  };
-
-  // Hàm xóa SubField
-  const removeSubField = (index: number) => {
-    setSubFields(subFields.filter((_, i) => i !== index));
-  };
 
   // Thêm slot mới
   const addSlot = () => {
@@ -226,8 +284,21 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({
   ) => {
     const [start, end] = formData.slots[index]?.split("-") || ["", ""];
     const updated = [...formData.slots];
-    updated[index] = key === "start" ? `${value}-${end}` : `${start}-${value}`;
+    
+    if (key === "start") {
+      updated[index] = `${value}-${end}`;
+    } else {
+      updated[index] = `${start}-${value}`;
+    }
+    
     setFormData((prev) => ({ ...prev, slots: updated }));
+  };
+
+  // Kiểm tra slot có hợp lệ không (start < end)
+  const isValidSlot = (slot: string) => {
+    const [start, end] = slot.split("-");
+    if (!start || !end) return true; // Allow empty values during input
+    return start < end;
   };
 
   // Xóa slot
@@ -377,33 +448,50 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({
 
             {formData.slots.map((slot, index) => {
               const [start, end] = slot.split("-");
+              const isValid = isValidSlot(slot);
               return (
-                <div key={index} className="flex items-center space-x-2">
-                  <input
-                    type="time"
-                    value={start || ""}
-                    onChange={(e) =>
-                      handleSlotChange(index, "start", e.target.value)
-                    }
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <span className="text-gray-500">-</span>
-                  <input
-                    type="time"
-                    value={end || ""}
-                    onChange={(e) =>
-                      handleSlotChange(index, "end", e.target.value)
-                    }
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  {formData.slots.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeSlot(index)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                <div key={index} className="space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="time"
+                      value={start || ""}
+                      onChange={(e) =>
+                        handleSlotChange(index, "start", e.target.value)
+                      }
+                      className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                        isValid 
+                          ? "border-gray-300 focus:ring-blue-500" 
+                          : "border-red-300 focus:ring-red-500 bg-red-50"
+                      }`}
+                    />
+                    <span className="text-gray-500">-</span>
+                    <input
+                      type="time"
+                      value={end || ""}
+                      onChange={(e) =>
+                        handleSlotChange(index, "end", e.target.value)
+                      }
+                      className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
+                        isValid 
+                          ? "border-gray-300 focus:ring-blue-500" 
+                          : "border-red-300 focus:ring-red-500 bg-red-50"
+                      }`}
+                    />
+                    {formData.slots.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeSlot(index)}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                  {!isValid && start && end && (
+                    <p className="text-sm text-red-600 flex items-center">
+                      <AlertTriangle className="h-4 w-4 mr-1" />
+                      Thời gian bắt đầu phải nhỏ hơn thời gian kết thúc
+                    </p>
                   )}
                 </div>
               );
@@ -427,45 +515,36 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({
             </div>
 
             <div className="space-y-2">
-              {subFields.map((subField, index) => (
+              {(formData.subFields || []).map((subField, index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <input
                     type="text"
-                    value={subField.name}
+                    value={subField.name || ""}
                     onChange={(e) =>
-                      handleSubFieldChange(index, {
-                        ...subField,
-                        name: e.target.value,
-                      })
+                      handleSubFieldChange(index, "name", e.target.value)
                     }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Tên sân con"
                   />
                   <input
                     type="text"
-                    value={subField.type}
+                    value={subField.type || ""}
                     onChange={(e) =>
-                      handleSubFieldChange(index, {
-                        ...subField,
-                        type: e.target.value,
-                      })
+                      handleSubFieldChange(index, "type", e.target.value)
                     }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Loại sân"
                   />
                   <input
                     type="number"
-                    value={subField.pricePerHour}
+                    value={subField.pricePerHour || 0}
                     onChange={(e) =>
-                      handleSubFieldChange(index, {
-                        ...subField,
-                        pricePerHour: Number(e.target.value),
-                      })
+                      handleSubFieldChange(index, "pricePerHour", Number(e.target.value))
                     }
                     className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Giá/giờ"
                   />
-                  {subFields.length > 1 && (
+                  {(formData.subFields || []).length > 0 && (
                     <button
                       type="button"
                       onClick={() => removeSubField(index)}

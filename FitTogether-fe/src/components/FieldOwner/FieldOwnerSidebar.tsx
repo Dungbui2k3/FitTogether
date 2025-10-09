@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  Users, 
-  Package, 
-  ShoppingCart, 
-  Tag,
+  MapPin,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -25,8 +22,8 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, to, isActive, is
       to={to}
       className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
         isActive
-          ? 'bg-blue-600 text-white shadow-lg'
-          : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
+          ? 'bg-green-600 text-white shadow-lg'
+          : 'text-gray-700 hover:bg-gray-100 hover:text-green-600'
       }`}
       title={isCollapsed ? label : ''}
     >
@@ -45,10 +42,20 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, to, isActive, is
   );
 };
 
-const AdminSidebar: React.FC = () => {
+interface FieldOwnerSidebarProps {
+  onCollapseChange?: (isCollapsed: boolean) => void;
+}
+
+const FieldOwnerSidebar: React.FC<FieldOwnerSidebarProps> = ({ onCollapseChange }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { user, logout } = useAuth();
   const location = useLocation();
+
+  const handleCollapseToggle = () => {
+    const newCollapsedState = !isCollapsed;
+    setIsCollapsed(newCollapsedState);
+    onCollapseChange?.(newCollapsedState);
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -56,29 +63,14 @@ const AdminSidebar: React.FC = () => {
 
   const menuItems = [
     {
-      icon: <Users className="h-5 w-5" />,
-      label: 'Quản Lý Người Dùng',
-      to: '/admin/users'
-    },
-    {
-      icon: <Package className="h-5 w-5" />,
-      label: 'Quản Lý Sản Phẩm',
-      to: '/admin/products'
-    },
-    {
-      icon: <Tag className="h-5 w-5" />,
-      label: 'Quản Lý Danh Mục',
-      to: '/admin/categories'
-    },
-    {
-      icon: <ShoppingCart className="h-5 w-5" />,
-      label: 'Quản Lý Đơn Hàng',
-      to: '/admin/orders'
+      icon: <MapPin className="h-5 w-5" />,
+      label: 'Quản Lý Sân Thể Thao',
+      to: '/field-owner/fields'
     }
   ];
 
   return (
-    <div className={`bg-white shadow-xl border-r border-gray-200 transition-all duration-300 ${
+    <div className={`fixed left-0 top-0 h-screen bg-white shadow-xl border-r border-gray-200 transition-all duration-300 z-40 ${
       isCollapsed ? 'w-20' : 'w-64'
     }`}>
       <div className="flex flex-col h-full">
@@ -87,11 +79,12 @@ const AdminSidebar: React.FC = () => {
           <div className="flex items-center justify-between">
             {!isCollapsed && (
               <div>
-                <h1 className="text-xl font-bold text-gray-800">Bảng Quản Trị</h1>
+                <h1 className="text-xl font-bold text-gray-800">Quản Lý Sân</h1>
+                <p className="text-sm text-gray-500">Chủ sân thể thao</p>
               </div>
             )}
             <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={handleCollapseToggle}
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
               {isCollapsed ? (
@@ -107,14 +100,14 @@ const AdminSidebar: React.FC = () => {
         {!isCollapsed && (
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-semibold text-sm">
                   {user?.name?.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div>
                 <p className="font-medium text-gray-800">{user?.name}</p>
-                <p className="text-sm text-gray-500 capitalize">{user?.role}</p>
+                <p className="text-sm text-gray-500 capitalize">Chủ sân thể thao</p>
               </div>
             </div>
           </div>
@@ -136,7 +129,7 @@ const AdminSidebar: React.FC = () => {
 
         {/* Footer Actions */}
         <div className="p-4 border-t border-gray-200 space-y-2">
-          
+        
           <button
             onClick={handleLogout}
             className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors w-full"
@@ -151,4 +144,4 @@ const AdminSidebar: React.FC = () => {
   );
 };
 
-export default AdminSidebar;
+export default FieldOwnerSidebar;

@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { SubField } from './subField.schema';
 import { User } from './user.schema';
 
 export type FieldDocument = Field & Document;
@@ -74,14 +73,6 @@ export class Field {
   })
   @Prop({ type: [String], default: [] })
   images: string[];
-
-  @Prop({ type: [{ type: Types.ObjectId, ref: SubField.name }], default: [] })
-  @ApiProperty({
-    description: 'Danh sách các sân con thuộc sân chính',
-    type: [String],
-    example: ['652abc12345...', '652def67890...'],
-  })
-  subFields: Types.ObjectId[];
 
   // === Soft Delete ===
   @ApiProperty({ description: 'Soft delete flag', example: false })

@@ -1,6 +1,5 @@
 import {
   CreateSubFieldRequest,
-  SubField,
   SubFieldListResponse,
 } from "./../types/subField";
 import { ApiResponse } from "../types";
@@ -34,10 +33,9 @@ class SubFieldService {
   ): Promise<ApiResponse<any>> {
     try {
       const response = await backendInstance.get<{ data: any }>(
-        `/subFields/${fieldId}`
+        `/subFields/field/${fieldId}`
       );
 
-      console.log("Get subFields by id response:", response.data.data);
       return {
         success: true,
         data: response.data.data,

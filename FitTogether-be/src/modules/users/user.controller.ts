@@ -186,6 +186,41 @@ export class UserController {
     );
   }
 
+  @Patch(':id/role')
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Update user role (Admin only)' })
+  @ApiParam({ name: 'id', description: 'User ID' })
+  @ApiResponse({ status: 200, description: 'User role updated successfully' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 400, description: 'Invalid role' })
+  async updateRole(
+    @Param('id') id: string,
+    @Body() body: { role: string }
+  ) {
+    const validRoles = ['user', 'admin', 'moderator', 'field_owner'];
+    if (!validRoles.includes(body.role)) {
+      return ResponseUtil.success(
+        null,
+        'Invalid role. Valid roles: user, admin, moderator, field_owner',
+        400
+      );
+    }
+
+    const user = await this.usersService.update(id, { role: body.role });
+    return ResponseUtil.success(
+      {
+        id: (user as any)._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isActive: user.isActive,
+        updatedAt: (user as any).updatedAt,
+      },
+      'User role updated successfully'
+    );
+  }
+
   @Delete(':id')
   @Roles(Role.ADMIN)
   @ApiBearerAuth('JWT-auth')

@@ -3,7 +3,6 @@ import { X } from "lucide-react";
 import { subFieldService } from "../../services/subFieldsService";
 import bookingService from "../../services/bookingService";
 import fieldService from "../../services/fieldService";
-import { Field } from "../../types/field";
 
 interface BookingFieldProps {
   open: boolean;
@@ -18,7 +17,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
 }) => {
   if (!open) return null;
 
-  const fieldId = field.id;
+  const fieldId = field?.id;
 
   const [selectedSlots, setSelectedSlots] = useState<
     { time: string; field: string; date: string }[]
@@ -70,7 +69,6 @@ const BookingField: React.FC<BookingFieldProps> = ({
     try {
       const response = await fieldService.getFieldById(fieldId);
       setFieldSlots(response.data?.slots || []);
-      console.log("Field slots:", response.data?.slots);
     } catch (error) {
       console.error("Error fetching sub-fields:", error);
     }
@@ -87,13 +85,6 @@ const BookingField: React.FC<BookingFieldProps> = ({
   const handleNext = () => {
     if (end < allDates.length) setWeekIndex(weekIndex + 1);
   };
-
-  const timeSlots = [
-    "5:00 - 6:30",
-    "6:40 - 8:10",
-    "8:20 - 9:50",
-    "10:00 - 11:30",
-  ];
 
   // Kiểm tra slot đã đặt
   const isBooked = (time: string, field: string) =>
@@ -130,13 +121,16 @@ const BookingField: React.FC<BookingFieldProps> = ({
   const getSubFieldsByFieldId = async (fieldId: string) => {
     try {
       const response = await subFieldService.getSubFieldsByFieldId(fieldId);
+      
       if (response.success) {
-        setSubFields(response.data.data);
+        setSubFields(response.data || []);
       } else {
         console.error("Failed to fetch sub-fields:", response.message);
+        setSubFields([]);
       }
     } catch (error) {
       console.error("Failed to fetch sub-fields:", error);
+      setSubFields([]);
     }
   };
 
@@ -145,13 +139,6 @@ const BookingField: React.FC<BookingFieldProps> = ({
     try {
       const response = await bookingService.getBookings(subFieldId, day);
       if (response.success) {
-        console.log(
-          "Bookings fetched successfully for subfield",
-          subFieldId,
-          day,
-          ":",
-          response.data
-        );
         return response.data;
       } else {
         return [];
@@ -168,16 +155,20 @@ const BookingField: React.FC<BookingFieldProps> = ({
       return;
     }
 
+    if (subFields.length === 0) {
+      alert("Sub-fields are still loading. Please wait a moment and try again.");
+      return;
+    }
+
     const selectedSlot = selectedSlots[0];
 
     // Tìm subFieldId dựa vào tên sân
     const subField = subFields.find((f) => f.name === selectedSlot.field);
+    
     if (!subField) {
       alert("Cannot find sub-field for selected slot.");
       return;
     }
-
-    console.log("Selected subField:", subField._id);
 
     const bookingRequest = {
       day: selectedSlot.date,
@@ -187,7 +178,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
 
     try {
       const response = await bookingService.booking(
-        subField._id,
+        subField.id,
         bookingRequest
       );
 
@@ -215,9 +206,12 @@ const BookingField: React.FC<BookingFieldProps> = ({
   };
 
   useEffect(() => {
-    if (field && field.id) getSubFieldsByFieldId(fieldId);
-    else setSubFields([]);
-  }, [field]);
+    if (field && field.id && fieldId) {
+      getSubFieldsByFieldId(fieldId);
+    } else {
+      setSubFields([]);
+    }
+  }, [field, fieldId]);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -245,148 +239,206 @@ const BookingField: React.FC<BookingFieldProps> = ({
   }, [selectedDate, subFields]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-5xl p-6 relative animate-fadeIn">
-        {/* Nút đóng */}
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-        >
-          <X size={20} />
-        </button>
-
-        <h2 className="text-xl font-semibold mb-4 pb-2 border-b border-gray-300">
-          Đặt {field?.name || "ACE Pickleball Club – Pullman Hanoi"}
-        </h2>
-
-        {/* Chọn ngày */}
-        <div>
-          <h3 className="font-medium mb-2">Chọn ngày đặt sân</h3>
-          <div className="flex items-center space-x-3">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        {/* Header */}
+        <div className="bg-blue-600 text-white p-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Đặt Sân {field?.name || "ACE Pickleball Club"}</h2>
             <button
-              onClick={handlePrev}
-              disabled={weekIndex === 0}
-              className="px-1 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-40"
+              onClick={onClose}
+              className="p-1 hover:bg-blue-700 rounded"
             >
-              &lt;
-            </button>
-
-            <div className="flex space-x-3">
-              {visibleDates.map((d) => (
-                <button
-                  key={d.dateString}
-                  onClick={() => setSelectedDate(d.dateString)}
-                  className={`w-26 p-3 rounded-lg border transition ${
-                    selectedDate === d.dateString
-                      ? "bg-orange-500 text-white border-orange-500"
-                      : "bg-gray-50 text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <div className="text-xs">Tháng {d.month}</div>
-                  <div className="text-lg font-semibold">{d.day}</div>
-                  <div className="text-sm">{d.weekday}</div>
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={handleNext}
-              disabled={end >= allDates.length}
-              className="px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-40"
-            >
-              &gt;
+              <X className="h-5 w-5" />
             </button>
           </div>
         </div>
 
-        {/* Chọn loại sân */}
-        <div className="mt-6">
-          <h3 className="font-medium mb-2">Chọn loại sân</h3>
-          <button className="bg-orange-500 text-white px-4 py-2 rounded-lg">
-            Sân Pickleball <span className="ml-2 font-semibold">220.000 ₫</span>
-          </button>
-        </div>
+        <div className="p-4 space-y-6">
+          {/* Date Selection */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Chọn Ngày</h3>
+            
+            <div className="flex items-center justify-center space-x-2">
+              <button
+                onClick={handlePrev}
+                disabled={weekIndex === 0}
+                className="p-2 rounded bg-white shadow hover:bg-gray-50 disabled:opacity-40"
+              >
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
 
-        {/* Chọn khung giờ */}
-        <div className="mt-6">
-          <h3 className="font-medium mb-3">Chọn khung giờ</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-200 text-center">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="p-2 border">Khung giờ</th>
-                  {subFields.map((f) => (
-                    <th key={f._id} className="p-2 border font-medium">
-                      {f.name}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {fieldSlots.map((t) => (
-                  <tr key={t}>
-                    <td className="p-2 border font-medium">{t}</td>
-                    {subFields.map((f) => {
-                      const booked = isBooked(t, f.name);
-                      const selected = isSelected(t, f.name);
-                      return (
-                        <td key={f._id} className="p-2 border">
-                          <button
-                            onClick={() => toggleSlot(t, f.name)}
-                            disabled={booked}
-                            className={`px-3 py-1 rounded-full text-sm font-medium border transition ${
-                              booked
-                                ? "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed opacity-50"
-                                : selected
-                                ? "bg-orange-500 text-white border-orange-500"
-                                : "text-green-600 border-green-500 hover:bg-green-50"
-                            }`}
-                          >
-                            {booked ? "Đã đặt" : selected ? "Đã chọn" : "Trống"}
-                          </button>
-                        </td>
-                      );
-                    })}
-                  </tr>
+              <div className="flex space-x-2 overflow-x-auto">
+                {visibleDates.map((d) => (
+                  <button
+                    key={d.dateString}
+                    onClick={() => setSelectedDate(d.dateString)}
+                    className={`min-w-[70px] p-3 rounded border transition-colors ${
+                      selectedDate === d.dateString
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-gray-700 border-gray-200 hover:border-blue-300"
+                    }`}
+                  >
+                    <div className="text-xs opacity-75">{d.month}</div>
+                    <div className="text-lg font-bold">{d.day}</div>
+                    <div className="text-xs">{d.weekday}</div>
+                  </button>
                 ))}
-              </tbody>
-            </table>
+              </div>
+
+              <button
+                onClick={handleNext}
+                disabled={end >= allDates.length}
+                className="p-2 rounded bg-white shadow hover:bg-gray-50 disabled:opacity-40"
+              >
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Time Slot Selection */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Chọn Khung Giờ</h3>
+            
+            <div className="overflow-x-auto">
+              <div className="min-w-full bg-white rounded-lg shadow overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-700">Khung Giờ</th>
+                      {subFields && subFields.length > 0 ? (
+                        subFields.map((f) => (
+                          <th key={f._id} className="px-4 py-3 text-center font-semibold text-gray-700">
+                            {f.name}
+                          </th>
+                        ))
+                      ) : (
+                        <th className="px-4 py-3 text-center font-semibold text-gray-700">
+                          Đang tải...
+                        </th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {fieldSlots && fieldSlots.length > 0 ? (
+                      fieldSlots.map((t) => (
+                        <tr key={t} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 font-medium text-gray-800">{t}</td>
+                          {subFields && subFields.length > 0 ? subFields.map((f) => {
+                            const booked = isBooked(t, f.name);
+                            const selected = isSelected(t, f.name);
+                            return (
+                              <td key={f._id} className="px-4 py-3 text-center">
+                                <button
+                                  onClick={() => toggleSlot(t, f.name)}
+                                  disabled={booked}
+                                  className={`px-3 py-2 rounded font-medium transition-colors ${
+                                    booked
+                                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                      : selected
+                                      ? "bg-blue-600 text-white"
+                                      : "bg-green-100 text-green-700 border border-green-300 hover:bg-green-200"
+                                  }`}
+                                >
+                                  {booked ? "Đã Đặt" : selected ? "Đã Chọn" : "Trống"}
+                                </button>
+                              </td>
+                            );
+                          }) : (
+                            <td className="px-4 py-3 text-center text-gray-400">
+                              Đang tải...
+                            </td>
+                          )}
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={(subFields?.length || 0) + 1} className="px-4 py-8 text-center text-gray-500">
+                          <div className="flex flex-col items-center space-y-2">
+                            <svg className="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p>Đang tải khung giờ...</p>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Selected Slots Summary */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Tóm Tắt Đặt Sân</h3>
+            
+            {selectedSlots.length === 0 ? (
+              <div className="text-center py-6">
+                <p className="text-gray-500">Chưa chọn khung giờ nào</p>
+                <p className="text-gray-400 text-sm">Vui lòng chọn ngày và khung giờ để tiếp tục</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {selectedSlots.map((s, idx) => {
+                  const [year, month, day] = s.date.split("-").map(Number);
+                  return (
+                    <div key={idx} className="bg-white rounded p-3 border">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-sm">
+                            {day}
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-800">{s.field}</p>
+                            <p className="text-gray-600 text-sm">{day}/{month}/{year}</p>
+                            <p className="text-xs text-gray-500">{s.time}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold text-blue-600">220.000 ₫</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Danh sách đã chọn */}
-        <div className="border-t pt-3 mt-4">
-          <h3 className="font-medium mb-2">Đã chọn:</h3>
-          {selectedSlots.length === 0 ? (
-            <p className="text-gray-500">Chưa chọn khung giờ nào</p>
-          ) : (
-            <ul className="list-disc list-inside text-gray-700">
-              {selectedSlots.map((s, idx) => {
-                const [year, month, day] = s.date.split("-").map(Number);
-                return (
-                  <li key={idx}>
-                    {day}/{month}/{year} – {s.field} – Thời gian: {s.time}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-
-        {/* Nút hành động */}
-        <div className="flex justify-end space-x-3 pt-3">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg border text-gray-600 hover:bg-gray-100"
-          >
-            Hủy
-          </button>
-          <button
-            onClick={booking}
-            className="px-4 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600"
-          >
-            Xác nhận đặt sân
-          </button>
+        {/* Footer Actions */}
+        <div className="bg-white border-t border-gray-200 p-4">
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-600">
+              {selectedSlots.length > 0 && (
+                <span>Tổng: {(selectedSlots.length * 220000).toLocaleString()} ₫</span>
+              )}
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={booking}
+                disabled={selectedSlots.length === 0 || subFields.length === 0}
+                className={`px-6 py-2 rounded font-medium ${
+                  selectedSlots.length > 0 && subFields.length > 0
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                {subFields.length === 0 ? "Đang tải..." : "Đặt Sân"}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

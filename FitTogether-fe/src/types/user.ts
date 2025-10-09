@@ -1,3 +1,5 @@
+export type UserRole = 'admin' | 'user' | 'field_owner';
+
 export interface User {
   _id: string;
   id: number;
@@ -6,7 +8,7 @@ export interface User {
   firstName: string;
   lastName: string;
   avatar?: string;
-  role?: string;
+  role?: UserRole;
   code?: number;
   isVerified?: boolean;
   createdAt: string;
@@ -17,7 +19,7 @@ export interface CreateUserRequest {
   name: string;
   email: string;
   password: string;
-  role?: string;
+  role?: UserRole;
   phone?: string;
   address?: string;
 }
@@ -25,7 +27,7 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
   name?: string;
   email?: string;
-  role?: string;
+  role?: UserRole;
   phone?: string;
   address?: string;
   status?: "active" | "inactive";

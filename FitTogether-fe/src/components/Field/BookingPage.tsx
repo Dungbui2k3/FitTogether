@@ -1,5 +1,5 @@
 // BookingPage.tsx
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useField } from "../../hooks";
 import { useState } from "react";
 import LocationMap from "./LocationMap";
@@ -10,7 +10,6 @@ const BookingPage = () => {
   const { field, loading, error } = useField(fieldId);
   const [imageError, setImageError] = useState(false);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const navigate = useNavigate();
 
   if (loading) return <p className="p-4">Đang tải thông tin sân...</p>;
   if (error) return <p className="p-4 text-red-500">{error}</p>;
@@ -37,97 +36,150 @@ const BookingPage = () => {
       : getPlaceholderImage(field.name);
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      {/* Tên sân */}
-      <h2 className="text-2xl font-semibold">{field.name}</h2>
-
-      {/* Địa chỉ */}
-      <p className="text-gray-700">
-        <span className="font-medium">Địa chỉ: </span>
-        {field.address}
-      </p>
-
-      {/* Giờ mở cửa */}
-      <p className="text-gray-700">
-        <span className="font-medium">Giờ mở cửa: </span>
-        05:00 - 12:00
-      </p>
-
-      {/* Giá thuê */}
-      <div>
-        <p className="font-medium text-gray-800 mb-1">Giá thuê:</p>
-        <ul className="list-disc ml-6 text-gray-700">
-          <li>
-            - Giá thuê:{" "}
-            <span className="font-medium">
-              Sân Pickleball, số lượng sân 8 - Giá thuê: 220.000 ₫
-            </span>
-          </li>
-        </ul>
-      </div>
-
-      {/* Tiện ích */}
-      {field.facilities?.length > 0 && (
-        <div>
-          <p className="font-medium text-gray-800 mb-2">Tiện ích:</p>
-          <div className="flex flex-wrap gap-2">
-            {field.facilities.map((f: string, i: number) => (
-              <span
-                key={i}
-                className="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm"
-              >
-                {f}
-              </span>
-            ))}
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-5xl mx-auto p-4">
+        {/* Hero Section */}
+        <div className="relative rounded-lg overflow-hidden shadow-lg mb-6">
+          <img
+            src={fieldImage}
+            alt={field.name}
+            className="w-full h-64 object-cover"
+            onError={() => setImageError(true)}
+          />
+          <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+          <div className="absolute bottom-4 left-4 text-white">
+            <h1 className="text-3xl font-bold mb-2">{field.name}</h1>
+            <p className="text-lg opacity-90">{field.address}</p>
           </div>
         </div>
-      )}
 
-      {/* Chủ sân */}
-      <p className="text-gray-700">
-        <span className="font-medium">Chủ sân: </span>
-        Tungg Tungg
-      </p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Field Information Cards */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Thông Tin Sân</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-blue-100 rounded">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Giờ mở cửa</p>
+                    <p className="font-medium text-gray-800">05:00 - 12:00</p>
+                  </div>
+                </div>
 
-      {/* Nút đặt sân */}
-      <button
-        onClick={() => setIsBookingOpen(true)}
-        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-md transition"
-      >
-        Đặt sân ngay
-      </button>
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-green-100 rounded">
+                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Chủ sân</p>
+                    <p className="font-medium text-gray-800">Tungg Tungg</p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-       <BookingField
+            {/* Facilities */}
+            {field.facilities?.length > 0 && (
+              <div className="bg-white rounded-lg shadow p-4">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">Tiện Ích</h2>
+                <div className="flex flex-wrap gap-2">
+                  {field.facilities.map((f: string, i: number) => (
+                    <span
+                      key={i}
+                      className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm font-medium"
+                    >
+                      {f}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Description */}
+            {field.description && (
+              <div className="bg-white rounded-lg shadow p-4">
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">Mô Tả</h2>
+                <p className="text-gray-600 leading-relaxed">{field.description}</p>
+              </div>
+            )}
+
+            {/* Map */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h2 className="text-xl font-semibold text-gray-800 mb-3">Vị Trí</h2>
+              {field && field.address ? (
+                <LocationMap address={field.address} />
+              ) : (
+                <div className="h-48 bg-gray-100 rounded flex items-center justify-center">
+                  <p className="text-gray-500">Đang tải dữ liệu sân...</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-4">
+            {/* Pricing Card */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Giá Thuê</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center p-3 bg-blue-50 rounded border">
+                  <div>
+                    <p className="font-medium text-gray-800">Sân Pickleball</p>
+                    <p className="text-sm text-gray-600">8 sân</p>
+                  </div>
+                  <span className="text-lg font-bold text-blue-600">220.000 ₫</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Booking Button */}
+            <div className="bg-blue-600 rounded-lg shadow p-4 text-white">
+              <h3 className="text-lg font-semibold mb-2">Sẵn Sàng Đặt Sân?</h3>
+              <p className="text-blue-100 mb-4 text-sm">Chọn ngày và khung giờ phù hợp với bạn</p>
+              <button
+                onClick={() => setIsBookingOpen(true)}
+                className="w-full bg-white text-blue-600 py-2 px-4 rounded font-medium hover:bg-gray-100 transition-colors"
+              >
+                Đặt Sân Ngay
+              </button>
+            </div>
+
+            {/* Quick Info */}
+            <div className="bg-white rounded-lg shadow p-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">Thông Tin Nhanh</h3>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-gray-700 text-sm">Sân chất lượng cao</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-gray-700 text-sm">Dịch vụ chuyên nghiệp</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-gray-700 text-sm">Đặt sân dễ dàng</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <BookingField
         open={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
         field={field}
       />
-
-      {/* Mô tả */}
-      {field.description && (
-        <div>
-          <h2 className="text-lg font-semibold mb-2">Mô tả</h2>
-          <p className="text-gray-600 leading-relaxed">{field.description}</p>
-        </div>
-      )}
-
-      <img
-        src={fieldImage}
-        alt={field.name}
-        className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-        onError={() => setImageError(true)}
-      />
-
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Vị trí trên bản đồ</h2>
-        {field && field.address ? (
-          <LocationMap address={field.address} />
-        ) : (
-          <p>Đang tải dữ liệu sân...</p>
-        )}
-      </div>
-
-     
     </div>
   );
 };

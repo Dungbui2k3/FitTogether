@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Trash2, Upload } from 'lucide-react';
+import { X, Plus, Trash2, Upload, AlertTriangle } from 'lucide-react';
 import { fieldService } from '../../../services/fieldService';
 import { useToast } from '../../../hooks';
 import type { Field, UpdateFieldRequest } from '../../../types/field';

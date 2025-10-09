@@ -152,7 +152,7 @@ const FieldManagement: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Quản Lý Sân Thể Thao</h1>
           <p className="text-gray-600 mt-1">
-            Quản lý và theo dõi tất cả sân thể thao trong hệ thống
+            Quản lý và theo dõi sân thể thao của bạn
           </p>
         </div>
         <button
@@ -438,6 +438,18 @@ const FieldManagement: React.FC = () => {
                     Chi Tiết Sân Thể Thao
                   </h2>
                   <p className="text-gray-600">{selectedField.name}</p>
+                  <div className="flex items-center space-x-4 mt-1">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      selectedField.isDeleted
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-green-100 text-green-800'
+                    }`}>
+                      {selectedField.isDeleted ? 'Đã Xóa' : 'Hoạt Động'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      ID: {selectedField.id}
+                    </span>
+                  </div>
                 </div>
               </div>
               <button
@@ -451,9 +463,9 @@ const FieldManagement: React.FC = () => {
             {/* Modal Content */}
             <div className="p-6 space-y-6">
               {/* Field Images */}
-              {selectedField.images && selectedField.images.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Hình Ảnh</h3>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Hình Ảnh</h3>
+                {selectedField.images && selectedField.images.length > 0 ? (
                   <div className="grid grid-cols-2 gap-4">
                     {selectedField.images.slice(0, 4).map((image, index) => (
                       <img
@@ -463,28 +475,45 @@ const FieldManagement: React.FC = () => {
                         className="w-full h-32 object-cover rounded-lg"
                       />
                     ))}
+                    {selectedField.images.length > 4 && (
+                      <div className="flex items-center justify-center bg-gray-100 rounded-lg">
+                        <span className="text-gray-500 text-sm">
+                          +{selectedField.images.length - 4} hình khác
+                        </span>
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="flex items-center justify-center bg-gray-100 rounded-lg h-32">
+                    <span className="text-gray-500 italic">Chưa có hình ảnh</span>
+                  </div>
+                )}
+              </div>
 
               {/* Basic Information */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Thông Tin Cơ Bản</h3>
-                <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-500">Tên Sân</p>
                     <p className="font-medium text-gray-900">{selectedField.name}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Địa Chỉ</p>
-                    <p className="font-medium text-gray-900">{selectedField.address}</p>
-                  </div>
-                  <div>
                     <p className="text-sm text-gray-500">Số Điện Thoại</p>
-                    <p className="font-medium text-gray-900">{selectedField.phone}</p>
+                    <p className="font-medium text-gray-900 flex items-center">
+                      <Phone className="h-4 w-4 mr-2 text-gray-400" />
+                      {selectedField.phone}
+                    </p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <p className="text-sm text-gray-500">Địa Chỉ</p>
+                    <p className="font-medium text-gray-900 flex items-start">
+                      <MapPin className="h-4 w-4 mr-2 text-gray-400 mt-0.5 flex-shrink-0" />
+                      {selectedField.address}
+                    </p>
                   </div>
                   {selectedField.description && (
-                    <div>
+                    <div className="md:col-span-2">
                       <p className="text-sm text-gray-500">Mô Tả</p>
                       <p className="font-medium text-gray-900">{selectedField.description}</p>
                     </div>
@@ -496,19 +525,40 @@ const FieldManagement: React.FC = () => {
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Tiện Ích</h3>
                 <div className="grid grid-cols-1 gap-2">
-                  {selectedField.facilities.map((facility, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-gray-700">{facility}</span>
-                    </div>
-                  ))}
+                  {selectedField.facilities && selectedField.facilities.length > 0 ? (
+                    selectedField.facilities.map((facility, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-gray-700">{facility}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 italic">Chưa có tiện ích nào</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Time Slots */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Khung Giờ Hoạt Động</h3>
+                <div className="grid grid-cols-1 gap-2">
+                  {selectedField.slots && selectedField.slots.length > 0 ? (
+                    selectedField.slots.map((slot, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <span className="text-gray-700">{slot}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 italic">Chưa có khung giờ nào</p>
+                  )}
                 </div>
               </div>
 
               {/* Status and Dates */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Trạng Thái & Thời Gian</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <p className="text-sm text-gray-500">Trạng Thái</p>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -521,7 +571,17 @@ const FieldManagement: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Ngày Tạo</p>
-                    <p className="font-medium text-gray-900">{formatDate(selectedField.createdAt)}</p>
+                    <p className="font-medium text-gray-900 flex items-center">
+                      <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                      {formatDate(selectedField.createdAt)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Cập Nhật Lần Cuối</p>
+                    <p className="font-medium text-gray-900 flex items-center">
+                      <Calendar className="h-4 w-4 mr-2 text-gray-400" />
+                      {formatDate(selectedField.updatedAt)}
+                    </p>
                   </div>
                 </div>
               </div>

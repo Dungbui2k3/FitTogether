@@ -6,7 +6,10 @@ import {
   IsArray,
   IsOptional,
   IsPhoneNumber,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { FieldSubFieldDto } from './sub-field.dto';
 
 export class CreateFieldDto {
   @ApiProperty({
@@ -97,4 +100,42 @@ export class CreateFieldDto {
   })
   @IsOptional()
   images?: Express.Multer.File[];
+
+  @ApiProperty({
+    description: 'Danh sách sân con',
+    example: [
+      { 
+        name: 'Sân số 1', 
+        type: 'Sân 7 người', 
+        pricePerHour: 300000,
+        status: 'available'
+      },
+      { 
+        name: 'Sân số 2', 
+        type: 'Sân 5 người', 
+        pricePerHour: 200000,
+        status: 'available'
+      }
+    ],
+    type: [FieldSubFieldDto],
+    required: false,
+  })
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return [];
+      }
+    }
+    if (value === null || value === undefined) {
+      return [];
+    }
+    return value;
+  })
+  @IsArray({ message: 'subFields must be an array' })
+  @ValidateNested({ each: true, message: 'each value in subFields must be a valid subField object' })
+  @Type(() => FieldSubFieldDto)
+  @IsOptional()
+  subFields?: FieldSubFieldDto[];
 }

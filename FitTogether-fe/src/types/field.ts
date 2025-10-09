@@ -1,3 +1,5 @@
+import { CreateSubFieldRequest } from './subField';
+
 export interface Field {
   id: string;
   name: string;
@@ -18,9 +20,10 @@ export interface CreateFieldRequest {
   address: string;
   phone: string;
   facilities: string[];
-  slots: string[]
+  slots: string[];
   description?: string;
   images?: string[];
+  subFields?: CreateSubFieldRequest[];
 }
 
 export interface UpdateFieldRequest {

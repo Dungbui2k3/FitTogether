@@ -39,13 +39,13 @@ export class FieldsController {
   @Post()
   @UseInterceptors(FilesInterceptor('images', 10))
   @ApiConsumes('multipart/form-data')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.FIELD_OWNER)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Create a new field (Admin only)' })
+  @ApiOperation({ summary: 'Create a new field (Admin or Field Owner only)' })
   @ApiResponse({ status: 201, description: 'Field created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 409, description: 'Field name or phone already exists' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin or Field Owner access required' })
   async create(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() createFieldDto: CreateFieldDto,
@@ -122,15 +122,15 @@ export class FieldsController {
   @Put(':id')
   @UseInterceptors(FilesInterceptor('images', 10))
   @ApiConsumes('multipart/form-data')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.FIELD_OWNER)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Update field by ID (Admin only)' })
+  @ApiOperation({ summary: 'Update field by ID (Admin or Field Owner only)' })
   @ApiParam({ name: 'id', description: 'Field ID' })
   @ApiResponse({ status: 200, description: 'Field updated successfully' })
   @ApiResponse({ status: 404, description: 'Field not found' })
   @ApiResponse({ status: 409, description: 'Field name or phone already exists' })
   @ApiResponse({ status: 400, description: 'Invalid field ID' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin or Field Owner access required' })
   async update(
     @Param('id') id: string,
     @Body() updateFieldDto: UpdateFieldDto,
@@ -144,15 +144,15 @@ export class FieldsController {
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.FIELD_OWNER)
   @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Delete field by ID (Admin only - soft delete)' })
+  @ApiOperation({ summary: 'Delete field by ID (Admin or Field Owner only - soft delete)' })
   @ApiParam({ name: 'id', description: 'Field ID' })
   @ApiResponse({ status: 200, description: 'Field deleted successfully' })
   @ApiResponse({ status: 404, description: 'Field not found' })
   @ApiResponse({ status: 400, description: 'Invalid field ID' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin access required' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin or Field Owner access required' })
   async remove(@Param('id') id: string) {
     return this.fieldsService.remove(id);
   }

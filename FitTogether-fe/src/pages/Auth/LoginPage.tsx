@@ -49,6 +49,8 @@ const LoginPage: React.FC = () => {
         const userData = result.data?.user;
         if (userData?.role === "admin") {
           navigate("/admin/users", { state: { loginSuccess: true } });
+        } else if (userData?.role === "field_owner") {
+          navigate("/field-owner/fields", { state: { loginSuccess: true } });
         } else {
           navigate("/", { state: { loginSuccess: true } });
         }

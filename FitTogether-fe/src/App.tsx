@@ -21,7 +21,9 @@ import NotFoundPage from "./pages/NotFoundPage";
 import UserManagement from "./pages/Admin/UserManagement";
 import OrderManagement from "./pages/Admin/OrderManagement";
 import AdminCategoryManagement from "./pages/Admin/CategoryManagement";
-import FieldManagement from "./pages/Admin/FieldManagement";
+import FieldManagement from "./pages/FieldOwner/FieldManagement";
+import FieldOwnerRoute from "./components/FieldOwnerRoute";
+import FieldOwnerLayout from "./components/FieldOwner/FieldOwnerLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/Admin/AdminRoute";
 import AdminLayout from "./components/Admin/AdminLayout";
@@ -109,8 +111,16 @@ function App() {
             <Route path="users" element={<UserManagement />} />
             <Route path="products" element={<ProductManagement />} />
             <Route path="categories" element={<AdminCategoryManagement />} />
-            <Route path="fields" element={<FieldManagement />} />
             <Route path="orders" element={<OrderManagement />} />
+          </Route>
+
+          {/* Field Owner Routes */}
+          <Route path="/field-owner" element={
+            <FieldOwnerRoute>
+              <FieldOwnerLayout />
+            </FieldOwnerRoute>
+          }>
+            <Route path="fields" element={<FieldManagement />} />
           </Route>
           
           <Route path="/login" element={<LoginPage />} />

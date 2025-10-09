@@ -6,7 +6,7 @@ NONE='\033[0m'
 
 MODE=$1
 
-DOCKER_REPO="phamphong07/fptaiez"
+DOCKER_REPO="phamphong07/fittogether"
 
 source .env
 

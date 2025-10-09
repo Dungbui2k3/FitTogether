@@ -8,6 +8,7 @@ import { CreateFieldDto } from './dto/create-field.dto';
 import { UpdateFieldDto } from './dto/update-field.dto';
 import { GetFieldsQueryDto } from './dto/get-fields-query.dto';
 import { Field, FieldDocument } from 'src/schemas/field.schema';
+import { SubField, SubFieldDocument } from 'src/schemas/subField.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { FieldsRepository } from './fields.repository';
@@ -20,6 +21,8 @@ export class FieldsService {
     private readonly fieldsRepository: FieldsRepository,
     @InjectModel(Field.name)
     private readonly fieldModel: Model<FieldDocument>,
+    @InjectModel(SubField.name)
+    private readonly subFieldModel: Model<SubFieldDocument>,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
 
@@ -61,14 +64,26 @@ export class FieldsService {
         uploadedUrls = uploads.map((upload) => upload.secure_url);
       }
 
+      const { subFields, images, ...fieldDataWithoutSubFields } = createFieldDto;
+      
       const fieldData = {
-        ...createFieldDto,
+        ...fieldDataWithoutSubFields,
         images: uploadedUrls,
         userId: new Types.ObjectId(userId), 
       };
 
       const newField = new this.fieldModel(fieldData);
       const savedField = await newField.save();
+
+      if (createFieldDto.subFields && createFieldDto.subFields.length > 0) {
+        for (const subField of createFieldDto.subFields) {
+          const newSubField = new this.subFieldModel({
+            fieldId: savedField._id,
+            ...subField,
+          });
+          await newSubField.save();
+        }
+      }
 
       return ResponseUtil.created(
         this.formatFieldResponse(savedField),
@@ -351,5 +366,45 @@ export class FieldsService {
       createdAt: field.createdAt,
       updatedAt: field.updatedAt,
     };
+  }
+
+  async getSubFields(fieldId: string): Promise<any> {
+    try {
+      if (!Types.ObjectId.isValid(fieldId)) {
+        throw new BadRequestException('Invalid field ID');
+      }
+
+      const field = await this.fieldModel.findById(fieldId);
+      if (!field) {
+        throw new NotFoundException('Field not found');
+      }
+
+      const subFields = await this.subFieldModel.find({
+        fieldId: new Types.ObjectId(fieldId),
+      }).sort({ createdAt: -1 });
+
+      return ResponseUtil.success(
+        subFields.map((subField: any) => ({
+          id: subField._id,
+          name: subField.name,
+          type: subField.type,
+          pricePerHour: subField.pricePerHour,
+          status: subField.status,
+          createdAt: subField.createdAt,
+          updatedAt: subField.updatedAt,
+        })),
+        'Sub-fields retrieved successfully',
+      );
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new BadRequestException(
+        `Failed to retrieve sub-fields: ${error.message}`,
+      );
+    }
   }
 }
