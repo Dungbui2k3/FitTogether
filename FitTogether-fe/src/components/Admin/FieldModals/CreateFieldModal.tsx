@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { X, Plus, Trash2, Upload } from 'lucide-react';
-import { fieldService } from '../../../services/fieldService';
-import { useToast } from '../../../hooks';
-import type { CreateFieldRequest } from '../../../types/field';
+import React, { useState } from "react";
+import { X, Plus, Trash2, Upload } from "lucide-react";
+import { fieldService } from "../../../services/fieldService";
+import { useToast } from "../../../hooks";
+import type { CreateFieldRequest } from "../../../types/field";
+import { SubField } from "../../../types/subField";
 
 interface CreateFieldModalProps {
   isOpen: boolean;
@@ -10,25 +11,35 @@ interface CreateFieldModalProps {
   onSuccess: () => void;
 }
 
-const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, onSuccess }) => {
+const CreateFieldModal: React.FC<CreateFieldModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+}) => {
   const { success, error } = useToast();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CreateFieldRequest>({
-    name: '',
-    address: '',
-    phone: '',
-    facilities: [''],
-    description: '',
+    name: "",
+    address: "",
+    phone: "",
+    facilities: [""],
+    slots: [""],
+    description: "",
     images: [],
   });
+
+  const [subFields, setSubFields] = useState<SubField[]>([]);
 
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   if (!isOpen) return null;
 
-  const handleInputChange = (field: keyof CreateFieldRequest, value: string) => {
-    setFormData(prev => ({
+  const handleInputChange = (
+    field: keyof CreateFieldRequest,
+    value: string
+  ) => {
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -37,23 +48,23 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
   const handleFacilityChange = (index: number, value: string) => {
     const newFacilities = [...formData.facilities];
     newFacilities[index] = value;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       facilities: newFacilities,
     }));
   };
 
   const addFacility = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      facilities: [...prev.facilities, ''],
+      facilities: [...prev.facilities, ""],
     }));
   };
 
   const removeFacility = (index: number) => {
     if (formData.facilities.length > 1) {
       const newFacilities = formData.facilities.filter((_, i) => i !== index);
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         facilities: newFacilities,
       }));
@@ -63,19 +74,19 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length > 0) {
-      setImageFiles(prev => [...prev, ...files]);
-      
+      setImageFiles((prev) => [...prev, ...files]);
+
       // Create preview URLs
-      files.forEach(file => {
+      files.forEach((file) => {
         const url = URL.createObjectURL(file);
-        setImageUrls(prev => [...prev, url]);
+        setImageUrls((prev) => [...prev, url]);
       });
     }
   };
 
   const removeImage = (index: number) => {
-    setImageFiles(prev => prev.filter((_, i) => i !== index));
-    setImageUrls(prev => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImageUrls((prev) => {
       // Revoke the URL to prevent memory leaks
       URL.revokeObjectURL(prev[index]);
       return prev.filter((_, i) => i !== index);
@@ -84,28 +95,28 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
     if (!formData.name.trim()) {
-      error('Tên sân là bắt buộc');
+      error("Tên sân là bắt buộc");
       return;
     }
     if (!formData.address.trim()) {
-      error('Địa chỉ là bắt buộc');
+      error("Địa chỉ là bắt buộc");
       return;
     }
     if (!formData.phone.trim()) {
-      error('Số điện thoại là bắt buộc');
+      error("Số điện thoại là bắt buộc");
       return;
     }
 
     // Filter out empty facilities and ensure we have a valid array
-    const facilities = Array.isArray(formData.facilities) 
-      ? formData.facilities.filter(f => f && f.trim() !== '') 
+    const facilities = Array.isArray(formData.facilities)
+      ? formData.facilities.filter((f) => f && f.trim() !== "")
       : [];
-    
+
     if (facilities.length === 0) {
-      error('Ít nhất một tiện ích là bắt buộc');
+      error("Ít nhất một tiện ích là bắt buộc");
       return;
     }
 
@@ -115,47 +126,48 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
       const formDataToSend = new FormData();
 
       // Append text fields
-      formDataToSend.append('name', formData.name.trim());
-      formDataToSend.append('address', formData.address.trim());
-      formDataToSend.append('phone', formData.phone.trim());
-      formDataToSend.append('description', formData.description?.trim() || '');
+      formDataToSend.append("name", formData.name.trim());
+      formDataToSend.append("address", formData.address.trim());
+      formDataToSend.append("phone", formData.phone.trim());
+      formDataToSend.append("description", formData.description?.trim() || "");
 
       formDataToSend.append("facilities", JSON.stringify(facilities));
 
       // Append image files
-      imageFiles.forEach(file => {
-        formDataToSend.append('images', file);
+      imageFiles.forEach((file) => {
+        formDataToSend.append("images", file);
       });
 
       const response = await fieldService.createField(formDataToSend as any);
 
       if (response.success) {
-        success('Tạo sân thể thao thành công');
+        success("Tạo sân thể thao thành công");
         onSuccess();
         handleClose();
       } else {
         // Hiển thị lỗi từ response
-        const errorMessage = response.error || response.message || 'Không thể tạo sân thể thao';
+        const errorMessage =
+          response.error || response.message || "Không thể tạo sân thể thao";
         error(errorMessage);
       }
     } catch (err: any) {
-      console.error('Error creating field:', err);
-      
+      console.error("Error creating field:", err);
+
       // Xử lý các loại lỗi khác nhau
-      let errorMessage = 'Có lỗi xảy ra khi tạo sân thể thao';
-      
+      let errorMessage = "Có lỗi xảy ra khi tạo sân thể thao";
+
       if (err?.response?.data) {
         // Lỗi từ API response với cấu trúc {status, code, message}
         const data = err.response.data;
         errorMessage = data.message || data.error || errorMessage;
       } else if (err?.message) {
-        // Lỗi JavaScript general  
+        // Lỗi JavaScript general
         errorMessage = err.message;
-      } else if (typeof err === 'object' && err.message) {
+      } else if (typeof err === "object" && err.message) {
         // Lỗi object trực tiếp với message
         errorMessage = err.message;
       }
-      
+
       error(errorMessage);
     } finally {
       setLoading(false);
@@ -164,21 +176,66 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
 
   const handleClose = () => {
     // Clean up preview URLs
-    imageUrls.forEach(url => URL.revokeObjectURL(url));
-    
+    imageUrls.forEach((url) => URL.revokeObjectURL(url));
+
     // Reset form
     setFormData({
-      name: '',
-      address: '',
-      phone: '',
-      facilities: [''],
-      description: '',
+      name: "",
+      address: "",
+      phone: "",
+      facilities: [""],
+      slots: [""],
+      description: "",
       images: [],
     });
     setImageFiles([]);
     setImageUrls([]);
-    
+
     onClose();
+  };
+
+  const addSubField = () => {
+    setSubFields([
+      ...subFields,
+      { name: "", type: "", pricePerHour: 0 } as SubField,
+    ]);
+  };
+
+  // Hàm chỉnh sửa SubField
+  const handleSubFieldChange = (index: number, newSubField: SubField) => {
+    const updated = [...subFields];
+    updated[index] = newSubField;
+    setSubFields(updated);
+  };
+
+  // Hàm xóa SubField
+  const removeSubField = (index: number) => {
+    setSubFields(subFields.filter((_, i) => i !== index));
+  };
+
+  // Thêm slot mới
+  const addSlot = () => {
+    setFormData((prev) => ({ ...prev, slots: [...prev.slots, ""] }));
+  };
+
+  // Thay đổi slot theo start hoặc end
+  const handleSlotChange = (
+    index: number,
+    key: "start" | "end",
+    value: string
+  ) => {
+    const [start, end] = formData.slots[index]?.split("-") || ["", ""];
+    const updated = [...formData.slots];
+    updated[index] = key === "start" ? `${value}-${end}` : `${start}-${value}`;
+    setFormData((prev) => ({ ...prev, slots: updated }));
+  };
+
+  // Xóa slot
+  const removeSlot = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      slots: prev.slots.filter((_, i) => i !== index),
+    }));
   };
 
   return (
@@ -186,7 +243,9 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900">Tạo Sân Thể Thao Mới</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Tạo Sân Thể Thao Mới
+          </h2>
           <button
             onClick={handleClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -199,8 +258,10 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900">Thông Tin Cơ Bản</h3>
-            
+            <h3 className="text-lg font-semibold text-gray-900">
+              Thông Tin Cơ Bản
+            </h3>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Tên Sân *
@@ -208,7 +269,7 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
               <input
                 type="text"
                 value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                onChange={(e) => handleInputChange("name", e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Nhập tên sân thể thao"
                 required
@@ -222,7 +283,7 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
               <input
                 type="text"
                 value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
+                onChange={(e) => handleInputChange("address", e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Nhập địa chỉ sân thể thao"
                 required
@@ -236,7 +297,7 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
               <input
                 type="tel"
                 value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Nhập số điện thoại liên hệ"
                 required
@@ -249,7 +310,9 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
               </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Nhập mô tả về sân thể thao"
@@ -270,14 +333,16 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
                 <span className="text-sm">Thêm tiện ích</span>
               </button>
             </div>
-            
+
             <div className="space-y-2">
               {formData.facilities.map((facility, index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <input
                     type="text"
                     value={facility}
-                    onChange={(e) => handleFacilityChange(index, e.target.value)}
+                    onChange={(e) =>
+                      handleFacilityChange(index, e.target.value)
+                    }
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Nhập tiện ích"
                   />
@@ -295,10 +360,129 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
             </div>
           </div>
 
+          {/* Slots */}
+         
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Slot</h3>
+               <button
+            type="button"
+            onClick={addSlot}
+            className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="text-sm">Thêm khung giờ</span>
+          </button>
+            </div>
+
+            {formData.slots.map((slot, index) => {
+              const [start, end] = slot.split("-");
+              return (
+                <div key={index} className="flex items-center space-x-2">
+                  <input
+                    type="time"
+                    value={start || ""}
+                    onChange={(e) =>
+                      handleSlotChange(index, "start", e.target.value)
+                    }
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <span className="text-gray-500">-</span>
+                  <input
+                    type="time"
+                    value={end || ""}
+                    onChange={(e) =>
+                      handleSlotChange(index, "end", e.target.value)
+                    }
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  {formData.slots.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeSlot(index)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* SubField */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Danh sách SubField
+              </h3>
+              <button
+                type="button"
+                onClick={addSubField}
+                className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="text-sm">Thêm sân con</span>
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {subFields.map((subField, index) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={subField.name}
+                    onChange={(e) =>
+                      handleSubFieldChange(index, {
+                        ...subField,
+                        name: e.target.value,
+                      })
+                    }
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Tên sân con"
+                  />
+                  <input
+                    type="text"
+                    value={subField.type}
+                    onChange={(e) =>
+                      handleSubFieldChange(index, {
+                        ...subField,
+                        type: e.target.value,
+                      })
+                    }
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Loại sân"
+                  />
+                  <input
+                    type="number"
+                    value={subField.pricePerHour}
+                    onChange={(e) =>
+                      handleSubFieldChange(index, {
+                        ...subField,
+                        pricePerHour: Number(e.target.value),
+                      })
+                    }
+                    className="w-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Giá/giờ"
+                  />
+                  {subFields.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeSubField(index)}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Images */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900">Hình Ảnh</h3>
-            
+
             <div>
               <label className="block">
                 <input
@@ -360,7 +544,7 @@ const CreateFieldModal: React.FC<CreateFieldModalProps> = ({ isOpen, onClose, on
               {loading && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               )}
-              <span>{loading ? 'Đang tạo...' : 'Tạo Sân'}</span>
+              <span>{loading ? "Đang tạo..." : "Tạo Sân"}</span>
             </button>
           </div>
         </form>

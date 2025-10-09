@@ -4,6 +4,7 @@ export interface Field {
   address: string;
   phone: string;
   facilities: string[];
+  slots: string[]
   description?: string;
   images?: string[];
   isDeleted?: boolean;
@@ -17,6 +18,7 @@ export interface CreateFieldRequest {
   address: string;
   phone: string;
   facilities: string[];
+  slots: string[]
   description?: string;
   images?: string[];
 }

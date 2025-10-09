@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { subFieldService } from "../../services/subFieldsService";
 import bookingService from "../../services/bookingService";
+import fieldService from "../../services/fieldService";
+import { Field } from "../../types/field";
 
 interface BookingFieldProps {
   open: boolean;
@@ -23,6 +25,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
   >([]);
   const [weekIndex, setWeekIndex] = useState(0);
   const [subFields, setSubFields] = useState<any[]>([]);
+  const [fieldSlots, setFieldSlots] = useState<string[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
 
   // Hàm pad để định dạng số
@@ -62,6 +65,20 @@ const BookingField: React.FC<BookingFieldProps> = ({
   const start = weekIndex * 10;
   const end = start + 10;
   const visibleDates = allDates.slice(start, end);
+
+  const getSlotsByFieldId = async (fieldId: string) => {
+    try {
+      const response = await fieldService.getFieldById(fieldId);
+      setFieldSlots(response.data?.slots || []);
+      console.log("Field slots:", response.data?.slots);
+    } catch (error) {
+      console.error("Error fetching sub-fields:", error);
+    }
+  };
+
+  useEffect(() => {
+    getSlotsByFieldId(fieldId);
+  }, [fieldId]);
 
   const handlePrev = () => {
     if (weekIndex > 0) setWeekIndex(weekIndex - 1);
@@ -300,13 +317,13 @@ const BookingField: React.FC<BookingFieldProps> = ({
                   <th className="p-2 border">Khung giờ</th>
                   {subFields.map((f) => (
                     <th key={f._id} className="p-2 border font-medium">
-                      {f._id}
+                      {f.name}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {timeSlots.map((t) => (
+                {fieldSlots.map((t) => (
                   <tr key={t}>
                     <td className="p-2 border font-medium">{t}</td>
                     {subFields.map((f) => {
