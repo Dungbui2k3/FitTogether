@@ -139,8 +139,9 @@ const BookingField: React.FC<BookingFieldProps> = ({
     try {
       const response = await bookingService.getBookings(subFieldId, day);
       if (response.success) {
-        return response.data;
+        return response.data.data;
       } else {
+        console.log("Booking API failed:", response.message);
         return [];
       }
     } catch (error) {
@@ -220,18 +221,23 @@ const BookingField: React.FC<BookingFieldProps> = ({
         return;
       }
 
+      console.log("Fetching bookings for date:", selectedDate);
+      console.log("SubFields:", subFields.map(f => ({ id: f.id, name: f.name })));
+
       const allBookingsPromises = subFields.map((subField) =>
-        getBookings(subField._id, selectedDate).then((subFieldBookings) =>
+        getBookings(subField.id, selectedDate).then((subFieldBookings) =>
           subFieldBookings.map((b: any) => ({
             ...b,
             field: subField.name,
-            subFieldId: subField._id,
+            subFieldId: subField.id,
             date: selectedDate,
           }))
         )
       );
 
       const allSubFieldBookings = await Promise.all(allBookingsPromises);
+
+      console.log("All subFieldBookings:", allSubFieldBookings);
       setBookings(allSubFieldBookings.flat());
     };
 

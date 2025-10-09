@@ -12,19 +12,19 @@ class BookingService {
         `/booking/${subFieldId}/${day}`
       );
 
-      console.log("Get subFields by id response:", response.data);
+      console.log("Get bookings response:", response.data);
       return {
         success: true,
-        data: response.data.data.data,
-        message: "Get subFields success",
+        data: response.data.data || [],
+        message: "Get bookings success",
         status: response.status,
       };
     } catch (error: any) {
-      console.error("Get subFields by id error:", error);
+      console.error("Get bookings error:", error);
       return {
         success: false,
         data: null as any,
-        message: "Get subFields error",
+        message: "Get bookings error",
         status: error.response?.status || 500,
       };
     }
