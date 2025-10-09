@@ -292,6 +292,42 @@ class FieldService {
       };
     }
   }
+
+  /**
+   * Lấy danh sách sân của field-owner
+   */
+  async getMyFields(): Promise<ApiResponse<{
+    fields: Field[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+      hasNextPage: boolean;
+      hasPrevPage: boolean;
+    };
+  }>> {
+    try {
+      const response = await backendInstance.get<{ data: any }>('/fields/my-fields');
+      
+      return {
+        success: true,
+        data: response.data.data,
+        message: 'Lấy danh sách sân của tôi thành công',
+        status: response.status,
+      };
+    } catch (error: any) {
+      console.error('Get my fields error:', error);
+      
+      const message = error.response?.data?.message || error.message || 'Không thể lấy danh sách sân của tôi';
+      return {
+        success: false,
+        data: null as any,
+        error: message,
+        status: error.response?.status || 500,
+      };
+    }
+  }
 }
 
 // Export singleton instance

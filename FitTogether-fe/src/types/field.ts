@@ -13,6 +13,14 @@ export interface Field {
   createdAt: string;
   updatedAt: string;
   __v?: number;
+  subFieldsCount?: number;
+  subFields?: any[];
+  owner?: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
 }
 
 export interface CreateFieldRequest {

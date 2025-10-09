@@ -108,6 +108,71 @@ export class FieldsController {
     return this.fieldsService.findAll(query);
   }
 
+  @Get('my-fields')
+  @Roles(Role.FIELD_OWNER, Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get all fields owned by current user with complete information including subFields (Field Owner or Admin only)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'name',
+    required: false,
+    type: String,
+    description: 'Search by field name',
+  })
+  @ApiQuery({
+    name: 'address',
+    required: false,
+    type: String,
+    description: 'Search by address',
+  })
+  @ApiQuery({
+    name: 'phone',
+    required: false,
+    type: String,
+    description: 'Search by phone',
+  })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    type: String,
+    description: 'Sort by field',
+  })
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
+    enum: ['asc', 'desc'],
+    description: 'Sort order',
+  })
+  @ApiResponse({ status: 200, description: 'My fields with complete information retrieved successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Field Owner or Admin access required' })
+  async getMyFields(
+    @Query() query: GetFieldsQueryDto,
+    @GetUser('_id') userId: string,
+  ) {
+    return this.fieldsService.findByUserId(userId, query);
+  }
+
+  @Get('my-fields/stats')
+  @Roles(Role.FIELD_OWNER, Role.ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get statistics for fields owned by current user (Field Owner or Admin only)' })
+  @ApiResponse({ status: 200, description: 'My fields statistics retrieved successfully' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Field Owner or Admin access required' })
+  async getMyFieldsStats(@GetUser('_id') userId: string) {
+    return this.fieldsService.getFieldsStatsByUserId(userId);
+  }
+
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get field by ID' })

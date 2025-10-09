@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AdminSidebar from './AdminSidebar';
 import { useToast } from '../../hooks';
 import ToastContainer from '../ToastContainer';
@@ -9,16 +9,22 @@ interface AdminLayoutProps {
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const { toasts, removeToast } = useToast();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  const handleSidebarCollapseChange = (collapsed: boolean) => {
+    setIsSidebarCollapsed(collapsed);
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <AdminSidebar />
+      <AdminSidebar onCollapseChange={handleSidebarCollapseChange} />
       
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Content Area */}
-        <main className="flex-1 overflow-auto">
+      <div className={`transition-all duration-300 ${
+        isSidebarCollapsed ? 'ml-20' : 'ml-64'
+      }`}>
+        <main className="min-h-screen">
           {children}
         </main>
       </div>

@@ -42,6 +42,14 @@ export class GetFieldsQueryDto {
   address?: string;
 
   @ApiPropertyOptional({
+    description: 'Search by phone',
+    example: '0901234567',
+  })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiPropertyOptional({
     description: 'General search term',
     example: 'sân bóng',
   })

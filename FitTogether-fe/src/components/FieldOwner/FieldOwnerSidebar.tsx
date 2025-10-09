@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  MapPin,
   ChevronLeft,
   ChevronRight,
   LogOut,
+  Building2,
 } from 'lucide-react';
 import { useAuth } from '../../hooks';
 
@@ -63,9 +63,9 @@ const FieldOwnerSidebar: React.FC<FieldOwnerSidebarProps> = ({ onCollapseChange 
 
   const menuItems = [
     {
-      icon: <MapPin className="h-5 w-5" />,
-      label: 'Quản Lý Sân Thể Thao',
-      to: '/field-owner/fields'
+      icon: <Building2 className="h-5 w-5" />,
+      label: 'Sân Của Tôi',
+      to: '/field-owner/my-fields'
     }
   ];
 

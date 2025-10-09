@@ -5,6 +5,7 @@ import {
   Package, 
   ShoppingCart, 
   Tag,
+  MapPin,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -45,10 +46,20 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, to, isActive, is
   );
 };
 
-const AdminSidebar: React.FC = () => {
+interface AdminSidebarProps {
+  onCollapseChange?: (collapsed: boolean) => void;
+}
+
+const AdminSidebar: React.FC<AdminSidebarProps> = ({ onCollapseChange }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { user, logout } = useAuth();
   const location = useLocation();
+
+  const handleCollapseToggle = () => {
+    const newCollapsed = !isCollapsed;
+    setIsCollapsed(newCollapsed);
+    onCollapseChange?.(newCollapsed);
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -71,6 +82,11 @@ const AdminSidebar: React.FC = () => {
       to: '/admin/categories'
     },
     {
+      icon: <MapPin className="h-5 w-5" />,
+      label: 'Quản Lý Sân Thể Thao',
+      to: '/admin/fields'
+    },
+    {
       icon: <ShoppingCart className="h-5 w-5" />,
       label: 'Quản Lý Đơn Hàng',
       to: '/admin/orders'
@@ -78,7 +94,7 @@ const AdminSidebar: React.FC = () => {
   ];
 
   return (
-    <div className={`bg-white shadow-xl border-r border-gray-200 transition-all duration-300 ${
+    <div className={`fixed left-0 top-0 h-screen bg-white shadow-xl border-r border-gray-200 transition-all duration-300 z-40 ${
       isCollapsed ? 'w-20' : 'w-64'
     }`}>
       <div className="flex flex-col h-full">
@@ -91,7 +107,7 @@ const AdminSidebar: React.FC = () => {
               </div>
             )}
             <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={handleCollapseToggle}
               className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
               {isCollapsed ? (

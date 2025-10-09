@@ -1,23 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Plus,
   Search,
   Filter,
-  Edit,
+  ChevronLeft,
+  ChevronRight,
+  X,
   Trash2,
   Eye,
   MapPin,
   Phone,
   Calendar,
-  ChevronLeft,
-  ChevronRight,
-  X,
 } from 'lucide-react';
 import { fieldService } from '../../services/fieldService';
 import { useToast } from '../../hooks';
 import type { Field, FieldListParams } from '../../types/field';
-import CreateFieldModal from '../../components/Admin/FieldModals/CreateFieldModal';
-import EditFieldModal from '../../components/Admin/FieldModals/EditFieldModal';
 
 interface FieldManagementState {
   fields: Field[];
@@ -47,9 +43,6 @@ const FieldManagement: React.FC = () => {
 
   const [selectedField, setSelectedField] = useState<Field | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingField, setEditingField] = useState<Field | null>(null);
 
   // Load fields
   const loadFields = React.useCallback(async () => {
@@ -134,12 +127,6 @@ const FieldManagement: React.FC = () => {
     setShowDetailModal(true);
   };
 
-  // Handle edit field
-  const handleEditField = (field: Field) => {
-    setEditingField(field);
-    setShowEditModal(true);
-  };
-
   // Format date
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('vi-VN');
@@ -152,16 +139,9 @@ const FieldManagement: React.FC = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Quản Lý Sân Thể Thao</h1>
           <p className="text-gray-600 mt-1">
-            Quản lý và theo dõi sân thể thao của bạn
+            Quản lý và theo dõi tất cả sân thể thao trong hệ thống
           </p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-        >
-          <Plus className="h-5 w-5" />
-          <span>Thêm Sân Mới</span>
-        </button>
       </div>
 
       {/* Search and Filters */}
@@ -322,14 +302,6 @@ const FieldManagement: React.FC = () => {
                           title="Xem Chi Tiết"
                         >
                           <Eye className="h-4 w-4" />
-                        </button>
-
-                        <button
-                          onClick={() => handleEditField(field)}
-                          className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors"
-                          title="Chỉnh Sửa"
-                        >
-                          <Edit className="h-4 w-4" />
                         </button>
 
                         <button
@@ -599,7 +571,6 @@ const FieldManagement: React.FC = () => {
                 <button
                   onClick={() => {
                     setShowDetailModal(false);
-                    handleEditField(selectedField);
                   }}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
@@ -610,24 +581,7 @@ const FieldManagement: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Create Field Modal */}
-      <CreateFieldModal
-        isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
-        onSuccess={loadFields}
-      />
-
-      {/* Edit Field Modal */}
-      <EditFieldModal
-        isOpen={showEditModal}
-        field={editingField}
-        onClose={() => {
-          setShowEditModal(false);
-          setEditingField(null);
-        }}
-        onSuccess={loadFields}
-      />
+      
     </div>
   );
 };

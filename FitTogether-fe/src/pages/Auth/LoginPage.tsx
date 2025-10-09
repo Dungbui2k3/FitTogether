@@ -47,13 +47,13 @@ const LoginPage: React.FC = () => {
       } else {
         // Check user role and redirect accordingly
         const userData = result.data?.user;
-        if (userData?.role === "admin") {
-          navigate("/admin/users", { state: { loginSuccess: true } });
-        } else if (userData?.role === "field_owner") {
-          navigate("/field-owner/fields", { state: { loginSuccess: true } });
-        } else {
-          navigate("/", { state: { loginSuccess: true } });
-        }
+      if (userData?.role === "admin") {
+        navigate("/admin/users", { state: { loginSuccess: true } });
+      } else if (userData?.role === "field_owner") {
+        navigate("/field-owner/my-fields", { state: { loginSuccess: true } });
+      } else {
+        navigate("/", { state: { loginSuccess: true } });
+      }
       }
     } catch (err) {
       console.error("Login error:", err);

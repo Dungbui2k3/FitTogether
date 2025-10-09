@@ -177,6 +177,238 @@ export class FieldsService {
     }
   }
 
+  async findByUserId(userId: string, query: GetFieldsQueryDto = {}): Promise<any> {
+    try {
+      if (!Types.ObjectId.isValid(userId)) {
+        throw new BadRequestException('Invalid user ID');
+      }
+
+      const {
+        page = 1,
+        limit = 10,
+        name,
+        address,
+        phone,
+        search,
+        sortBy = 'createdAt',
+        sortOrder = 'desc',
+      } = query;
+
+      // Build filter object for user's fields
+      const filter: any = { 
+        userId: new Types.ObjectId(userId),
+        isDeleted: { $ne: true } 
+      };
+
+      if (search) {
+        filter.$or = [
+          { name: { $regex: search, $options: 'i' } },
+          { address: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+          { facilities: { $elemMatch: { $regex: search, $options: 'i' } } },
+        ];
+      }
+
+      if (name) {
+        filter.name = { $regex: name, $options: 'i' };
+      }
+
+      if (address) {
+        filter.address = { $regex: address, $options: 'i' };
+      }
+
+      if (phone) {
+        filter.phone = { $regex: phone, $options: 'i' };
+      }
+
+      // Build sort object
+      const sort: any = {};
+      sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
+
+      // Calculate pagination
+      const skip = (page - 1) * limit;
+
+      // Get total count
+      const total = await this.fieldModel.countDocuments(filter);
+
+      // Get fields with subFields using aggregation
+      const fields = await this.fieldModel.aggregate([
+        { $match: filter },
+        {
+          $lookup: {
+            from: 'subfields',
+            localField: '_id',
+            foreignField: 'fieldId',
+            as: 'subFields'
+          }
+        },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'owner'
+          }
+        },
+        {
+          $addFields: {
+            owner: { $arrayElemAt: ['$owner', 0] }
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            address: 1,
+            phone: 1,
+            facilities: 1,
+            slots: 1,
+            description: 1,
+            images: 1,
+            userId: 1,
+            isDeleted: 1,
+            deletedAt: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            subFields: {
+              $map: {
+                input: '$subFields',
+                as: 'subField',
+                in: {
+                  id: '$$subField._id',
+                  name: '$$subField.name',
+                  type: '$$subField.type',
+                  pricePerHour: '$$subField.pricePerHour',
+                  status: '$$subField.status',
+                  createdAt: '$$subField.createdAt',
+                  updatedAt: '$$subField.updatedAt'
+                }
+              }
+            },
+            owner: {
+              id: '$owner._id',
+              name: '$owner.name',
+              email: '$owner.email',
+              role: '$owner.role'
+            }
+          }
+        },
+        { $sort: sort },
+        { $skip: skip },
+        { $limit: limit }
+      ]);
+
+      const formattedFields = fields.map((field: any) =>
+        this.formatFieldResponseWithSubFields(field),
+      );
+
+      return ResponseUtil.success(
+        {
+          fields: formattedFields,
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            hasNextPage: page * limit < total,
+            hasPrevPage: page > 1,
+          },
+        },
+        'My fields retrieved successfully',
+      );
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        `Failed to retrieve my fields: ${error.message}`,
+      );
+    }
+  }
+
+  async getFieldsStatsByUserId(userId: string): Promise<any> {
+    try {
+      if (!Types.ObjectId.isValid(userId)) {
+        throw new BadRequestException('Invalid user ID');
+      }
+
+      const filter = { 
+        userId: new Types.ObjectId(userId),
+        isDeleted: { $ne: true } 
+      };
+
+      // Get total fields count
+      const totalFields = await this.fieldModel.countDocuments(filter);
+
+      // Get fields with subFields count
+      const fieldsWithSubFields = await this.fieldModel.aggregate([
+        { $match: filter },
+        {
+          $lookup: {
+            from: 'subfields',
+            localField: '_id',
+            foreignField: 'fieldId',
+            as: 'subFields'
+          }
+        },
+        {
+          $project: {
+            _id: 1,
+            name: 1,
+            subFieldsCount: { $size: '$subFields' }
+          }
+        }
+      ]);
+
+      // Calculate total subFields
+      const totalSubFields = fieldsWithSubFields.reduce((sum, field) => sum + field.subFieldsCount, 0);
+
+      // Get recent fields (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const recentFields = await this.fieldModel.countDocuments({
+        ...filter,
+        createdAt: { $gte: thirtyDaysAgo }
+      });
+
+      // Get fields by status (if we had status field)
+      const fieldsByStatus = await this.fieldModel.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: '$isActive', // Using isActive as status indicator
+            count: { $sum: 1 }
+          }
+        }
+      ]);
+
+      const stats = {
+        totalFields,
+        totalSubFields,
+        recentFields,
+        fieldsByStatus: fieldsByStatus.reduce((acc, item) => {
+          acc[item._id ? 'active' : 'inactive'] = item.count;
+          return acc;
+        }, {}),
+        fieldsWithSubFields: fieldsWithSubFields.map(field => ({
+          id: field._id,
+          name: field.name,
+          subFieldsCount: field.subFieldsCount
+        }))
+      };
+
+      return ResponseUtil.success(stats, 'My fields statistics retrieved successfully');
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(
+        `Failed to retrieve my fields statistics: ${error.message}`,
+      );
+    }
+  }
+
   async findById(id: string): Promise<any> {
     try {
       if (!Types.ObjectId.isValid(id)) {
@@ -365,6 +597,24 @@ export class FieldsService {
       images: field.images,
       createdAt: field.createdAt,
       updatedAt: field.updatedAt,
+    };
+  }
+
+  private formatFieldResponseWithSubFields(field: any) {
+    return {
+      id: field._id,
+      name: field.name,
+      address: field.address,
+      phone: field.phone,
+      facilities: field.facilities,
+      slots: field.slots,
+      description: field.description,
+      images: field.images,
+      createdAt: field.createdAt,
+      updatedAt: field.updatedAt,
+      subFields: field.subFields || [],
+      owner: field.owner || null,
+      subFieldsCount: field.subFields ? field.subFields.length : 0,
     };
   }
 

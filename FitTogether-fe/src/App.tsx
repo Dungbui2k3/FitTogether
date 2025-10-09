@@ -21,7 +21,9 @@ import NotFoundPage from "./pages/NotFoundPage";
 import UserManagement from "./pages/Admin/UserManagement";
 import OrderManagement from "./pages/Admin/OrderManagement";
 import AdminCategoryManagement from "./pages/Admin/CategoryManagement";
-import FieldManagement from "./pages/FieldOwner/FieldManagement";
+import FieldManagement from "./pages/Admin/FieldManagement";
+import MyFieldsPage from "./pages/FieldOwner/MyFieldsPage";
+import FieldDetailPage from "./pages/FieldOwner/FieldDetailPage";
 import FieldOwnerRoute from "./components/FieldOwnerRoute";
 import FieldOwnerLayout from "./components/FieldOwner/FieldOwnerLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -111,17 +113,19 @@ function App() {
             <Route path="users" element={<UserManagement />} />
             <Route path="products" element={<ProductManagement />} />
             <Route path="categories" element={<AdminCategoryManagement />} />
+            <Route path="fields" element={<FieldManagement />} />
             <Route path="orders" element={<OrderManagement />} />
           </Route>
 
-          {/* Field Owner Routes */}
-          <Route path="/field-owner" element={
-            <FieldOwnerRoute>
-              <FieldOwnerLayout />
-            </FieldOwnerRoute>
-          }>
-            <Route path="fields" element={<FieldManagement />} />
-          </Route>
+        {/* Field Owner Routes */}
+        <Route path="/field-owner" element={
+          <FieldOwnerRoute>
+            <FieldOwnerLayout />
+          </FieldOwnerRoute>
+        }>
+          <Route path="my-fields" element={<MyFieldsPage />} />
+          <Route path="field/:fieldId" element={<FieldDetailPage />} />
+        </Route>
           
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
