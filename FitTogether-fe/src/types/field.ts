@@ -1,4 +1,4 @@
-import { CreateSubFieldRequest } from './subField';
+import { CreateSubFieldRequest, EditSubFieldRequest } from "./subField";
 
 export interface Field {
   id: string;
@@ -6,7 +6,7 @@ export interface Field {
   address: string;
   phone: string;
   facilities: string[];
-  slots: string[]
+  slots: string[];
   description?: string;
   images?: string[];
   isDeleted?: boolean;
@@ -40,7 +40,9 @@ export interface UpdateFieldRequest {
   phone?: string;
   facilities?: string[];
   description?: string;
+  slots?: string[];
   images?: string[];
+  subFields?: EditSubFieldRequest[];
 }
 
 export interface FieldFilter {
@@ -50,8 +52,8 @@ export interface FieldFilter {
 }
 
 export interface FieldSort {
-  field: 'name' | 'address' | 'createdAt' | 'updatedAt';
-  order: 'asc' | 'desc';
+  field: "name" | "address" | "createdAt" | "updatedAt";
+  order: "asc" | "desc";
 }
 
 export interface FieldListParams {
@@ -59,8 +61,8 @@ export interface FieldListParams {
   limit?: number;
   search?: string;
   isDeleted?: boolean;
-  sortBy?: 'name' | 'address' | 'createdAt' | 'updatedAt';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: "name" | "address" | "createdAt" | "updatedAt";
+  sortOrder?: "asc" | "desc";
 }
 
 export interface FieldListResponse {

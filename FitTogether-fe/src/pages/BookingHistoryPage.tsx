@@ -151,14 +151,14 @@ const BookingHistoryPage: React.FC = () => {
               <Package className="h-8 w-8 text-gray-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Không tìm thấy đơn hàng nào
+              Không tìm thấy ca nào
             </h3>
-            <p className="text-gray-600 mb-6">Bạn chưa đặt đơn hàng nào.</p>
+            <p className="text-gray-600 mb-6">Bạn chưa đặt ca nào.</p>
             <button
               onClick={() => navigate("/")}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
             >
-              Bắt đầu mua sắm
+              Bắt đầu đặt sân
             </button>
           </div>
         ) : (
@@ -240,6 +240,16 @@ const BookingHistoryPage: React.FC = () => {
                             <span className="text-gray-500">Họ và tên:</span>
                             <p className="font-medium text-gray-900">
                               {order.userId.name}
+                            </p>
+                          </div>
+                        )}
+                        {order.phone && (
+                          <div>
+                            <span className="text-gray-500">
+                              Số điện thoại:
+                            </span>
+                            <p className="font-medium text-gray-900">
+                              {order.phone}
                             </p>
                           </div>
                         )}

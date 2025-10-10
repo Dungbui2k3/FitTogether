@@ -191,7 +191,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
       day: selectedSlot.date,
       duration: selectedSlot.time,
       totalPrice: subField.pricePerHour,
-      phoneNumber: phoneNumber.trim(),
+      phone: phoneNumber.trim(),
     };
 
     try {

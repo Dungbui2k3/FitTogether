@@ -37,6 +37,7 @@ import { ToastProvider } from "./contexts/ToastContext";
 import GlobalToastContainer from "./components/GlobalToastContainer";
 import BookingPage from "./components/Field/BookingPage";
 import BookingHistoryPage from "./pages/BookingHistoryPage";
+import FieldManagerPage from "./pages/FieldOwner/FieldManagerPage";
 
 // Layout có Header/Footer
 const MainLayout = () => {
@@ -65,8 +66,8 @@ function App() {
     <ToastProvider>
       <CartProvider>
         <Router>
-        <Routes>
-          {/* Routes với Header/Footer */}
+          <Routes>
+            {/* Routes với Header/Footer */}
             <Route path="/" element={<MainLayout />}>
               <Route index element={<HomePage />} />
               <Route path="products" element={<ProductsPage />} />
@@ -103,39 +104,49 @@ function App() {
                 }
               />
             </Route>
-          
-          {/* Admin Routes với AdminLayout */}
-          <Route path="/admin" element={
-            <AdminRoute>
-              <AdminLayoutWrapper />
-            </AdminRoute>
-          }>
-            <Route path="users" element={<UserManagement />} />
-            <Route path="products" element={<ProductManagement />} />
-            <Route path="categories" element={<AdminCategoryManagement />} />
-            <Route path="fields" element={<FieldManagement />} />
-            <Route path="orders" element={<OrderManagement />} />
-          </Route>
 
-        {/* Field Owner Routes */}
-        <Route path="/field-owner" element={
-          <FieldOwnerRoute>
-            <FieldOwnerLayout />
-          </FieldOwnerRoute>
-        }>
-          <Route path="my-fields" element={<MyFieldsPage />} />
-          <Route path="field/:fieldId" element={<FieldDetailPage />} />
-        </Route>
-          
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+            {/* Admin Routes với AdminLayout */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminLayoutWrapper />
+                </AdminRoute>
+              }
+            >
+              <Route path="users" element={<UserManagement />} />
+              <Route path="products" element={<ProductManagement />} />
+              <Route path="categories" element={<AdminCategoryManagement />} />
+              <Route path="fields" element={<FieldManagement />} />
+              <Route path="orders" element={<OrderManagement />} />
+            </Route>
 
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-        
-        {/* Global Toast Container */}
-        <GlobalToastContainer />
-      </Router>
+            {/* Field Owner Routes */}
+            <Route
+              path="/field-owner"
+              element={
+                <FieldOwnerRoute>
+                  <FieldOwnerLayout />
+                </FieldOwnerRoute>
+              }
+            >
+              <Route path="my-fields" element={<MyFieldsPage />} />
+              <Route
+                path="field-manage/:fieldId"
+                element={<FieldManagerPage />}
+              />
+              <Route path="field/:fieldId" element={<FieldDetailPage />} />
+            </Route>
+
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+
+          {/* Global Toast Container */}
+          <GlobalToastContainer />
+        </Router>
       </CartProvider>
     </ToastProvider>
   );

@@ -17,6 +17,13 @@ export interface CreateSubFieldRequest {
   status?: "available" | "maintenance" | "booked";
 }
 
+export interface EditSubFieldRequest {
+  name: string;
+  type?: string;
+  pricePerHour: number;
+  status?: "available" | "maintenance" | "booked";
+}
+
 // Response khi trả về danh sách SubField
 export interface SubFieldListResponse {
   subFields: SubField[];

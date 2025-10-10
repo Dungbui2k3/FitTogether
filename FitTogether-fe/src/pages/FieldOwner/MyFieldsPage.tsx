@@ -288,32 +288,34 @@ const MyFieldsPage: React.FC = () => {
                           </div>
                         </div>
 
-                          {/* Actions */}
-                          <div className="flex flex-col space-y-2 ml-4">
-                            <Link
-                              to={`/field-owner/field/${field.id}`}
-                              className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              Xem Chi Tiết
-                            </Link>
+                        {/* Actions */}
+                        <div className="flex flex-col space-y-2 ml-4">
+                          <Link
+                            to={`/field-owner/field/${field.id}`}
+                            className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Xem Chi Tiết
+                          </Link>
 
-                            <button
-                              onClick={() => handleOpenBooking(field)}
-                              className="bg-green-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-green-700 transition-colors flex items-center justify-center"
-                            >
-                              <CalendarDays className="h-4 w-4 mr-2" />
-                              Đặt Sân
-                            </button>
+                          <Link
+                            key={field.id}
+                            to={`/field-owner/field-manage/${field.id}`}
+                            state={{ field }}
+                           className="bg-green-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
+                          >
+                            <CalendarDays className="h-4 w-4 mr-2" />
+                            Đặt Sân
+                          </Link>
 
-                            <button
-                              onClick={() => handleDeleteField(field.id)}
-                              className="bg-red-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors flex items-center justify-center"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Xóa
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => handleDeleteField(field.id)}
+                            className="bg-red-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors flex items-center justify-center"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Xóa
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

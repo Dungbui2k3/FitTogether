@@ -128,7 +128,7 @@ const BookingPage = () => {
           {/* Sidebar */}
           <div className="space-y-4">
             {/* Pricing Card */}
-            <div className="bg-white rounded-lg shadow p-4">
+            {/* <div className="bg-white rounded-lg shadow p-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-3">Giá Thuê</h3>
               <div className="space-y-2">
                 <div className="flex justify-between items-center p-3 bg-blue-50 rounded border">
@@ -139,7 +139,7 @@ const BookingPage = () => {
                   <span className="text-lg font-bold text-blue-600">220.000 ₫</span>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Booking Button */}
             <div className="bg-blue-600 rounded-lg shadow p-4 text-white">
