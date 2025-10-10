@@ -26,6 +26,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
   const [subFields, setSubFields] = useState<any[]>([]);
   const [fieldSlots, setFieldSlots] = useState<string[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
 
   // Hàm pad để định dạng số
   const pad = (n: number) => n.toString().padStart(2, "0");
@@ -157,6 +158,18 @@ const BookingField: React.FC<BookingFieldProps> = ({
       return;
     }
 
+    if (!phoneNumber.trim()) {
+      alert("Vui lòng nhập số điện thoại.");
+      return;
+    }
+
+    // Validate phone number format (simple validation for Vietnamese phone numbers)
+    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+    if (!phoneRegex.test(phoneNumber.trim())) {
+      alert("Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại 10 chữ số bắt đầu bằng 03, 05, 07, 08 hoặc 09.");
+      return;
+    }
+
     if (subFields.length === 0) {
       alert(
         "Sub-fields are still loading. Please wait a moment and try again."
@@ -178,6 +191,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
       day: selectedSlot.date,
       duration: selectedSlot.time,
       totalPrice: subField.pricePerHour,
+      phoneNumber: phoneNumber.trim(),
     };
 
     try {
@@ -200,6 +214,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
         ]);
 
         setSelectedSlots([]); // Xóa chọn sau khi booking
+        setPhoneNumber(""); // Clear phone number after successful booking
       } else {
         alert("Booking failed: " + response.message);
       }
@@ -251,8 +266,8 @@ const BookingField: React.FC<BookingFieldProps> = ({
   }, [selectedDate, subFields]);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto relative z-[10000]">
         {/* Header */}
         <div className="bg-blue-600 text-white p-4">
           <div className="flex items-center justify-between">
@@ -439,6 +454,30 @@ const BookingField: React.FC<BookingFieldProps> = ({
             </div>
           </div>
 
+          {/* Phone Number Input */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">
+              Thông Tin Liên Hệ
+            </h3>
+            <div className="space-y-2">
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                Số điện thoại <span className="text-red-500">*</span>
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Nhập số điện thoại (VD: 0987654321)"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                maxLength={10}
+              />
+              <p className="text-xs text-gray-500">
+                Số điện thoại 10 chữ số, bắt đầu bằng 03, 05, 07, 08 hoặc 09
+              </p>
+            </div>
+          </div>
+
           {/* Selected Slots Summary */}
           <div className="bg-gray-50 rounded-lg p-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">
@@ -501,9 +540,9 @@ const BookingField: React.FC<BookingFieldProps> = ({
               </button>
               <button
                 onClick={booking}
-                disabled={selectedSlots.length === 0 || subFields.length === 0}
+                disabled={selectedSlots.length === 0 || subFields.length === 0 || !phoneNumber.trim()}
                 className={`px-6 py-2 rounded font-medium ${
-                  selectedSlots.length > 0 && subFields.length > 0
+                  selectedSlots.length > 0 && subFields.length > 0 && phoneNumber.trim()
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}
