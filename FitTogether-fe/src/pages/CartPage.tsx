@@ -184,7 +184,7 @@ const CartPage: React.FC = () => {
                 <span className="text-lg font-bold text-gray-900">Tổng cộng</span>
                 <span className="text-2xl font-bold text-blue-600">
                   {formatPrice(
-                    cart.total + (cart.items.length > 0 ? 30000 : 0)
+                    cart.total
                   )}
                 </span>
               </div>
