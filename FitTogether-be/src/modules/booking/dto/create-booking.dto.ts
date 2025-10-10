@@ -1,13 +1,23 @@
 // create-booking.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsMongoId, IsEnum, IsNumber, Min } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsMongoId,
+  IsEnum,
+  IsNumber,
+  Min,
+} from 'class-validator';
 
 export class CreateBookingDto {
   @ApiProperty({ description: 'Thời gian đặt sân', example: '5:00 - 6:30' })
   @IsNotEmpty()
   duration: string;
 
-  @ApiProperty({ description: 'Ngày đặt sân (YYYY-MM-DD)', example: '2025-10-10' })
+  @ApiProperty({
+    description: 'Ngày đặt sân (YYYY-MM-DD)',
+    example: '2025-10-10',
+  })
   @IsNotEmpty()
   @IsString()
   day: string;
@@ -17,4 +27,13 @@ export class CreateBookingDto {
   @IsNumber()
   @Min(0)
   totalPrice: number;
+
+  @ApiProperty({
+    example: '1234567890',
+    description: 'Shipping phone number for physical products',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  phone: string;
 }

@@ -39,6 +39,14 @@ export class Booking {
   })
   status: string;
 
+  @ApiProperty({
+    description: 'Phone number for the order',
+    example: '1234567890',
+    required: false,
+  })
+  @Prop({ type: String, default: '' })
+  phone: string;
+
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -46,4 +54,3 @@ export class Booking {
 export const BookingSchema = SchemaFactory.createForClass(Booking);
 
 BookingSchema.index({ subFieldId: 1, day: 1, duration: 1 }, { unique: true });
-

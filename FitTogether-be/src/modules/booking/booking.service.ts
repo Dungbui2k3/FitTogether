@@ -26,7 +26,7 @@ export class BookingService {
     userId: string,
   ): Promise<any> {
     try {
-      const { day, duration, totalPrice } = createBookingDto;
+      const { day, duration, totalPrice, phone } = createBookingDto;
 
       // 1️⃣ Kiểm tra subFieldId hợp lệ và tồn tại
       if (!Types.ObjectId.isValid(subFieldId)) {
@@ -58,6 +58,7 @@ export class BookingService {
         day,
         duration,
         totalPrice,
+        phone,
         status: 'confirmed',
       });
 
@@ -89,7 +90,8 @@ export class BookingService {
 
     const bookings = await this.bookingModel
       .find({ subFieldId, day })
-      .select('duration status userId -_id') // chỉ cần thông tin cần thiết
+      .select('duration status userId phone -_id')
+      .populate('userId', 'name email -_id') 
       .lean();
 
     return bookings;

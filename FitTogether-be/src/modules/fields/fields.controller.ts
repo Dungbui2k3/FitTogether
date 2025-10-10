@@ -13,6 +13,7 @@ import {
   Put,
   UseInterceptors,
   UploadedFiles,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -30,6 +31,8 @@ import { UpdateFieldDto } from './dto/update-field.dto';
 import { GetFieldsQueryDto } from './dto/get-fields-query.dto';
 import { GetUser, Public, Roles } from 'src/decorators';
 import { JwtAuthGuard, Role } from 'src/guards';
+import { validate } from 'class-validator';
+import { plainToInstance } from 'class-transformer';
 
 @ApiTags('Fields')
 @Controller('api/v1/fields')
@@ -44,15 +47,48 @@ export class FieldsController {
   @ApiOperation({ summary: 'Create a new field (Admin or Field Owner only)' })
   @ApiResponse({ status: 201, description: 'Field created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({ status: 409, description: 'Field name or phone already exists' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin or Field Owner access required' })
+  @ApiResponse({
+    status: 409,
+    description: 'Field name or phone already exists',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin or Field Owner access required',
+  })
   async create(
     @UploadedFiles() files: Express.Multer.File[],
-    @Body() createFieldDto: CreateFieldDto,
+    @Body() body: any, // Nhận tạm body raw từ FormData
     @GetUser('_id') userId: string,
   ) {
+    // 1️⃣ Parse subFields JSON string nếu tồn tại
+    if (body.subFields) {
+      try {
+        body.subFields = JSON.parse(body.subFields);
+      } catch (e) {
+        throw new BadRequestException('subFields JSON không hợp lệ');
+      }
+    }
+
+    // 2️⃣ Sanitize subFields chỉ giữ các field hợp lệ
+    if (body.subFields && Array.isArray(body.subFields)) {
+      body.subFields = body.subFields.map((s: any) => ({
+        name: s.name,
+        type: s.type,
+        pricePerHour: s.pricePerHour,
+        status: s.status || 'available',
+      }));
+    }
+
+    // 3️⃣ Nếu có files upload, gán vào body
     if (files?.length > 0) {
-      createFieldDto.images = files;
+      body.images = files;
+    }
+
+    // 4️⃣ Transform body thành DTO và validate
+    const createFieldDto = plainToInstance(CreateFieldDto, body);
+    const errors = await validate(createFieldDto);
+    if (errors.length) {
+      throw new BadRequestException(errors);
     }
 
     return this.fieldsService.create(createFieldDto, userId);
@@ -97,9 +133,9 @@ export class FieldsController {
     enum: ['name', 'address', 'createdAt', 'updatedAt'],
     description: 'Sort by field',
   })
-  @ApiQuery({ 
-    name: 'sortOrder', 
-    required: false, 
+  @ApiQuery({
+    name: 'sortOrder',
+    required: false,
     enum: ['asc', 'desc'],
     description: 'Sort order',
   })
@@ -111,7 +147,10 @@ export class FieldsController {
   @Get('my-fields')
   @Roles(Role.FIELD_OWNER, Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get all fields owned by current user with complete information including subFields (Field Owner or Admin only)' })
+  @ApiOperation({
+    summary:
+      'Get all fields owned by current user with complete information including subFields (Field Owner or Admin only)',
+  })
   @ApiQuery({
     name: 'page',
     required: false,
@@ -154,8 +193,14 @@ export class FieldsController {
     enum: ['asc', 'desc'],
     description: 'Sort order',
   })
-  @ApiResponse({ status: 200, description: 'My fields with complete information retrieved successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Field Owner or Admin access required' })
+  @ApiResponse({
+    status: 200,
+    description: 'My fields with complete information retrieved successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Field Owner or Admin access required',
+  })
   async getMyFields(
     @Query() query: GetFieldsQueryDto,
     @GetUser('_id') userId: string,
@@ -166,9 +211,18 @@ export class FieldsController {
   @Get('my-fields/stats')
   @Roles(Role.FIELD_OWNER, Role.ADMIN)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get statistics for fields owned by current user (Field Owner or Admin only)' })
-  @ApiResponse({ status: 200, description: 'My fields statistics retrieved successfully' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Field Owner or Admin access required' })
+  @ApiOperation({
+    summary:
+      'Get statistics for fields owned by current user (Field Owner or Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'My fields statistics retrieved successfully',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Field Owner or Admin access required',
+  })
   async getMyFieldsStats(@GetUser('_id') userId: string) {
     return this.fieldsService.getFieldsStatsByUserId(userId);
   }
@@ -193,18 +247,53 @@ export class FieldsController {
   @ApiParam({ name: 'id', description: 'Field ID' })
   @ApiResponse({ status: 200, description: 'Field updated successfully' })
   @ApiResponse({ status: 404, description: 'Field not found' })
-  @ApiResponse({ status: 409, description: 'Field name or phone already exists' })
+  @ApiResponse({
+    status: 409,
+    description: 'Field name or phone already exists',
+  })
   @ApiResponse({ status: 400, description: 'Invalid field ID' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin or Field Owner access required' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin or Field Owner access required',
+  })
   async update(
     @Param('id') id: string,
-    @Body() updateFieldDto: UpdateFieldDto,
+    @Body() body: any, // Nhận tạm body raw từ FormData
     @UploadedFiles() files: Express.Multer.File[],
   ) {
-    if (files?.length > 0) {
-      updateFieldDto.images = files;
+    // 1️⃣ Parse subFields JSON string nếu tồn tại
+    if (body.subFields) {
+      try {
+        body.subFields = JSON.parse(body.subFields);
+      } catch (e) {
+        throw new BadRequestException('subFields JSON không hợp lệ');
+      }
     }
 
+    // 2️⃣ Sanitize subFields chỉ giữ các field hợp lệ
+    if (body.subFields && Array.isArray(body.subFields)) {
+      body.subFields = body.subFields.map((s: any) => ({
+        _id: s._id,
+        name: s.name,
+        type: s.type,
+        pricePerHour: s.pricePerHour,
+        status: s.status || 'available', // Keep original status or default to available
+      }));
+    }
+
+    // 3️⃣ Nếu có files upload, gán vào body
+    if (files?.length > 0) {
+      body.images = files;
+    }
+
+    // 4️⃣ Transform body thành DTO và validate
+    const updateFieldDto = plainToInstance(UpdateFieldDto, body);
+    const errors = await validate(updateFieldDto);
+    if (errors.length) {
+      throw new BadRequestException(errors);
+    }
+
+    // 5️⃣ Gọi service update
     return this.fieldsService.update(id, updateFieldDto);
   }
 
@@ -212,12 +301,17 @@ export class FieldsController {
   @Roles(Role.ADMIN, Role.FIELD_OWNER)
   @ApiBearerAuth('JWT-auth')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Delete field by ID (Admin or Field Owner only - soft delete)' })
+  @ApiOperation({
+    summary: 'Delete field by ID (Admin or Field Owner only - soft delete)',
+  })
   @ApiParam({ name: 'id', description: 'Field ID' })
   @ApiResponse({ status: 200, description: 'Field deleted successfully' })
   @ApiResponse({ status: 404, description: 'Field not found' })
   @ApiResponse({ status: 400, description: 'Invalid field ID' })
-  @ApiResponse({ status: 403, description: 'Forbidden - Admin or Field Owner access required' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - Admin or Field Owner access required',
+  })
   async remove(@Param('id') id: string) {
     return this.fieldsService.remove(id);
   }

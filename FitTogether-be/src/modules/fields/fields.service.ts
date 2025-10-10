@@ -45,7 +45,9 @@ export class FieldsService {
       });
 
       if (existingPhone) {
-        throw new ConflictException('Field with this phone number already exists');
+        throw new ConflictException(
+          'Field with this phone number already exists',
+        );
       }
 
       let uploadedUrls: string[] = [];
@@ -64,12 +66,13 @@ export class FieldsService {
         uploadedUrls = uploads.map((upload) => upload.secure_url);
       }
 
-      const { subFields, images, ...fieldDataWithoutSubFields } = createFieldDto;
-      
+      const { subFields, images, ...fieldDataWithoutSubFields } =
+        createFieldDto;
+
       const fieldData = {
         ...fieldDataWithoutSubFields,
         images: uploadedUrls,
-        userId: new Types.ObjectId(userId), 
+        userId: new Types.ObjectId(userId),
       };
 
       const newField = new this.fieldModel(fieldData);
@@ -96,9 +99,7 @@ export class FieldsService {
       ) {
         throw error;
       }
-      throw new BadRequestException(
-        `Failed to create field: ${error.message}`,
-      );
+      throw new BadRequestException(`Failed to create field: ${error.message}`);
     }
   }
 
@@ -177,7 +178,10 @@ export class FieldsService {
     }
   }
 
-  async findByUserId(userId: string, query: GetFieldsQueryDto = {}): Promise<any> {
+  async findByUserId(
+    userId: string,
+    query: GetFieldsQueryDto = {},
+  ): Promise<any> {
     try {
       if (!Types.ObjectId.isValid(userId)) {
         throw new BadRequestException('Invalid user ID');
@@ -195,9 +199,9 @@ export class FieldsService {
       } = query;
 
       // Build filter object for user's fields
-      const filter: any = { 
+      const filter: any = {
         userId: new Types.ObjectId(userId),
-        isDeleted: { $ne: true } 
+        isDeleted: { $ne: true },
       };
 
       if (search) {
@@ -239,21 +243,21 @@ export class FieldsService {
             from: 'subfields',
             localField: '_id',
             foreignField: 'fieldId',
-            as: 'subFields'
-          }
+            as: 'subFields',
+          },
         },
         {
           $lookup: {
             from: 'users',
             localField: 'userId',
             foreignField: '_id',
-            as: 'owner'
-          }
+            as: 'owner',
+          },
         },
         {
           $addFields: {
-            owner: { $arrayElemAt: ['$owner', 0] }
-          }
+            owner: { $arrayElemAt: ['$owner', 0] },
+          },
         },
         {
           $project: {
@@ -281,21 +285,21 @@ export class FieldsService {
                   pricePerHour: '$$subField.pricePerHour',
                   status: '$$subField.status',
                   createdAt: '$$subField.createdAt',
-                  updatedAt: '$$subField.updatedAt'
-                }
-              }
+                  updatedAt: '$$subField.updatedAt',
+                },
+              },
             },
             owner: {
               id: '$owner._id',
               name: '$owner.name',
               email: '$owner.email',
-              role: '$owner.role'
-            }
-          }
+              role: '$owner.role',
+            },
+          },
         },
         { $sort: sort },
         { $skip: skip },
-        { $limit: limit }
+        { $limit: limit },
       ]);
 
       const formattedFields = fields.map((field: any) =>
@@ -332,9 +336,9 @@ export class FieldsService {
         throw new BadRequestException('Invalid user ID');
       }
 
-      const filter = { 
+      const filter = {
         userId: new Types.ObjectId(userId),
-        isDeleted: { $ne: true } 
+        isDeleted: { $ne: true },
       };
 
       // Get total fields count
@@ -348,28 +352,31 @@ export class FieldsService {
             from: 'subfields',
             localField: '_id',
             foreignField: 'fieldId',
-            as: 'subFields'
-          }
+            as: 'subFields',
+          },
         },
         {
           $project: {
             _id: 1,
             name: 1,
-            subFieldsCount: { $size: '$subFields' }
-          }
-        }
+            subFieldsCount: { $size: '$subFields' },
+          },
+        },
       ]);
 
       // Calculate total subFields
-      const totalSubFields = fieldsWithSubFields.reduce((sum, field) => sum + field.subFieldsCount, 0);
+      const totalSubFields = fieldsWithSubFields.reduce(
+        (sum, field) => sum + field.subFieldsCount,
+        0,
+      );
 
       // Get recent fields (last 30 days)
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
+
       const recentFields = await this.fieldModel.countDocuments({
         ...filter,
-        createdAt: { $gte: thirtyDaysAgo }
+        createdAt: { $gte: thirtyDaysAgo },
       });
 
       // Get fields by status (if we had status field)
@@ -378,9 +385,9 @@ export class FieldsService {
         {
           $group: {
             _id: '$isActive', // Using isActive as status indicator
-            count: { $sum: 1 }
-          }
-        }
+            count: { $sum: 1 },
+          },
+        },
       ]);
 
       const stats = {
@@ -391,14 +398,17 @@ export class FieldsService {
           acc[item._id ? 'active' : 'inactive'] = item.count;
           return acc;
         }, {}),
-        fieldsWithSubFields: fieldsWithSubFields.map(field => ({
+        fieldsWithSubFields: fieldsWithSubFields.map((field) => ({
           id: field._id,
           name: field.name,
-          subFieldsCount: field.subFieldsCount
-        }))
+          subFieldsCount: field.subFieldsCount,
+        })),
       };
 
-      return ResponseUtil.success(stats, 'My fields statistics retrieved successfully');
+      return ResponseUtil.success(
+        stats,
+        'My fields statistics retrieved successfully',
+      );
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
@@ -450,16 +460,13 @@ export class FieldsService {
         _id: id,
         isDeleted: { $ne: true },
       });
-      
+
       if (!existingField) {
         throw new NotFoundException('Field not found');
       }
 
       // Check name conflict
-      if (
-        updateFieldDto.name &&
-        updateFieldDto.name !== existingField.name
-      ) {
+      if (updateFieldDto.name && updateFieldDto.name !== existingField.name) {
         const conflict = await this.fieldModel.findOne({
           name: updateFieldDto.name,
           _id: { $ne: id },
@@ -481,7 +488,9 @@ export class FieldsService {
           isDeleted: { $ne: true },
         });
         if (conflict) {
-          throw new ConflictException('Field with this phone number already exists');
+          throw new ConflictException(
+            'Field with this phone number already exists',
+          );
         }
       }
 
@@ -528,8 +537,20 @@ export class FieldsService {
       delete updateData.images;
       delete updateData.removedImages;
 
+      // 4. Handle subFields updates
+      if (updateFieldDto.subFields && Array.isArray(updateFieldDto.subFields)) {
+        await this.updateSubFields(id, updateFieldDto.subFields);
+      }
+
+      // Remove subFields from updateData as they're handled separately
+      delete updateData.subFields;
+
       const updatedField = await this.fieldModel
-        .findByIdAndUpdate(id, { ...updateData, images: finalUrls }, { new: true })
+        .findByIdAndUpdate(
+          id,
+          { ...updateData, images: finalUrls },
+          { new: true },
+        )
         .exec();
 
       return ResponseUtil.success(
@@ -544,9 +565,7 @@ export class FieldsService {
       ) {
         throw error;
       }
-      throw new BadRequestException(
-        `Failed to update field: ${error.message}`,
-      );
+      throw new BadRequestException(`Failed to update field: ${error.message}`);
     }
   }
 
@@ -579,9 +598,7 @@ export class FieldsService {
       ) {
         throw error;
       }
-      throw new BadRequestException(
-        `Failed to delete field: ${error.message}`,
-      );
+      throw new BadRequestException(`Failed to delete field: ${error.message}`);
     }
   }
 
@@ -629,9 +646,11 @@ export class FieldsService {
         throw new NotFoundException('Field not found');
       }
 
-      const subFields = await this.subFieldModel.find({
-        fieldId: new Types.ObjectId(fieldId),
-      }).sort({ createdAt: -1 });
+      const subFields = await this.subFieldModel
+        .find({
+          fieldId: new Types.ObjectId(fieldId),
+        })
+        .sort({ createdAt: -1 });
 
       return ResponseUtil.success(
         subFields.map((subField: any) => ({
@@ -654,6 +673,69 @@ export class FieldsService {
       }
       throw new BadRequestException(
         `Failed to retrieve sub-fields: ${error.message}`,
+      );
+    }
+  }
+
+  private async updateSubFields(
+    fieldId: string,
+    subFieldsData: any[],
+  ): Promise<void> {
+    try {
+      const fieldObjectId = new Types.ObjectId(fieldId);
+
+      // Get existing subFields for this field
+      const existingSubFields = await this.subFieldModel.find({
+        fieldId: fieldObjectId,
+      });
+
+      const existingSubFieldIds = existingSubFields.map((sf: any) =>
+        sf._id.toString(),
+      );
+      const incomingSubFieldIds = subFieldsData
+        .filter((sf) => sf._id)
+        .map((sf) => sf._id);
+
+      // Delete subFields that are no longer in the incoming data
+      const subFieldsToDelete = existingSubFieldIds.filter(
+        (id) => !incomingSubFieldIds.includes(id),
+      );
+
+      if (subFieldsToDelete.length > 0) {
+        await this.subFieldModel.deleteMany({
+          _id: { $in: subFieldsToDelete.map((id) => new Types.ObjectId(id)) },
+        });
+      }
+
+      // Process each subField in the incoming data
+      for (const subFieldData of subFieldsData) {
+        if (subFieldData._id) {
+          // Update existing subField
+          await this.subFieldModel.findByIdAndUpdate(
+            subFieldData._id,
+            {
+              name: subFieldData.name,
+              type: subFieldData.type,
+              pricePerHour: subFieldData.pricePerHour,
+              status: subFieldData.status || 'available',
+            },
+            { new: true },
+          );
+        } else {
+          // Create new subField
+          const newSubField = new this.subFieldModel({
+            fieldId: fieldObjectId,
+            name: subFieldData.name,
+            type: subFieldData.type,
+            pricePerHour: subFieldData.pricePerHour,
+            status: subFieldData.status || 'available',
+          });
+          await newSubField.save();
+        }
+      }
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to update sub-fields: ${error.message}`,
       );
     }
   }
