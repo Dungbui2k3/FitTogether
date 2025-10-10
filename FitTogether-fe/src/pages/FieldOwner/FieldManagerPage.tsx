@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { subFieldService } from "../../services/subFieldsService";
 import bookingService from "../../services/bookingService";
 import fieldService from "../../services/fieldService";
 import { useLocation, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { useAuth, useToast } from "../../hooks";
 
 const FieldManagerPage: React.FC = () => {
+  const { user } = useAuth();
+  const { success, error } = useToast();
   const { fieldId } = useParams<{ fieldId: string }>();
   const location = useLocation();
   const field = (location.state as { field: any })?.field;
@@ -148,28 +151,26 @@ const FieldManagerPage: React.FC = () => {
 
   const booking = async () => {
     if (selectedSlots.length === 0) {
-      alert("Please select a slot to book.");
+      error("Vui lòng chọn khung giờ để đặt sân.");
       return;
     }
 
     if (!phoneNumber.trim()) {
-      alert("Vui lòng nhập số điện thoại.");
+      error("Vui lòng nhập số điện thoại.");
       return;
     }
 
     // Validate phone number format (simple validation for Vietnamese phone numbers)
     const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
     if (!phoneRegex.test(phoneNumber.trim())) {
-      alert(
+      error(
         "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại 10 chữ số bắt đầu bằng 03, 05, 07, 08 hoặc 09."
       );
       return;
     }
 
     if (subFields.length === 0) {
-      alert(
-        "Sub-fields are still loading. Please wait a moment and try again."
-      );
+      error("Đang tải thông tin sân. Vui lòng đợi một chút và thử lại.");
       return;
     }
 
@@ -179,7 +180,7 @@ const FieldManagerPage: React.FC = () => {
     const subField = subFields.find((f) => f.name === selectedSlot.field);
 
     if (!subField) {
-      alert("Cannot find sub-field for selected slot.");
+      error("Không tìm thấy thông tin sân đã chọn.");
       return;
     }
 
@@ -197,7 +198,9 @@ const FieldManagerPage: React.FC = () => {
       );
 
       if (response.success) {
-        alert("Booking successful!");
+        success(
+          `Đặt sân thành công!`
+        );
         setBookings((prev) => [
           ...prev,
           {
@@ -205,18 +208,20 @@ const FieldManagerPage: React.FC = () => {
             field: selectedSlot.field,
             subFieldId: subField._id,
             date: selectedSlot.date,
-            status: "confirmed", // hiển thị ngay là đã đặt
+            status: "confirmed",
+            phone: phoneNumber,
+            userId: { name: user?.name, phone: phoneNumber },
           },
         ]);
 
         setSelectedSlots([]); // Xóa chọn sau khi booking
         setPhoneNumber(""); // Clear phone number after successful booking
       } else {
-        alert("Booking failed: " + response.message);
+        error("Đặt sân thất bại: " + response.message);
       }
-    } catch (error) {
-      console.error("Failed to book slot:", error);
-      alert("Booking error. Please try again.");
+    } catch (err) {
+      console.error("Failed to book slot:", err);
+      error("Có lỗi xảy ra khi đặt sân. Vui lòng thử lại.");
     }
   };
 
@@ -407,13 +412,14 @@ const FieldManagerPage: React.FC = () => {
                                     className="px-12 py-3 text-center"
                                   >
                                     {bookedInfo ? (
-                                      <div className="inline-block bg-gray-200 text-gray-700 rounded px-3 py-2 text-sm leading-tight">
+                                      <div className="inline-block bg-gray-200 text-gray-700 rounded px-2 py-2 text-sm leading-tight whitespace-nowrap">
                                         <p className="font-medium">
                                           {bookedInfo.userId?.name ||
-                                            "Người dùng"}
+                                            "Khách hàng"}
                                         </p>
-                                        <p className="text-xs text-gray-500">
-                                          SDT: {bookedInfo.phone ||
+                                        <p className="text-xs text-gray-600">
+                                          SDT:{" "}
+                                          {bookedInfo.phone ||
                                             bookedInfo.userId?.phone ||
                                             "Ẩn SĐT"}
                                         </p>
