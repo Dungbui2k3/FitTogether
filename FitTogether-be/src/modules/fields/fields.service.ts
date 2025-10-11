@@ -422,11 +422,12 @@ export class FieldsService {
   async findById(id: string): Promise<any> {
     try {
       if (!Types.ObjectId.isValid(id)) {
-        throw new BadRequestException('Invalid field ID');
+        throw new BadRequestException('Invalid field ID 2');
       }
 
       const field = await this.fieldModel
         .findOne({ _id: id, isDeleted: { $ne: true } })
+        .populate('userId', 'name -_id')
         .exec();
 
       if (!field) {
@@ -607,6 +608,11 @@ export class FieldsService {
       id: field._id,
       name: field.name,
       address: field.address,
+      owner: field.userId
+        ? {
+            name: field.userId.name,
+          }
+        : null,
       phone: field.phone,
       facilities: field.facilities,
       slots: field.slots,
