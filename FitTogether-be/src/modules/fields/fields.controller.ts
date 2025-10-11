@@ -47,48 +47,15 @@ export class FieldsController {
   @ApiOperation({ summary: 'Create a new field (Admin or Field Owner only)' })
   @ApiResponse({ status: 201, description: 'Field created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
-  @ApiResponse({
-    status: 409,
-    description: 'Field name or phone already exists',
-  })
-  @ApiResponse({
-    status: 403,
-    description: 'Forbidden - Admin or Field Owner access required',
-  })
+  @ApiResponse({ status: 409, description: 'Field name or phone already exists' })
+  @ApiResponse({ status: 403, description: 'Forbidden - Admin or Field Owner access required' })
   async create(
     @UploadedFiles() files: Express.Multer.File[],
-    @Body() body: any, // Nhận tạm body raw từ FormData
+    @Body() createFieldDto: CreateFieldDto,
     @GetUser('_id') userId: string,
   ) {
-    // 1️⃣ Parse subFields JSON string nếu tồn tại
-    if (body.subFields) {
-      try {
-        body.subFields = JSON.parse(body.subFields);
-      } catch (e) {
-        throw new BadRequestException('subFields JSON không hợp lệ');
-      }
-    }
-
-    // 2️⃣ Sanitize subFields chỉ giữ các field hợp lệ
-    if (body.subFields && Array.isArray(body.subFields)) {
-      body.subFields = body.subFields.map((s: any) => ({
-        name: s.name,
-        type: s.type,
-        pricePerHour: s.pricePerHour,
-        status: s.status || 'available',
-      }));
-    }
-
-    // 3️⃣ Nếu có files upload, gán vào body
     if (files?.length > 0) {
-      body.images = files;
-    }
-
-    // 4️⃣ Transform body thành DTO và validate
-    const createFieldDto = plainToInstance(CreateFieldDto, body);
-    const errors = await validate(createFieldDto);
-    if (errors.length) {
-      throw new BadRequestException(errors);
+      createFieldDto.images = files;
     }
 
     return this.fieldsService.create(createFieldDto, userId);
