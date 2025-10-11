@@ -58,30 +58,65 @@ const BookingPage = () => {
           <div className="lg:col-span-2 space-y-4">
             {/* Field Information Cards */}
             <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">Thông Tin Sân</h2>
-              
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                Thông Tin Sân
+              </h2>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-blue-100 rounded">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="w-5 h-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Giờ mở cửa</p>
-                    <p className="font-medium text-gray-800">05:00 - 12:00</p>
+                    <p className="text-sm text-gray-500">Các khung giờ</p>
+                    {field.slots?.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {field.slots.map((f: string, i: number) => (
+                          <span
+                            key={i}
+                            className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm font-medium"
+                          >
+                            {f}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-green-100 rounded">
-                    <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <svg
+                      className="w-5 h-5 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
                     </svg>
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Chủ sân</p>
-                    <p className="font-medium text-gray-800">Tungg Tungg</p>
+                    <p className="font-medium text-gray-800">
+                      {field?.owner?.name}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -90,7 +125,9 @@ const BookingPage = () => {
             {/* Facilities */}
             {field.facilities?.length > 0 && (
               <div className="bg-white rounded-lg shadow p-4">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">Tiện Ích</h2>
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                  Tiện Ích
+                </h2>
                 <div className="flex flex-wrap gap-2">
                   {field.facilities.map((f: string, i: number) => (
                     <span
@@ -107,14 +144,20 @@ const BookingPage = () => {
             {/* Description */}
             {field.description && (
               <div className="bg-white rounded-lg shadow p-4">
-                <h2 className="text-xl font-semibold text-gray-800 mb-3">Mô Tả</h2>
-                <p className="text-gray-600 leading-relaxed">{field.description}</p>
+                <h2 className="text-xl font-semibold text-gray-800 mb-3">
+                  Mô Tả
+                </h2>
+                <p className="text-gray-600 leading-relaxed">
+                  {field.description}
+                </p>
               </div>
             )}
 
             {/* Map */}
             <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-xl font-semibold text-gray-800 mb-3">Vị Trí</h2>
+              <h2 className="text-xl font-semibold text-gray-800 mb-3">
+                Vị Trí
+              </h2>
               {field && field.address ? (
                 <LocationMap address={field.address} />
               ) : (
@@ -144,7 +187,9 @@ const BookingPage = () => {
             {/* Booking Button */}
             <div className="bg-blue-600 rounded-lg shadow p-4 text-white">
               <h3 className="text-lg font-semibold mb-2">Sẵn Sàng Đặt Sân?</h3>
-              <p className="text-blue-100 mb-4 text-sm">Chọn ngày và khung giờ phù hợp với bạn</p>
+              <p className="text-blue-100 mb-4 text-sm">
+                Chọn ngày và khung giờ phù hợp với bạn
+              </p>
               <button
                 onClick={() => setIsBookingOpen(true)}
                 className="w-full bg-white text-blue-600 py-2 px-4 rounded font-medium hover:bg-gray-100 transition-colors"
@@ -155,15 +200,21 @@ const BookingPage = () => {
 
             {/* Quick Info */}
             <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">Thông Tin Nhanh</h3>
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                Thông Tin Nhanh
+              </h3>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-700 text-sm">Sân chất lượng cao</span>
+                  <span className="text-gray-700 text-sm">
+                    Sân chất lượng cao
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-700 text-sm">Dịch vụ chuyên nghiệp</span>
+                  <span className="text-gray-700 text-sm">
+                    Dịch vụ chuyên nghiệp
+                  </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
