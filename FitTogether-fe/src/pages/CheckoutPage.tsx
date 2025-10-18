@@ -1,6 +1,6 @@
 /**
  * CheckoutPage Component
- * 
+ *
  * Payment methods available:
  * - PayOS: Online payment gateway
  * - COD: Cash on Delivery
@@ -8,13 +8,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  ArrowLeft,
-  CreditCard,
-  Smartphone,
-  MapPin,
-  User,
-} from "lucide-react";
+import { ArrowLeft, CreditCard, Smartphone, MapPin, User } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import { useToast } from "../hooks";
 import { useAuth } from "../hooks";
@@ -96,7 +90,7 @@ const CheckoutPage: React.FC = () => {
     try {
       // Convert cart items to order items
       const orderItems = orderService.convertCartItemsToOrderItems(
-        cart.items.map(item => ({
+        cart.items.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
         }))
@@ -113,10 +107,10 @@ const CheckoutPage: React.FC = () => {
       const orderData = {
         items: orderItems,
         paymentMethod: formData.paymentMethod,
-        totalAmount: cart.total + (hasPhysicalProducts ? 30000 : 0),
+        totalAmount: cart.total,
         notes: formData.notes || "",
         phone: formData.phone,
-        address: formData.address,      
+        address: formData.address,
       };
 
       // Create order
@@ -124,26 +118,32 @@ const CheckoutPage: React.FC = () => {
 
       if (response.success) {
         if (formData.paymentMethod === "cod") {
-          success("Đặt hàng thành công! Bạn sẽ thanh toán khi nhận được sản phẩm.");
+          success(
+            "Đặt hàng thành công! Bạn sẽ thanh toán khi nhận được sản phẩm."
+          );
           clearCart();
           // Redirect to success page with order data
-          navigate("/order-success", { 
-            state: { 
+          navigate("/order-success", {
+            state: {
               order: response.data,
-              paymentMethod: "cod"
-            } 
+              paymentMethod: "cod",
+            },
           });
         } else if (formData.paymentMethod === "payos") {
           // PayOS payment
-          success("Đặt hàng thành công! Đang chuyển hướng đến PayOS để thanh toán...");
+          success(
+            "Đặt hàng thành công! Đang chuyển hướng đến PayOS để thanh toán..."
+          );
           clearCart();
-          
+
           // Check if payment URL exists
           if (response.data.payment?.checkoutUrl) {
             // Redirect to PayOS checkout URL
             window.location.href = response.data.payment.checkoutUrl;
           } else {
-            showError("Không tìm thấy URL thanh toán. Vui lòng liên hệ hỗ trợ.");
+            showError(
+              "Không tìm thấy URL thanh toán. Vui lòng liên hệ hỗ trợ."
+            );
             navigate("/");
           }
         }
@@ -369,7 +369,7 @@ const CheckoutPage: React.FC = () => {
                     type="button"
                     onClick={() => {
                       navigate("/cart");
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
                     className="flex-1 bg-gray-100 text-gray-700 py-4 rounded-lg font-semibold hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2"
                   >
@@ -431,9 +431,7 @@ const CheckoutPage: React.FC = () => {
                       <h3 className="text-sm font-medium text-gray-900 truncate">
                         {item.name}
                       </h3>
-                      <p className="text-xs text-gray-500">
-                        Sản phẩm thể thao
-                      </p>
+                      <p className="text-xs text-gray-500">Sản phẩm thể thao</p>
                       <p className="text-sm font-semibold text-blue-600">
                         {formatPrice(item.price * item.quantity, "VND")}
                       </p>
@@ -460,7 +458,7 @@ const CheckoutPage: React.FC = () => {
                   <span className="text-gray-600">Shipping</span>
                   <span className="font-medium">
                     {hasPhysicalProducts ? (
-                      formatPrice(30000, "VND")
+                      formatPrice(0, "VND")
                     ) : (
                       <span className="text-green-600">Free</span>
                     )}
@@ -473,20 +471,17 @@ const CheckoutPage: React.FC = () => {
                       Total
                     </span>
                     <span className="text-xl font-bold text-blue-600">
-                      {formatPrice(
-                        cart.total + (hasPhysicalProducts ? 30000 : 0),
-                        "VND"
-                      )}
+                      {formatPrice(cart.total, "VND")}
                     </span>
                   </div>
-                </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
 export default CheckoutPage;
