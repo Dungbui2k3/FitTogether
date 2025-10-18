@@ -23,13 +23,60 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+FitTogether Backend - A NestJS application for fitness and sports facility booking system with email OTP verification.
+
+## Features
+
+- 🔐 **Authentication & Authorization**: JWT-based authentication with role-based access control
+- 📧 **Email OTP Verification**: Secure email verification with OTP (One-Time Password)
+- 🏟️ **Field Booking System**: Book sports fields and facilities
+- 🛒 **E-commerce**: Product management and ordering system
+- 💳 **Payment Integration**: PayOS payment gateway integration
+- 📱 **RESTful API**: Well-structured API with Swagger documentation
+- 🗄️ **MongoDB Database**: NoSQL database with Mongoose ODM
+- ☁️ **Cloudinary Integration**: Image upload and management
 
 ## Project setup
 
 ```bash
 $ npm install
 ```
+
+## Environment Configuration
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+# Application
+PORT=3000
+
+# Database
+MONGODB_URI=mongodb://localhost:27017/fittogether
+
+# JWT
+JWT_SECRET=your-super-secret-jwt-key-here
+JWT_EXPIRES_IN=24h
+
+# Email Configuration (Required for OTP)
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USER=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+MAIL_FROM=noreply@fittogether.com
+```
+
+**Important:** For Gmail, you need to use an App Password. See [EMAIL_SETUP.md](./EMAIL_SETUP.md) for detailed instructions.
+
+## Email OTP Feature
+
+The application includes email verification with OTP for new user registrations:
+
+- Users receive a 6-digit OTP via email after registration
+- OTP is valid for 10 minutes
+- Users must verify their email before accessing the system
+- Welcome email is sent after successful verification
+
+For detailed email configuration, see [EMAIL_SETUP.md](./EMAIL_SETUP.md).
 
 ## Compile and run the project
 

@@ -3,6 +3,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nes
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { ActiveUserGuard } from '../../guards/active-user.guard';
 import { Public } from '../../decorators/public.decorator';
@@ -64,6 +66,22 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout user' })
   logout() {
     return ResponseUtil.success(null, 'Logout successful');
+  }
+
+  @Public()
+  @Post('verify-otp')
+  @ApiOperation({ summary: 'Verify OTP for email verification' })
+  @ApiBody({ type: VerifyOtpDto })
+  async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
+    return this.authService.verifyOtp(verifyOtpDto);
+  }
+
+  @Public()
+  @Post('resend-otp')
+  @ApiOperation({ summary: 'Resend OTP to email' })
+  @ApiBody({ type: ResendOtpDto })
+  async resendOtp(@Body() resendOtpDto: ResendOtpDto) {
+    return this.authService.resendOtp(resendOtpDto);
   }
 
 }

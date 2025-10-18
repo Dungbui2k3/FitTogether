@@ -44,6 +44,30 @@ export class User {
   @Prop({ default: true })
   isActive: boolean;
 
+  @ApiProperty({
+    description: 'Whether the user email is verified',
+    example: false,
+    default: false,
+  })
+  @Prop({ default: false })
+  isEmailVerified: boolean;
+
+  @ApiProperty({
+    description: 'OTP code for email verification',
+    example: '123456',
+    required: false,
+  })
+  @Prop()
+  otp?: string;
+
+  @ApiProperty({
+    description: 'OTP expiry time',
+    example: new Date(),
+    required: false,
+  })
+  @Prop()
+  otpExpiry?: Date;
+
   async validatePassword(password: string): Promise<boolean> {
     return bcrypt.compare(password, this.password);
   }
@@ -54,13 +78,15 @@ export const UserSchema = SchemaFactory.createForClass(User);
 // Hash password before saving
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  
+
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
 // Add instance method
-UserSchema.methods.validatePassword = async function (password: string): Promise<boolean> {
+UserSchema.methods.validatePassword = async function (
+  password: string,
+): Promise<boolean> {
   return bcrypt.compare(password, this.password);
 };
