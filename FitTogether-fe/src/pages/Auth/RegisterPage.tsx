@@ -88,8 +88,10 @@ const RegisterPage: React.FC = () => {
       if (!result.success) {
         showError(result.error || "Đăng ký thất bại. Vui lòng thử lại.");
       } else {
-        // Navigate to home with success state
-        navigate("/login", { replace: true, state: { registerSuccess: true } });
+        // Navigate to OTP verification page
+        navigate("/verify-otp", { 
+          state: { email: formData.email } 
+        });
       }
     } catch (err) {
       console.error("Registration error:", err);

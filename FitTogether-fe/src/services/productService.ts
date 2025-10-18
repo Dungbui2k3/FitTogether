@@ -14,8 +14,8 @@ class ProductService {
       if (params.limit) queryParams.append('limit', params.limit.toString());
       if (params.search) queryParams.append('search', params.search);
       if (params.category) queryParams.append('category', params.category);
-      if (params.priceMin !== undefined) queryParams.append('priceMin', params.priceMin.toString());
-      if (params.priceMax !== undefined) queryParams.append('priceMax', params.priceMax.toString());
+      if (params.minPrice !== undefined) queryParams.append('minPrice', params.minPrice.toString());
+      if (params.maxPrice !== undefined) queryParams.append('maxPrice', params.maxPrice.toString());
       if (params.sortBy) queryParams.append('sortBy', params.sortBy);
       if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
       if (params.featured !== undefined) queryParams.append('featured', params.featured.toString());

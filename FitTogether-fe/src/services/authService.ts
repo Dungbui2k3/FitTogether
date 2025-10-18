@@ -289,6 +289,62 @@ class AuthService {
   }
 
   /**
+   * Verify OTP
+   */
+  async verifyOtp(email: string, otp: string): Promise<ApiResponse<LoginApiResponse['data']>> {
+    try {
+      const response = await authInstance.post<LoginApiResponse>('/verify-otp', { email, otp });
+      
+      if (response.data?.data?.access_token) {
+        useAuthStore.getState().setAccessToken(response.data.data.access_token);
+      }
+
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message || 'Email verified successfully',
+        status: response.status,
+      };
+    } catch (error: any) {
+      console.error('Verify OTP error:', error);
+      
+      const message = error.response?.data?.message || error.message || 'OTP verification failed';
+      return {
+        success: false,
+        data: null as any,
+        error: message,
+        status: error.response?.status || 500,
+      };
+    }
+  }
+
+  /**
+   * Resend OTP
+   */
+  async resendOtp(email: string): Promise<ApiResponse<{ email: string }>> {
+    try {
+      const response = await authInstance.post<{ data: { email: string }; message: string }>('/resend-otp', { email });
+      
+      return {
+        success: true,
+        data: response.data.data,
+        message: response.data.message || 'OTP has been resent to your email',
+        status: response.status,
+      };
+    } catch (error: any) {
+      console.error('Resend OTP error:', error);
+      
+      const message = error.response?.data?.message || error.message || 'Failed to resend OTP';
+      return {
+        success: false,
+        data: null as any,
+        error: message,
+        status: error.response?.status || 500,
+      };
+    }
+  }
+
+  /**
    * Check login status
    */
   isAuthenticated(): boolean {

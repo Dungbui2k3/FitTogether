@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
 import { useToast } from "../../hooks";
 import ToastContainer from "../../components/ToastContainer";
@@ -17,7 +17,17 @@ const LoginPage: React.FC = () => {
   const { login } = useAuth();
 
   const navigate = useNavigate();
-  const { error: showError, toasts, removeToast } = useToast();
+  const location = useLocation();
+  const { error: showError, success: showSuccess, toasts, removeToast } = useToast();
+
+  // Show registration success message
+  useEffect(() => {
+    if (location.state?.registrationSuccess) {
+      showSuccess(location.state?.message || 'Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.');
+      // Clear the state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, showSuccess]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

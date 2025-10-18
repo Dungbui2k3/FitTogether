@@ -20,8 +20,8 @@ export interface Product {
 
 export interface ProductFilter {
   category?: string;
-  priceMin?: number;
-  priceMax?: number;
+  minPrice?: number;
+  maxPrice?: number;
   rating?: number;
   inStock?: boolean;
   featured?: boolean;
@@ -90,8 +90,8 @@ export interface ProductListParams {
   limit?: number;
   search?: string;
   category?: string;
-  priceMin?: number;
-  priceMax?: number;
+  minPrice?: number;
+  maxPrice?: number;
   categoryId?: string;
   sortBy?: 'name' | 'price' | 'rating' | 'createdAt';
   sortOrder?: 'asc' | 'desc';

@@ -5,7 +5,7 @@ import {
   ShoppingCart,
   RotateCw,
   Package,    
-  Heart,
+  // Heart,
   Share2,
   ChevronLeft,
   ChevronRight,
@@ -16,6 +16,7 @@ import {
   Plus,
   Minus,
   Eye,
+  CreditCard,
 } from "lucide-react";
 import ProductImage from "../components/ProductImage";
 import { productService } from "../services/productService";
@@ -38,7 +39,7 @@ const ProductDetailPage: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [autoRotate, setAutoRotate] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  // const [isWishlisted, setIsWishlisted] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [activeTab, setActiveTab] = useState<"shipping" | "support">("shipping");
 
@@ -118,6 +119,32 @@ const ProductDetailPage: React.FC = () => {
       `Đã thêm ${quantity} ${product.name} vào giỏ hàng!`
     );
   }, [product, quantity, addToCart, success, showError]);
+
+  const handleBuyNow = useCallback(() => {
+    if (!product) return;
+
+    if (!product.price) {
+      showError("Giá sản phẩm không có sẵn");
+      return;
+    }
+
+    if (quantity > product.quantity) {
+      showError(`Số lượng không thể vượt quá ${product.quantity} sản phẩm có sẵn`);
+      return;
+    }
+
+    // Add to cart first
+    addToCart({
+      productId: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: quantity,
+      image: product.urlImgs?.[0],
+    });
+
+    // Navigate to checkout immediately
+    navigate('/checkout');
+  }, [product, quantity, addToCart, showError, navigate]);
 
   const handleShare = useCallback(async () => {
     if (navigator.share) {
@@ -211,7 +238,7 @@ const ProductDetailPage: React.FC = () => {
           </button>
             
             <div className="flex items-center space-x-3">
-              <button
+              {/* <button
                 onClick={() => setIsWishlisted(!isWishlisted)}
                 className={`p-2 rounded-lg transition-colors ${
                   isWishlisted 
@@ -221,7 +248,7 @@ const ProductDetailPage: React.FC = () => {
                 title="Thêm vào danh sách yêu thích"
               >
                 <Heart className={`h-5 w-5 ${isWishlisted ? "fill-current" : ""}`} />
-              </button>
+              </button> */}
               
               <button
                 onClick={handleShare}
@@ -479,27 +506,46 @@ const ProductDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Add to Cart Button */}
+              {/* Action Buttons */}
+              <div className="flex space-x-3">
                 <button
                   onClick={handleAddToCart}
-                disabled={isInCart(product.id) || product.isDeleted || product.quantity <= 0}
-                className={`w-full py-4 rounded-xl font-semibold transition-all flex items-center justify-center space-x-2 text-lg ${
-                  isInCart(product.id)
-                  ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                    : (product.isDeleted || product.quantity <= 0)
-                    ? "bg-red-400 text-red-200 cursor-not-allowed"
-                    : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-lg transform hover:-translate-y-0.5"
-                }`}
-              >
-                <ShoppingCart className="h-5 w-5" />
-                <span>
-                  {(product.isDeleted || product.quantity <= 0)
-                    ? "Hết hàng"
-                    : isInCart(product.id)
-                    ? "Đã có trong giỏ"
-                    : "Thêm vào giỏ hàng"}
-                </span>
+                  disabled={isInCart(product.id) || product.isDeleted || product.quantity <= 0}
+                  className={`flex-1 py-4 rounded-xl font-semibold transition-all flex items-center justify-center space-x-2 text-lg ${
+                    isInCart(product.id)
+                    ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                      : (product.isDeleted || product.quantity <= 0)
+                      ? "bg-red-400 text-red-200 cursor-not-allowed"
+                      : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-lg transform hover:-translate-y-0.5"
+                  }`}
+                >
+                  <ShoppingCart className="h-5 w-5" />
+                  <span>
+                    {(product.isDeleted || product.quantity <= 0)
+                      ? "Hết hàng"
+                      : isInCart(product.id)
+                      ? "Đã có trong giỏ"
+                      : "Thêm vào giỏ hàng"}
+                  </span>
                 </button>
+
+                <button
+                  onClick={handleBuyNow}
+                  disabled={product.isDeleted || product.quantity <= 0}
+                  className={`flex-1 py-4 rounded-xl font-semibold transition-all flex items-center justify-center space-x-2 text-lg ${
+                    (product.isDeleted || product.quantity <= 0)
+                      ? "bg-red-400 text-red-200 cursor-not-allowed"
+                      : "bg-gradient-to-r from-green-600 to-emerald-600 text-white hover:from-green-700 hover:to-emerald-700 hover:shadow-lg transform hover:-translate-y-0.5"
+                  }`}
+                >
+                  <CreditCard className="h-5 w-5" />
+                  <span>
+                    {(product.isDeleted || product.quantity <= 0)
+                      ? "Hết hàng"
+                      : "Mua hàng luôn"}
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter } from 'lucide-react';
+import { Search } from 'lucide-react';
 import ProductCard from '../components/Product/ProductCard';
 import { productService } from '../services/productService';
 import categoryService from '../services/categoryService';
@@ -17,6 +17,10 @@ const ProductsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearchTerm, setActiveSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [maxPrice] = useState(5000000); // Max price for slider
+  const [minSliderValue, setMinSliderValue] = useState(0);
+  const [maxSliderValue, setMaxSliderValue] = useState(5000000);
+  const [activePriceRange, setActivePriceRange] = useState({ min: '', max: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [, setTotalProducts] = useState(0);
@@ -24,7 +28,7 @@ const ProductsPage: React.FC = () => {
 
   useEffect(() => {
     loadProducts();
-  }, [currentPage, activeSearchTerm, selectedCategory]);
+  }, [currentPage, activeSearchTerm, selectedCategory, activePriceRange]);
 
   useEffect(() => {
     loadCategories();
@@ -55,6 +59,8 @@ const ProductsPage: React.FC = () => {
         limit: limit,
         search: activeSearchTerm || undefined,
         categoryId: selectedCategory || undefined,
+        minPrice: activePriceRange.min ? Number(activePriceRange.min) : undefined,
+        maxPrice: activePriceRange.max ? Number(activePriceRange.max) : undefined,
       });
 
       if (response.success && response.data) {
@@ -88,10 +94,33 @@ const ProductsPage: React.FC = () => {
     setCurrentPage(1);
   };
 
+  const handleMinSliderChange = (value: number) => {
+    if (value < maxSliderValue) {
+      setMinSliderValue(value);
+    }
+  };
+
+  const handleMaxSliderChange = (value: number) => {
+    if (value > minSliderValue) {
+      setMaxSliderValue(value);
+    }
+  };
+
+  const handleApplyPriceFilter = () => {
+    setActivePriceRange({
+      min: minSliderValue.toString(),
+      max: maxSliderValue.toString()
+    });
+    setCurrentPage(1);
+  };
+
   const handleClearFilters = () => {
     setSearchTerm('');
     setActiveSearchTerm('');
     setSelectedCategory('');
+    setMinSliderValue(0);
+    setMaxSliderValue(maxPrice);
+    setActivePriceRange({ min: '', max: '' });
     setCurrentPage(1);
   };
 
@@ -104,6 +133,10 @@ const ProductsPage: React.FC = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('vi-VN').format(amount);
   };
 
   if (loading && currentPage === 1) {
@@ -129,67 +162,140 @@ const ProductsPage: React.FC = () => {
             </h1>
           </div>
           
-          {/* Search and Filters */}
-          <div className="flex flex-col gap-4 mb-6">
-            {/* Search Bar */}
-            <div className="flex items-center space-x-4 w-full">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm sản phẩm..."
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  onKeyPress={handleKeyPress}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <button
-                onClick={handleSearch}
-                className="bg-blue-600 text-white px-6 py-2 rounded-r-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 whitespace-nowrap"
-              >
-                <Search className="h-4 w-4" />
-                <span className="hidden md:inline">Tìm kiếm</span>
-              </button>
+          {/* Search Bar */}
+          <div className="flex items-center space-x-4 w-full mb-6">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                onKeyPress={handleKeyPress}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
+            <button
+              onClick={handleSearch}
+              className="bg-blue-600 text-white px-6 py-2 rounded-r-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 whitespace-nowrap"
+            >
+              <Search className="h-4 w-4" />
+              <span className="hidden md:inline">Tìm kiếm</span>
+            </button>
+          </div>
+        </div>
 
-            {/* Category Filter */}
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-              <div className="flex items-center space-x-2">
-                <Filter className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">Danh mục:</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => handleCategoryChange('')}
-                  className={`px-4 py-2 text-sm rounded-full transition-colors ${
-                    selectedCategory === ''
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Tất cả
-                </button>
-                {categories.map((category) => (
+        {/* Main Content with Sidebar */}
+        <div className="flex gap-8">
+          {/* Sidebar Filters */}
+          <div className="w-64 flex-shrink-0">
+            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
+              {/* Category Filter */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Danh mục</h3>
+                <div className="space-y-2">
                   <button
-                    key={category._id}
-                    onClick={() => handleCategoryChange(category._id)}
-                    className={`px-4 py-2 text-sm rounded-full transition-colors ${
-                      selectedCategory === category._id
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    onClick={() => handleCategoryChange('')}
+                    className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
+                      selectedCategory === ''
+                        ? 'bg-blue-100 text-blue-700 font-medium'
+                        : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    {category.name}
+                    Tất cả
                   </button>
-                ))}
+                  {categories.map((category) => (
+                    <button
+                      key={category._id}
+                      onClick={() => handleCategoryChange(category._id)}
+                      className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
+                        selectedCategory === category._id
+                          ? 'bg-blue-100 text-blue-700 font-medium'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {category.name}
+                    </button>
+                  ))}
+                </div>
               </div>
-              
-              {/* Clear Filters Button */}
-              {(activeSearchTerm || selectedCategory) && (
+
+              {/* Price Filter */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Mức giá</h3>
+                  <button className="text-gray-400 hover:text-gray-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </button>
+                </div>
+                
+                {/* Dual Range Slider */}
+                <div className="mb-4">
+                  <div className="relative">
+                    {/* Track */}
+                    <div className="h-2 bg-gray-200 rounded-lg"></div>
+                    
+                    {/* Active Range */}
+                    <div 
+                      className="absolute top-0 h-2 bg-teal-500 rounded-lg"
+                      style={{
+                        left: `${(minSliderValue / maxPrice) * 100}%`,
+                        width: `${((maxSliderValue - minSliderValue) / maxPrice) * 100}%`
+                      }}
+                    ></div>
+                    
+                    {/* Min Thumb */}
+                    <input
+                      type="range"
+                      min="0"
+                      max={maxPrice}
+                      step="100000"
+                      value={minSliderValue}
+                      onChange={(e) => handleMinSliderChange(Number(e.target.value))}
+                      className="absolute top-0 w-full h-2 bg-transparent appearance-none cursor-pointer slider-thumb-min"
+                      style={{ zIndex: minSliderValue > maxSliderValue - 100000 ? 5 : 3 }}
+                    />
+                    
+                    {/* Max Thumb */}
+                    <input
+                      type="range"
+                      min="0"
+                      max={maxPrice}
+                      step="100000"
+                      value={maxSliderValue}
+                      onChange={(e) => handleMaxSliderChange(Number(e.target.value))}
+                      className="absolute top-0 w-full h-2 bg-transparent appearance-none cursor-pointer slider-thumb-max"
+                      style={{ zIndex: maxSliderValue < minSliderValue + 100000 ? 5 : 3 }}
+                    />
+                  </div>
+                </div>
+                
+                {/* Price Display */}
+                <div className="flex justify-between items-center mb-4">
+                  <div className="text-sm font-bold text-gray-900">
+                    {formatCurrency(minSliderValue)} ₫
+                  </div>
+                  <div className="text-sm font-bold text-gray-900">
+                    {formatCurrency(maxSliderValue)} ₫
+                  </div>
+                </div>
+                
+                {/* Apply Button */}
+                <button
+                  onClick={handleApplyPriceFilter}
+                  className="w-full px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Áp dụng
+                </button>
+              </div>
+
+              {/* Clear Filters */}
+              {(activeSearchTerm || selectedCategory || activePriceRange.min || activePriceRange.max) && (
                 <button
                   onClick={handleClearFilters}
-                  className="text-sm text-gray-500 hover:text-gray-700 underline"
+                  className="w-full px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Xóa tất cả bộ lọc
                 </button>
@@ -197,7 +303,8 @@ const ProductsPage: React.FC = () => {
             </div>
           </div>
 
-        </div>
+          {/* Products Content */}
+          <div className="flex-1">
 
         {/* Products Grid/List */}
         {error ? (
@@ -263,12 +370,12 @@ const ProductsPage: React.FC = () => {
         ) : (
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg">
-              {activeSearchTerm || selectedCategory
+              {activeSearchTerm || selectedCategory || activePriceRange.min || activePriceRange.max
                 ? 'Không tìm thấy sản phẩm nào phù hợp với bộ lọc.'
                 : 'Hiện tại chưa có sản phẩm nào.'
               }
             </p>
-            {(activeSearchTerm || selectedCategory) && (
+            {(activeSearchTerm || selectedCategory || activePriceRange.min || activePriceRange.max) && (
               <button
                 onClick={handleClearFilters}
                 className="mt-4 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
@@ -279,12 +386,14 @@ const ProductsPage: React.FC = () => {
           </div>
         )}
 
-        {/* Loading indicator for pagination */}
-        {loading && currentPage > 1 && (
-          <div className="flex justify-center mt-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            {/* Loading indicator for pagination */}
+            {loading && currentPage > 1 && (
+              <div className="flex justify-center mt-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

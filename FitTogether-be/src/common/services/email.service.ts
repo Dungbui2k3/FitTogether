@@ -1,26 +1,78 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
+  private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter;
 
   constructor(private configService: ConfigService) {
+    this.initializeTransporter();
+  }
+
+  private initializeTransporter() {
+    const mailHost = this.configService.get<string>('MAIL_HOST');
+    const mailPort = this.configService.get<number>('MAIL_PORT');
+    const mailUser = this.configService.get<string>('MAIL_USER');
+    const mailPassword = this.configService.get<string>('MAIL_PASSWORD');
+
+    // Check if email configuration is available
+    if (!mailHost || !mailPort || !mailUser || !mailPassword) {
+      this.logger.warn('Email configuration is incomplete. Email functionality will be disabled.');
+      return;
+    }
+
     this.transporter = nodemailer.createTransport({
-      host: this.configService.get<string>('MAIL_HOST'),
-      port: this.configService.get<number>('MAIL_PORT'),
-      secure: false, // true for 465, false for other ports
+      host: mailHost,
+      port: mailPort,
+      secure: mailPort === 465, // true for 465, false for other ports
       auth: {
-        user: this.configService.get<string>('MAIL_USER'),
-        pass: this.configService.get<string>('MAIL_PASSWORD'),
+        user: mailUser,
+        pass: mailPassword,
       },
+      // Add timeout and connection options
+      connectionTimeout: 60000, // 60 seconds
+      greetingTimeout: 30000, // 30 seconds
+      socketTimeout: 60000, // 60 seconds
+      // Add TLS options for better compatibility
+      tls: {
+        rejectUnauthorized: false,
+      },
+      // Add pool options for better connection management
+      pool: true,
+      maxConnections: 5,
+      maxMessages: 100,
+      rateDelta: 20000, // 20 seconds
+      rateLimit: 5, // max 5 emails per rateDelta
     });
+
+    // Verify connection configuration
+    this.verifyConnection();
+  }
+
+  private async verifyConnection() {
+    if (!this.transporter) {
+      this.logger.warn('Email transporter not initialized. Skipping connection verification.');
+      return;
+    }
+
+    try {
+      await this.transporter.verify();
+      this.logger.log('Email transporter connection verified successfully');
+    } catch (error) {
+      this.logger.error('Email transporter connection verification failed:', error.message);
+    }
   }
 
   async sendOTPEmail(email: string, otp: string, name: string): Promise<void> {
+    if (!this.transporter) {
+      this.logger.warn('Email transporter not available. Skipping OTP email send.');
+      return;
+    }
+
     const mailOptions = {
-      from: `"FitTogether" <${this.configService.get<string>('MAIL_FROM')}>`,
+      from: `"FitTogether" <${this.configService.get<string>('MAIL_FROM') || 'noreply@fittogether.com'}>`,
       to: email,
       subject: 'Xác thực tài khoản FitTogether',
       html: `
@@ -107,16 +159,21 @@ export class EmailService {
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log(`OTP email sent to ${email}`);
+      this.logger.log(`OTP email sent successfully to ${email}`);
     } catch (error) {
-      console.error('Error sending email:', error);
-      throw new Error('Failed to send OTP email');
+      this.logger.error(`Failed to send OTP email to ${email}:`, error.message);
+      throw new Error(`Failed to send OTP email: ${error.message}`);
     }
   }
 
   async sendWelcomeEmail(email: string, name: string): Promise<void> {
+    if (!this.transporter) {
+      this.logger.warn('Email transporter not available. Skipping welcome email send.');
+      return;
+    }
+
     const mailOptions = {
-      from: `"FitTogether" <${this.configService.get<string>('MAIL_FROM')}>`,
+      from: `"FitTogether" <${this.configService.get<string>('MAIL_FROM') || 'noreply@fittogether.com'}>`,
       to: email,
       subject: 'Chào mừng bạn đến với FitTogether!',
       html: `
@@ -185,9 +242,9 @@ export class EmailService {
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log(`Welcome email sent to ${email}`);
+      this.logger.log(`Welcome email sent successfully to ${email}`);
     } catch (error) {
-      console.error('Error sending welcome email:', error);
+      this.logger.error(`Failed to send welcome email to ${email}:`, error.message);
     }
   }
 }

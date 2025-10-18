@@ -16,6 +16,7 @@ import PaymentSuccessPage from "./pages/Payment/PaymentSuccessPage";
 import PaymentCancelPage from "./pages/Payment/PaymentCancelPage";
 import LoginPage from "./pages/Auth/LoginPage";
 import RegisterPage from "./pages/Auth/RegisterPage";
+import VerifyOtpPage from "./pages/Auth/VerifyOtpPage";
 import ProfilePage from "./pages/ProfilePage";
 import NotFoundPage from "./pages/NotFoundPage";
 import UserManagement from "./pages/Admin/UserManagement";
@@ -140,6 +141,7 @@ function App() {
 
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-otp" element={<VerifyOtpPage />} />
 
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
