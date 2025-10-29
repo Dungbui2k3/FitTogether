@@ -23,7 +23,7 @@ class AuthService {
       const response = await authInstance.post<LoginApiResponse>('/login', credentials);
 
       if (response.data?.data?.access_token) {
-        console.log('Setting access token in store');
+        console.log('Setting access token in store:', response.data.data.user);
         useAuthStore.getState().setAccessToken(response.data.data.access_token);
 
         // if (response.data.data.refresh_token) {

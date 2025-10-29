@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { Gift, X } from "lucide-react";
 import { subFieldService } from "../../services/subFieldsService";
 import bookingService from "../../services/bookingService";
 import fieldService from "../../services/fieldService";
+import { useAuth } from "../../hooks";
 
 interface BookingFieldProps {
   open: boolean;
@@ -18,6 +19,8 @@ const BookingField: React.FC<BookingFieldProps> = ({
   if (!open) return null;
 
   const fieldId = field?.id;
+
+  const { user } = useAuth();
 
   const [selectedSlots, setSelectedSlots] = useState<
     { time: string; field: string; date: string; pricePerHour: number }[]
@@ -166,7 +169,9 @@ const BookingField: React.FC<BookingFieldProps> = ({
     // Validate phone number format (simple validation for Vietnamese phone numbers)
     const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
     if (!phoneRegex.test(phoneNumber.trim())) {
-      alert("Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại 10 chữ số bắt đầu bằng 03, 05, 07, 08 hoặc 09.");
+      alert(
+        "Số điện thoại không hợp lệ. Vui lòng nhập số điện thoại 10 chữ số bắt đầu bằng 03, 05, 07, 08 hoặc 09."
+      );
       return;
     }
 
@@ -460,7 +465,10 @@ const BookingField: React.FC<BookingFieldProps> = ({
               Thông Tin Liên Hệ
             </h3>
             <div className="space-y-2">
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Số điện thoại <span className="text-red-500">*</span>
               </label>
               <input
@@ -524,13 +532,27 @@ const BookingField: React.FC<BookingFieldProps> = ({
               </div>
             )}
           </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-3 shadow-sm">
+            <div className="bg-blue-100 p-3 rounded-full">
+              <Gift className="text-blue-600 w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Mỗi lần đặt sân bạn sẽ nhận được 1{" "}
+                <span className="font-semibold text-green-600">
+                  voucher 10.000&nbsp;VND
+                </span>
+                .
+              </h3>
+            </div>
+          </div>
         </div>
 
         {/* Footer Actions */}
         <div className="bg-white border-t border-gray-200 p-4">
           <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-600">
-            </div>
+            <div className="text-sm text-gray-600"></div>
             <div className="flex space-x-3">
               <button
                 onClick={onClose}
@@ -540,9 +562,15 @@ const BookingField: React.FC<BookingFieldProps> = ({
               </button>
               <button
                 onClick={booking}
-                disabled={selectedSlots.length === 0 || subFields.length === 0 || !phoneNumber.trim()}
+                disabled={
+                  selectedSlots.length === 0 ||
+                  subFields.length === 0 ||
+                  !phoneNumber.trim()
+                }
                 className={`px-6 py-2 rounded font-medium ${
-                  selectedSlots.length > 0 && subFields.length > 0 && phoneNumber.trim()
+                  selectedSlots.length > 0 &&
+                  subFields.length > 0 &&
+                  phoneNumber.trim()
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 }`}

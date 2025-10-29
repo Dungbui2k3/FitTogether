@@ -318,6 +318,7 @@ export const useAuth = (): UseAuthReturn => {
 
     try {
       const result = await getProfile();
+        console.log("checkAuth -> profile:", result);
       if (!result.success) {
         // If profile fetch fails, user might be invalid
         await logout();

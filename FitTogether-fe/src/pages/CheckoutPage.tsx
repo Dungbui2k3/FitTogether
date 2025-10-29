@@ -8,7 +8,16 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, CreditCard, Smartphone, MapPin, User } from "lucide-react";
+import {
+  ArrowLeft,
+  CreditCard,
+  Smartphone,
+  MapPin,
+  User,
+  Plus,
+  Minus,
+  Ticket,
+} from "lucide-react";
 import { useCart } from "../contexts/CartContext";
 import { useToast } from "../hooks";
 import { useAuth } from "../hooks";
@@ -29,6 +38,10 @@ const CheckoutPage: React.FC = () => {
   const { cart, clearCart } = useCart();
   const { success, error: showError } = useToast();
   const { user } = useAuth();
+  const [profileData, setProfileData] = useState({
+    points: 0,
+    pointsUsed: 0,
+  });
 
   const [formData, setFormData] = useState<CheckoutFormData>({
     fullName: user?.name || "",
@@ -40,6 +53,16 @@ const CheckoutPage: React.FC = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      console.log("Profile:", user);
+      setProfileData({
+        points: user.points || 0,
+        pointsUsed: 0,
+      });
+    }
+  }, [user]);
 
   // Update form data when user data changes
   useEffect(() => {
@@ -75,6 +98,13 @@ const CheckoutPage: React.FC = () => {
     }));
   };
 
+  const handleUpdateQuantityVoucher = (newValue: number) => {
+    if (newValue < 0 || newValue > profileData.points) return;
+    setProfileData((prev) => ({ ...prev, pointsUsed: newValue }));
+  };
+
+  const totalAfterVoucher = Math.max(cart.total - profileData.pointsUsed * 10000, 0);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -107,7 +137,7 @@ const CheckoutPage: React.FC = () => {
       const orderData = {
         items: orderItems,
         paymentMethod: formData.paymentMethod,
-        totalAmount: cart.total,
+        totalAmount: totalAfterVoucher,
         notes: formData.notes || "",
         phone: formData.phone,
         address: formData.address,
@@ -115,6 +145,7 @@ const CheckoutPage: React.FC = () => {
 
       // Create order
       const response = await orderService.createOrder(orderData);
+      console.log("Create order response:", response);
 
       if (response.success) {
         if (formData.paymentMethod === "cod") {
@@ -264,10 +295,14 @@ const CheckoutPage: React.FC = () => {
 
               {/* Order Notes */}
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                <h2 className="text-xl font-bold text-gray-900 mb-1 flex items-center">
                   <MapPin className="h-5 w-5 mr-2" />
                   Thông tin bổ sung
                 </h2>
+                <label className="block text-sm font-medium text-gray-700 mb-0">
+                  (Hỗ trợ in chữ lên vợt (giới hạn 20 ký tự) + đổi màu cuối cán
+                  vợt miễn phí)
+                </label>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -447,15 +482,61 @@ const CheckoutPage: React.FC = () => {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">
-                    Items ({cart.itemCount})
+                    Tạm tính ({cart.itemCount})
                   </span>
                   <span className="font-medium">
                     {formatPrice(cart.total, "VND")}
                   </span>
                 </div>
 
+                <div className="mt-4 mb-4 border-t border-gray-100 pt-4">
+                  <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center space-x-2">
+                    <Ticket className="h-5 w-5 text-blue-600" />
+                    <span>Voucher</span>
+                  </h3>
+
+                  <p className="text-sm text-gray-500 mb-2">
+                    Bạn có{" "}
+                    <span className="font-semibold text-blue-600">
+                      {profileData.points}
+                    </span>{" "}
+                    voucher. Mỗi voucher giảm{" "}
+                    <span className="font-semibold">10.000&nbsp;VND</span>.
+                  </p>
+
+                  <div className="flex items-center justify-center space-x-3">
+                    <button
+                      onClick={() =>
+                        handleUpdateQuantityVoucher(profileData.pointsUsed - 1)
+                      }
+                      disabled={profileData.pointsUsed <= 0}
+                      className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition disabled:opacity-50"
+                    >
+                      <Minus className="h-4 w-4 text-gray-700" />
+                    </button>
+
+                    <span className="w-12 text-center text-lg font-semibold text-gray-800">
+                      {profileData.pointsUsed}
+                    </span>
+
+                    <button
+                      onClick={() =>
+                        handleUpdateQuantityVoucher(profileData.pointsUsed + 1)
+                      }
+                      disabled={profileData.pointsUsed >= profileData.points}
+                      className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition disabled:opacity-50"
+                    >
+                      <Plus className="h-4 w-4 text-gray-700" />
+                    </button>
+                  </div>
+
+                  <div className="text-right mt-2 text-sm text-green-600 font-medium">
+                    Giảm: {formatPrice(profileData.pointsUsed * 10000, "VND")}
+                  </div>
+                </div>
+
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Shipping</span>
+                  <span className="text-gray-600">Phí vận chuyển</span>
                   <span className="font-medium">
                     {hasPhysicalProducts ? (
                       formatPrice(0, "VND")
@@ -468,10 +549,10 @@ const CheckoutPage: React.FC = () => {
                 <div className="border-t border-gray-200 pt-3">
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold text-gray-900">
-                      Total
+                      Tổng cộng
                     </span>
                     <span className="text-xl font-bold text-blue-600">
-                      {formatPrice(cart.total, "VND")}
+                      {formatPrice(totalAfterVoucher, "VND")}
                     </span>
                   </div>
                 </div>

@@ -13,6 +13,7 @@ export interface User {
   isVerified?: boolean;
   createdAt: string;
   updatedAt: string;
+  points: number;
 }
 
 export interface CreateUserRequest {
