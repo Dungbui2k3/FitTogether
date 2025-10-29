@@ -12,7 +12,7 @@ export class OrderItem {
     description: 'ID of the product',
     example: '507f1f77bcf86cd799439011',
   })
-  @Prop({ type: Types.ObjectId, ref: Product.name, required: true })
+  @Prop({ type: Types.ObjectId, ref: 'Product', required: true })
   productId: Types.ObjectId;
 
 

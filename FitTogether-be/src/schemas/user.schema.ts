@@ -29,6 +29,13 @@ export class User {
   password: string;
 
   @ApiProperty({
+    description: 'Reward points of the user',
+    example: 50,
+  })
+  @Prop({ type: Number, default: 0 })
+  points: number;   //Nó là voucher nhé
+
+  @ApiProperty({
     description: 'User role',
     example: 'user',
     default: 'user',

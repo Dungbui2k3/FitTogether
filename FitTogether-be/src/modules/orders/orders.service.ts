@@ -59,7 +59,7 @@ export class OrdersService {
       // Check if product has enough quantity for physical products
       if (item.type === 'physical' && product.quantity < quantity) {
         throw new BadRequestException(
-          `Not enough quantity for product ${product.name}. Available: ${product.quantity}, Requested: ${quantity}`
+          `Not enough quantity for product ${product.name}. Available: ${product.quantity}, Requested: ${quantity}`,
         );
       }
 
@@ -99,12 +99,17 @@ export class OrdersService {
         await this.productModel.findByIdAndUpdate(
           item.productId,
           { $inc: { quantity: -item.quantity } },
-          { new: true }
+          { new: true },
         );
       }
     }
 
-    return savedOrder;
+    await savedOrder.populate({
+      path: 'items.productId',
+      select: 'name urlImgs price',
+    });
+
+    return savedOrder as Orders;
   }
 
   async findAll(query: GetOrdersQueryDto = {}) {
@@ -245,14 +250,17 @@ export class OrdersService {
     }
 
     // Handle quantity restoration when order is cancelled
-    if (updateOrderDto.status === OrderStatus.CANCEL && order.status !== OrderStatus.CANCEL) {
+    if (
+      updateOrderDto.status === OrderStatus.CANCEL &&
+      order.status !== OrderStatus.CANCEL
+    ) {
       // Restore product quantities for physical products
       for (const item of order.items) {
-          await this.productModel.findByIdAndUpdate(
-            item.productId,
-            { $inc: { quantity: item.quantity } },
-            { new: true }
-          );
+        await this.productModel.findByIdAndUpdate(
+          item.productId,
+          { $inc: { quantity: item.quantity } },
+          { new: true },
+        );
       }
     }
 
@@ -301,9 +309,9 @@ export class OrdersService {
    * Check if products have enough quantity for the order
    */
   private async validateProductAvailability(
-    items: { productId: string; type: string; quantity: number }[]
+    items: { productId: string; type: string; quantity: number }[],
   ): Promise<void> {
-    const productIds = items.map(item => item.productId);
+    const productIds = items.map((item) => item.productId);
     const products = await this.productModel
       .find({
         _id: { $in: productIds },
@@ -312,14 +320,14 @@ export class OrdersService {
       .lean();
 
     for (const item of items) {
-      const product = products.find(p => p._id.toString() === item.productId);
+      const product = products.find((p) => p._id.toString() === item.productId);
       if (!product) {
         throw new BadRequestException(`Product ${item.productId} not found`);
       }
 
       if (item.type === 'physical' && product.quantity < item.quantity) {
         throw new BadRequestException(
-          `Not enough quantity for product ${product.name}. Available: ${product.quantity}, Requested: ${item.quantity}`
+          `Not enough quantity for product ${product.name}. Available: ${product.quantity}, Requested: ${item.quantity}`,
         );
       }
     }

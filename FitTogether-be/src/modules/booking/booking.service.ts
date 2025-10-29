@@ -10,6 +10,7 @@ import {
 import { CreateBookingDto } from './dto';
 import { BookingRepository } from './booking.repository';
 import { Booking, BookingDocument } from 'src/schemas/booking.schema';
+import { User, UserDocument } from 'src/schemas/user.schema';
 
 @Injectable()
 export class BookingService {
@@ -19,6 +20,8 @@ export class BookingService {
     private readonly subFieldModel: Model<SubFieldDocument>,
     @InjectModel(Booking.name)
     private readonly bookingModel: Model<BookingDocument>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
   ) {}
   async create(
     createBookingDto: CreateBookingDto,
@@ -64,6 +67,10 @@ export class BookingService {
 
       const savedBooking = await newBooking.save();
 
+      await this.userModel.findByIdAndUpdate(userId, {
+        $inc: { points: 1 },
+      });
+
       return {
         success: true,
         message: 'Booking created successfully',
@@ -91,7 +98,7 @@ export class BookingService {
     const bookings = await this.bookingModel
       .find({ subFieldId, day })
       .select('duration status userId phone -_id')
-      .populate('userId', 'name email -_id') 
+      .populate('userId', 'name email -_id')
       .lean();
 
     return bookings;
@@ -131,19 +138,19 @@ export class BookingService {
     }
 
     const bookings = await this.bookingModel
-    .find({ userId: new Types.ObjectId(userId) })
-    .populate('userId', 'name email -_id')
-    .populate({
-      path: 'subFieldId',
-      select: 'name type pricePerHour fieldId -_id', 
-      populate: {
-        path: 'fieldId',
-        select: 'name -_id',
-      },
-    })
-    .sort({ createdAt: -1 })
-    .lean() 
-    .exec();
+      .find({ userId: new Types.ObjectId(userId) })
+      .populate('userId', 'name email -_id')
+      .populate({
+        path: 'subFieldId',
+        select: 'name type pricePerHour fieldId -_id',
+        populate: {
+          path: 'fieldId',
+          select: 'name -_id',
+        },
+      })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
 
     return bookings;
   }
