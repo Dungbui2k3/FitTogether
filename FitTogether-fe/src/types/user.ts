@@ -31,6 +31,7 @@ export interface UpdateUserRequest {
   role?: UserRole;
   phone?: string;
   address?: string;
+  points?: number;
   status?: "active" | "inactive";
 }
 

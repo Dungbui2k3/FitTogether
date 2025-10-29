@@ -21,8 +21,9 @@ import {
 import { useCart } from "../contexts/CartContext";
 import { useToast } from "../hooks";
 import { useAuth } from "../hooks";
-import { orderService } from "../services";
+import { orderService, userService } from "../services";
 import { validateCheckoutForm, validateOrderItems } from "../utils/validation";
+import { UpdateProfileRequest } from "../types";
 
 interface CheckoutFormData {
   fullName: string;
@@ -103,7 +104,10 @@ const CheckoutPage: React.FC = () => {
     setProfileData((prev) => ({ ...prev, pointsUsed: newValue }));
   };
 
-  const totalAfterVoucher = Math.max(cart.total - profileData.pointsUsed * 10000, 0);
+  const totalAfterVoucher = Math.max(
+    cart.total - profileData.pointsUsed * 10000,
+    0
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,6 +152,17 @@ const CheckoutPage: React.FC = () => {
       console.log("Create order response:", response);
 
       if (response.success) {
+        const updates: UpdateProfileRequest = {
+          points: profileData.points - profileData.pointsUsed,
+        };
+
+        const result = await userService.updateUser(
+          user?.id?.toString() || "",
+          updates
+        );
+
+        console.log("Update user result:", result);
+
         if (formData.paymentMethod === "cod") {
           success(
             "Đặt hàng thành công! Bạn sẽ thanh toán khi nhận được sản phẩm."

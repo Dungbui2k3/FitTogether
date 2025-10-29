@@ -7,10 +7,9 @@ import {
   Trash2,
   CreditCard,
   Package,
-  Ticket,
 } from "lucide-react";
 import { useCart } from "../contexts/CartContext";
-import { useAuth, useToast } from "../hooks";
+import { useToast } from "../hooks";
 import { productService } from "../services/productService";
 import type { CartItem } from "../types/cart";
 import type { Product } from "../types/product";
@@ -18,58 +17,38 @@ import type { Product } from "../types/product";
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
   const { cart, updateQuantity, removeFromCart } = useCart();
-  const { user } = useAuth();
-  const [profileData, setProfileData] = useState({
-    points: 0,
-    pointsUsed: 0,
-  });
-
   const { success, error: showError } = useToast();
-  const [productData, setProductData] = useState<{ [key: string]: Product }>(
-    {}
-  );
+  const [productData, setProductData] = useState<{ [key: string]: Product }>({});
   const [loadingProducts, setLoadingProducts] = useState(false);
 
   // Scroll to top when component mounts
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
-
-  useEffect(() => {
-    if (user) {
-      console.log("Profile:", user);
-      setProfileData({
-        points: user.points || 0,
-        pointsUsed: 0,
-      });
-    }
-  }, [user]);
 
   // Fetch product data for stock validation
   useEffect(() => {
     const fetchProductData = async () => {
       if (cart.items.length === 0) return;
-
+      
       setLoadingProducts(true);
       const productMap: { [key: string]: Product } = {};
-
+      
       try {
         await Promise.all(
           cart.items.map(async (item) => {
             if (!productData[item.productId]) {
-              const response = await productService.getProductById(
-                item.productId
-              );
+              const response = await productService.getProductById(item.productId);
               if (response.success && response.data) {
                 productMap[item.productId] = response.data;
               }
             }
           })
         );
-
-        setProductData((prev) => ({ ...prev, ...productMap }));
+        
+        setProductData(prev => ({ ...prev, ...productMap }));
       } catch (error) {
-        console.error("Error fetching product data:", error);
+        console.error('Error fetching product data:', error);
       } finally {
         setLoadingProducts(false);
       }
@@ -81,7 +60,7 @@ const CartPage: React.FC = () => {
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
-      currency: "VND",
+      currency: 'VND',
     }).format(price);
   };
 
@@ -94,15 +73,13 @@ const CartPage: React.FC = () => {
     if (newQuantity < 1) {
       return;
     }
-
+    
     const product = productData[productId];
     if (product && newQuantity > product.quantity) {
-      showError(
-        `Số lượng không thể vượt quá ${product.quantity} sản phẩm có sẵn cho ${productName}`
-      );
+      showError(`Số lượng không thể vượt quá ${product.quantity} sản phẩm có sẵn cho ${productName}`);
       return;
     }
-
+    
     updateQuantity(itemId, newQuantity);
   };
 
@@ -111,13 +88,9 @@ const CartPage: React.FC = () => {
     success(`${itemName} đã được xóa khỏi giỏ hàng`);
   };
 
-  const handleUpdateQuantityVoucher = (newValue: number) => {
-    if (newValue < 0 || newValue > profileData.points) return;
-    setProfileData((prev) => ({ ...prev, pointsUsed: newValue }));
-  };
 
   const handleCheckout = () => {
-    navigate("/checkout");
+    navigate('/checkout');
   };
 
   if (cart.items.length === 0) {
@@ -136,8 +109,7 @@ const CartPage: React.FC = () => {
               Giỏ hàng của bạn đang trống
             </h2>
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              Có vẻ như bạn chưa thêm sản phẩm nào vào giỏ hàng. Hãy bắt đầu mua
-              sắm ngay!
+              Có vẻ như bạn chưa thêm sản phẩm nào vào giỏ hàng. Hãy bắt đầu mua sắm ngay!
             </p>
             <button
               onClick={() => navigate("/")}
@@ -184,91 +156,40 @@ const CartPage: React.FC = () => {
                 Tóm Tắt Đơn Hàng
               </h2>
 
-              {/* Tạm tính */}
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-gray-600">Tạm tính</span>
-                <span className="font-medium text-gray-800">
+              {/* Items Count */}
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-gray-600">Sản phẩm ({cart.itemCount})</span>
+                <span className="font-medium">
                   {formatPrice(cart.total)}
                 </span>
               </div>
 
-              {/* Phí vận chuyển */}
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-gray-600">Phí vận chuyển</span>
-                <span className="font-medium text-gray-800">
-                  {cart.items.length > 0 ? formatPrice(0) : "Miễn phí"}
-                </span>
-              </div>
-
-              {/* Divider */}
-              <div className="border-t border-gray-200 my-4"></div>
-
-              {/* 🎁 Voucher / Điểm thưởng */}
-              <div className="mb-5">
-                <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center space-x-2">
-                  <Ticket className="h-5 w-5 text-blue-600" />
-                  <span>Voucher</span>
-                </h3>
-
-                <p className="text-sm text-gray-500 mb-2">
-                  Bạn có{" "}
-                  <span className="font-semibold text-blue-600">
-                    {profileData.points}
-                  </span>{" "}
-                  voucher. Mỗi voucher giảm{" "}
-                  <span className="font-semibold">10.000&nbsp;VND</span>.
-                </p>
-
-                <div className="flex items-center justify-center space-x-3">
-                  <button
-                    onClick={() =>
-                      handleUpdateQuantityVoucher(profileData.pointsUsed - 1)
-                    }
-                    disabled={profileData.pointsUsed <= 0}
-                    className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition disabled:opacity-50"
-                  >
-                    <Minus className="h-4 w-4 text-gray-700" />
-                  </button>
-
-                  <span className="w-12 text-center text-lg font-semibold text-gray-800">
-                    {profileData.pointsUsed}
-                  </span>
-
-                  <button
-                    onClick={() =>
-                      handleUpdateQuantityVoucher(profileData.pointsUsed + 1)
-                    }
-                    disabled={profileData.pointsUsed >= profileData.points}
-                    className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition disabled:opacity-50"
-                  >
-                    <Plus className="h-4 w-4 text-gray-700" />
-                  </button>
-                </div>
-
-                {/* Hiển thị số tiền giảm */}
-                <div className="text-right mt-2 text-sm text-green-600 font-medium">
-                  Giảm: {formatPrice(profileData.pointsUsed * 10000)}
-                </div>
-              </div>
-
-              {/* Divider */}
-              <div className="border-t border-gray-200 my-4"></div>
-
-              {/* Tổng cộng */}
+              {/* Shipping */}
               <div className="flex justify-between items-center mb-6">
-                <span className="text-lg font-bold text-gray-900">
-                  Tổng cộng
-                </span>
-                <span className="text-2xl font-bold text-blue-600">
-                  {formatPrice(
-                    cart.total - profileData.pointsUsed * 10000 > 0
-                      ? cart.total - profileData.pointsUsed * 10000
-                      : 0
+                <span className="text-gray-600">Phí vận chuyển</span>
+                <span className="font-medium">
+                  {cart.items.length > 0 ? (
+                    formatPrice(0)
+                  ) : (
+                    <span className="text-green-600">Miễn phí</span>
                   )}
                 </span>
               </div>
 
-              {/* Nút Thanh toán */}
+              {/* Divider */}
+              <div className="border-t border-gray-200 mb-6"></div>
+
+              {/* Total */}
+              <div className="flex justify-between items-center mb-6">
+                <span className="text-lg font-bold text-gray-900">Tổng cộng</span>
+                <span className="text-2xl font-bold text-blue-600">
+                  {formatPrice(
+                    cart.total
+                  )}
+                </span>
+              </div>
+
+              {/* Checkout Button */}
               <button
                 onClick={handleCheckout}
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all flex items-center justify-center space-x-2 mb-4"
@@ -315,9 +236,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
   loadingProducts,
 }) => {
   const isAtMaxQuantity = product ? item.quantity >= product.quantity : false;
-  const isOutOfStock = product
-    ? product.quantity <= 0 || product.isDeleted
-    : false;
+  const isOutOfStock = product ? product.quantity <= 0 || product.isDeleted : false;
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6">
       <div className="flex items-start space-x-4">
@@ -357,12 +276,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
           <div className="flex items-center space-x-3">
             <button
               onClick={() =>
-                onQuantityChange(
-                  item.id,
-                  item.quantity - 1,
-                  item.productId,
-                  item.name
-                )
+                onQuantityChange(item.id, item.quantity - 1, item.productId, item.name)
               }
               disabled={item.quantity <= 1}
               className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -381,12 +295,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
             </div>
             <button
               onClick={() =>
-                onQuantityChange(
-                  item.id,
-                  item.quantity + 1,
-                  item.productId,
-                  item.name
-                )
+                onQuantityChange(item.id, item.quantity + 1, item.productId, item.name)
               }
               disabled={isAtMaxQuantity || isOutOfStock || loadingProducts}
               className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -394,7 +303,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
               <Plus className="h-4 w-4" />
             </button>
           </div>
-
+          
           {/* Stock Status */}
           {product && (
             <div className="text-center">

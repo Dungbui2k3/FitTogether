@@ -45,6 +45,7 @@ export interface UpdateProfileRequest {
   name?: string;
   avatar?: string;
   email?: string;
+  points?: number;
 }
 
 export interface ChangePasswordRequest {
