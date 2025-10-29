@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, IsBoolean, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, IsBoolean, MinLength, IsNumber } from 'class-validator';
 
 export class UpdateUserDto {
   @ApiPropertyOptional({
@@ -35,6 +35,14 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   role?: string;
+
+  @ApiPropertyOptional({
+    description: 'Reward points of the user',
+    example: 100,
+  })
+  @IsOptional()
+  @IsNumber()
+  points?: number;
 
   @ApiPropertyOptional({
     description: 'Whether the user account is active',
