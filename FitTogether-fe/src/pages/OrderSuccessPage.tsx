@@ -283,13 +283,13 @@ const OrderSuccessPage: React.FC = () => {
                     <div className="flex items-center p-2 bg-gray-50 rounded-lg">
                       <Phone className="h-4 w-4 mr-2 text-blue-600" />
                       <span className="font-medium text-gray-800 text-sm">
-                        0123 456 789
+                        0375667822
                       </span>
                     </div>
                     <div className="flex items-center p-2 bg-gray-50 rounded-lg">
                       <Mail className="h-4 w-4 mr-2 text-blue-600" />
                       <span className="font-medium text-gray-800 text-sm">
-                        support@fittogether.vn
+                        fitttogether202@gmail.com
                       </span>
                     </div>
                   </div>

@@ -4,6 +4,7 @@ import { subFieldService } from "../../services/subFieldsService";
 import bookingService from "../../services/bookingService";
 import fieldService from "../../services/fieldService";
 import { useAuth } from "../../hooks";
+import { useNavigate } from "react-router-dom";
 
 interface BookingFieldProps {
   open: boolean;
@@ -21,6 +22,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
   const fieldId = field?.id;
 
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [selectedSlots, setSelectedSlots] = useState<
     { time: string; field: string; date: string; pricePerHour: number }[]
@@ -220,6 +222,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
 
         setSelectedSlots([]); // Xóa chọn sau khi booking
         setPhoneNumber(""); // Clear phone number after successful booking
+        navigate("/booking-history");
       } else {
         alert("Booking failed: " + response.message);
       }
