@@ -111,7 +111,8 @@ const OrderSuccessPage: React.FC = () => {
             Đặt hàng thành công!
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ xử lý đơn hàng của bạn trong thời gian sớm nhất.
+            Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ xử lý đơn hàng của bạn trong
+            thời gian sớm nhất.
           </p>
         </div>
 
@@ -178,10 +179,12 @@ const OrderSuccessPage: React.FC = () => {
                     <div
                       key={index}
                       className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200 hover:shadow-md transition-shadow"
+                      onClick={() => navigate(`/product/${item.productId._id}`)}
                     >
                       <div className="flex-1">
                         <h4 className="text-lg font-semibold text-gray-900 mb-2">
-                          {item.productId?.name || `Mã sản phẩm: ${item.productId}`}
+                          {item.productId?.name ||
+                            `Mã sản phẩm: ${item.productId}`}
                         </h4>
                         <div className="flex items-center space-x-4">
                           <span className="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
@@ -271,11 +274,10 @@ const OrderSuccessPage: React.FC = () => {
                 </button>
 
                 <div className="pt-6 border-t border-gray-200">
-                  <h3 className="font-bold text-gray-900 mb-3">
-                    Cần hỗ trợ?
-                  </h3>
+                  <h3 className="font-bold text-gray-900 mb-3">Cần hỗ trợ?</h3>
                   <p className="text-gray-600 mb-4 text-sm">
-                    Nếu bạn có bất kỳ câu hỏi nào về đơn hàng của mình, vui lòng liên hệ chúng tôi:
+                    Nếu bạn có bất kỳ câu hỏi nào về đơn hàng của mình, vui lòng
+                    liên hệ chúng tôi:
                   </p>
                   <div className="space-y-3">
                     <div className="flex items-center p-2 bg-gray-50 rounded-lg">
