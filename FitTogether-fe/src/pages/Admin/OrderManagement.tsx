@@ -471,10 +471,7 @@ const AdminOrderManagement: React.FC = () => {
                        <p className="font-medium text-gray-900">{selectedOrder.userId.email}</p>
                      </div>
                    )}
-                   <div>
-                     <p className="text-sm text-gray-500">Mã Đơn Hàng</p>
-                     <p className="font-medium text-gray-900">{selectedOrder._id.slice(-8).toUpperCase()}</p>
-                   </div>
+                   
                    {selectedOrder.address && (
                      <div className="md:col-span-2 lg:col-span-4">
                        <p className="text-sm text-gray-500">Địa chỉ giao hàng</p>
@@ -568,12 +565,6 @@ const AdminOrderManagement: React.FC = () => {
                <div className="flex items-center justify-between">
                  {/* Order Status Info */}
                  <div className="flex items-center space-x-4">
-                   <div className="flex items-center space-x-2">
-                     <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                     <span className="text-sm text-gray-600">
-                       Mã đơn hàng: {selectedOrder._id.slice(-8).toUpperCase()}
-                     </span>
-                   </div>
                    <div className="flex items-center space-x-2">
                      <Calendar className="h-4 w-4 text-gray-400" />
                      <span className="text-sm text-gray-600">

@@ -314,15 +314,12 @@ const CheckoutPage: React.FC = () => {
                   <MapPin className="h-5 w-5 mr-2" />
                   Thông tin bổ sung
                 </h2>
-                <label className="block text-sm font-medium text-gray-700 mb-0">
+                <label className="block text-sm font-medium text-gray-700 mb-0 pb-5">
                   (Hỗ trợ in chữ lên vợt (giới hạn 20 ký tự) + đổi màu cuối cán
                   vợt miễn phí)
                 </label>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ghi chú đơn hàng
-                  </label>
                   <textarea
                     name="notes"
                     value={formData.notes}
