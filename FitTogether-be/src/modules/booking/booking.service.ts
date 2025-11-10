@@ -97,7 +97,7 @@ export class BookingService {
 
     const bookings = await this.bookingModel
       .find({ subFieldId, day })
-      .select('duration status userId phone -_id')
+      .select('duration status userId phone _id')
       .populate('userId', 'name email -_id')
       .lean();
 
@@ -146,6 +146,36 @@ export class BookingService {
         populate: {
           path: 'fieldId',
           select: 'name -_id',
+        },
+      })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+
+    return bookings;
+  }
+
+  async getOwnerBookingHistory(fieldId: string) {
+    // 1️⃣ Lấy danh sách subFieldId của field đó
+
+    const subFields = await this.subFieldModel
+      .find({ fieldId: new Types.ObjectId(fieldId) })
+      .select('_id name type pricePerHour fieldId')
+      .lean();
+
+    // chuyển _id ObjectId thành string
+    const subFieldIds = subFields.map((sf) => sf._id.toString());
+
+    // Query booking bằng string
+    const bookings = await this.bookingModel
+      .find({ subFieldId: { $in: subFieldIds } })
+      .populate('userId', 'name email')
+      .populate({
+        path: 'subFieldId',
+        select: 'name type pricePerHour fieldId',
+        populate: {
+          path: 'fieldId',
+          select: 'name',
         },
       })
       .sort({ createdAt: -1 })

@@ -49,4 +49,10 @@ export class BookingController {
     const slots = await this.bookingService.getSlots(subFieldId, day);
     return { success: true, data: slots };
   }
+
+  @Get('history-booking/owner/:fieldId')
+  async getOwnerBookingHistory (@Param('fieldId') fieldId: string) {
+    const slots = await this.bookingService.getOwnerBookingHistory(fieldId);
+    return { success: true, data: slots };
+  }
 }
