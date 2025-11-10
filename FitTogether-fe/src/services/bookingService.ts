@@ -80,6 +80,30 @@ class BookingService {
     }
   }
 
+  async getOwnerBookingHistory(fieldId: string): Promise<ApiResponse<any>> {
+    try {
+      const response = await backendInstance.get<{ data: any }>(
+        `/booking/history-booking/owner/${fieldId}`
+      );
+
+      console.log("Get subFields by id response:", response.data);
+      return {
+        success: true,
+        data: response.data.data.data,
+        message: "Get subFields success",
+        status: response.status,
+      };
+    } catch (error: any) {
+      console.error("Update category error:", error);
+      return {
+        success: false,
+        data: null as any,
+        message: "Update category error",
+        status: error.response?.status || 500,
+      };
+    }
+  }
+
   // async deleteCategory(id: string): Promise<ApiResponse<null>> {
   //     try {
   //         const response = await backendInstance.delete(`/subFields/${id}`);

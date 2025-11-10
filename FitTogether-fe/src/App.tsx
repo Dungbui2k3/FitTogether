@@ -39,6 +39,7 @@ import GlobalToastContainer from "./components/GlobalToastContainer";
 import BookingPage from "./components/Field/BookingPage";
 import BookingHistoryPage from "./pages/BookingHistoryPage";
 import FieldManagerPage from "./pages/FieldOwner/FieldManagerPage";
+import FieldHistoryPage from "./pages/FieldOwner/FieldHistoryPage";
 
 // Layout có Header/Footer
 const MainLayout = () => {
@@ -132,6 +133,7 @@ function App() {
               }
             >
               <Route path="my-fields" element={<MyFieldsPage />} />
+              <Route path="fields-history/:fieldId" element={<FieldHistoryPage />} />
               <Route
                 path="field-manage/:fieldId"
                 element={<FieldManagerPage />}

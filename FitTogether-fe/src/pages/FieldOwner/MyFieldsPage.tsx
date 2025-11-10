@@ -14,6 +14,8 @@ import {
   Calendar,
   Users,
   CalendarDays,
+  Coins,
+  History,
 } from "lucide-react";
 
 const MyFieldsPage: React.FC = () => {
@@ -302,10 +304,18 @@ const MyFieldsPage: React.FC = () => {
                             key={field.id}
                             to={`/field-owner/field-manage/${field.id}`}
                             state={{ field }}
-                           className="bg-green-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
+                            className="bg-green-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
                           >
                             <CalendarDays className="h-4 w-4 mr-2" />
                             Đặt Sân
+                          </Link>
+
+                          <Link
+                            to={`/field-owner/fields-history/${field.id}`}
+                            className="bg-yellow-400 text-white px-4 py-2 rounded text-sm font-medium hover:bg-yellow-500 transition-colors flex items-center justify-center"
+                          >
+                            <History className="h-4 w-4 mr-2" />
+                            Lịch sử đặt sân
                           </Link>
 
                           <button
