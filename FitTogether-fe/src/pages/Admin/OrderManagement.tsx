@@ -88,6 +88,11 @@ const AdminOrderManagement: React.FC = () => {
     (order.phone?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
   );
 
+  // Tổng doanh thu của các đơn 'success' trong danh sách đang hiển thị (sau khi filter + trang hiện tại)
+  const totalRevenue = filteredOrders
+    .filter((order) => order.status === 'success')
+    .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -191,6 +196,20 @@ const AdminOrderManagement: React.FC = () => {
           </div>
         </div>
 
+        {/* Revenue Card - Large Display */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg border border-blue-500 p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-100 text-sm font-medium mb-1">Tổng Doanh Thu</p>
+              <p className="text-white text-4xl font-bold">{formatPrice(totalRevenue)}</p>
+              <p className="text-blue-100 text-xs mt-2">Từ các đơn hàng đã hoàn thành (trang hiện tại)</p>
+            </div>
+            <div className="p-4 bg-white bg-opacity-20 rounded-lg">
+              <Package className="h-8 w-8 text-white" />
+            </div>
+          </div>
+        </div>
+
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -223,9 +242,9 @@ const AdminOrderManagement: React.FC = () => {
 
             {/* Stats */}
             <div className="flex items-center justify-center">
-              <span className="text-sm text-gray-600">
-                Tổng cộng: {totalOrders} đơn hàng
-              </span>
+              <div className="text-sm text-gray-600 text-center">
+                <div>Tổng cộng: <span className="font-semibold text-gray-900">{totalOrders}</span> đơn hàng</div>
+              </div>
             </div>
           </div>
         </div>

@@ -105,7 +105,7 @@ const CheckoutPage: React.FC = () => {
   };
 
   const totalAfterVoucher = Math.max(
-    cart.total - profileData.pointsUsed * 10000,
+    cart.total - profileData.pointsUsed * 5000,
     0
   );
 
@@ -513,7 +513,7 @@ const CheckoutPage: React.FC = () => {
                       {profileData.points}
                     </span>{" "}
                     voucher. Mỗi voucher giảm{" "}
-                    <span className="font-semibold">10.000&nbsp;VND</span>.
+                    <span className="font-semibold">5.000&nbsp;VND</span>.
                   </p>
 
                   <div className="flex items-center justify-center space-x-3">
@@ -543,7 +543,7 @@ const CheckoutPage: React.FC = () => {
                   </div>
 
                   <div className="text-right mt-2 text-sm text-green-600 font-medium">
-                    Giảm: {formatPrice(profileData.pointsUsed * 10000, "VND")}
+                    Giảm: {formatPrice(profileData.pointsUsed * 5000, "VND")}
                   </div>
                 </div>
 

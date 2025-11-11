@@ -224,12 +224,20 @@ export class SubFieldsService {
       }
 
       const subFields = await this.subFieldModel
-        .find({ fieldId: new Types.ObjectId(fieldId) })
+        .find({ 
+          fieldId: new Types.ObjectId(fieldId),
+          isDeleted: { $ne: true }
+        })
         .populate('fieldId', 'name address')
         .sort({ createdAt: -1 })
         .exec();
 
-      const formattedSubFields = subFields.map((subField: any) =>
+      // Filter out subFields without valid _id
+      const validSubFields = subFields.filter((subField: any) => 
+        subField && subField._id && Types.ObjectId.isValid(subField._id)
+      );
+
+      const formattedSubFields = validSubFields.map((subField: any) =>
         this.formatSubFieldResponse(subField),
       );
 

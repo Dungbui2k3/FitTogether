@@ -544,7 +544,7 @@ const BookingField: React.FC<BookingFieldProps> = ({
               <h3 className="text-lg font-semibold text-gray-800">
                 Mỗi lần đặt sân bạn sẽ nhận được 1{" "}
                 <span className="font-semibold text-green-600">
-                  voucher 10.000&nbsp;VND
+                  voucher 5.000&nbsp;VND
                 </span>
                 .
               </h3>
