@@ -1,36 +1,187 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-import { Booking, BookingDocument } from 'src/schemas/booking.schema';
 import { SubField, SubFieldDocument } from 'src/schemas/subField.schema';
+import { Model, Types } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { CreateBookingDto } from './dto';
+import { BookingRepository } from './booking.repository';
+import { Booking, BookingDocument } from 'src/schemas/booking.schema';
+import { User, UserDocument } from 'src/schemas/user.schema';
 
 @Injectable()
-export class BookingRepository {
+export class BookingService {
   constructor(
-    @InjectModel(Booking.name) private bookingModel: Model<BookingDocument>,
+    private readonly bookingRepository: BookingRepository,
+    @InjectModel(SubField.name)
+    private readonly subFieldModel: Model<SubFieldDocument>,
+    @InjectModel(Booking.name)
+    private readonly bookingModel: Model<BookingDocument>,
+    @InjectModel(User.name)
+    private readonly userModel: Model<UserDocument>,
   ) {}
+  async create(
+    createBookingDto: CreateBookingDto,
+    subFieldId: string,
+    userId: string,
+  ): Promise<any> {
+    try {
+      const { day, duration, totalPrice, phone } = createBookingDto;
 
-  async exists(id: string): Promise<boolean> {
-    if (!Types.ObjectId.isValid(id)) {
-      return false;
+      // 1️⃣ Kiểm tra subFieldId hợp lệ và tồn tại
+      if (!Types.ObjectId.isValid(subFieldId)) {
+        throw new BadRequestException('Invalid subFieldId format');
+      }
+
+      const existingSubField = await this.subFieldModel.findById(subFieldId);
+      if (!existingSubField) {
+        throw new NotFoundException('Sub-field not found');
+      }
+
+      // 2️⃣ Kiểm tra trùng booking (subFieldId + day + duration)
+      const existingBooking = await this.bookingModel.findOne({
+        subFieldId,
+        day,
+        duration,
+      });
+
+      if (existingBooking) {
+        throw new ConflictException(
+          `Booking for this sub-field at ${duration} on ${day} already exists.`,
+        );
+      }
+
+      // 3️⃣ Tạo mới Booking
+      const newBooking = new this.bookingModel({
+        subFieldId,
+        userId,
+        day,
+        duration,
+        totalPrice,
+        phone,
+        status: 'confirmed',
+      });
+
+      const savedBooking = await newBooking.save();
+
+      await this.userModel.findByIdAndUpdate(userId, {
+        $inc: { points: 1 },
+      });
+
+      return {
+        success: true,
+        message: 'Booking created successfully',
+        data: savedBooking,
+      };
+    } catch (error) {
+      if (
+        error instanceof ConflictException ||
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new BadRequestException(
+        `Failed to create booking: ${error.message}`,
+      );
     }
-
-    const product = await this.bookingModel.findOne({
-      _id: new Types.ObjectId(id),
-      isDeleted: { $ne: true },
-    });
-
-    return !!product;
   }
 
-  async findById(id: string): Promise<SubFieldDocument | null> {
-    if (!Types.ObjectId.isValid(id)) {
-      return null;
+  async getBookingsBySubField(subFieldId: string, day: string) {
+    if (!Types.ObjectId.isValid(subFieldId)) {
+      throw new BadRequestException('Invalid subFieldId format');
     }
 
-    return this.bookingModel.findOne({
-      _id: new Types.ObjectId(id),
-      isDeleted: { $ne: true },
-    });
+    const bookings = await this.bookingModel
+      .find({ subFieldId, day })
+      .select('duration status userId phone _id')
+      .populate('userId', 'name email -_id')
+      .lean();
+
+    return bookings;
+  }
+
+  // booking.service.ts
+  async getSlots(subFieldId: string, day: string) {
+    if (!Types.ObjectId.isValid(subFieldId)) {
+      throw new BadRequestException('Invalid subFieldId format');
+    }
+
+    const bookings = await this.bookingModel
+      .find({ subFieldId, day })
+      .select('duration status -_id') // chỉ cần duration + trạng thái
+      .lean();
+
+    // Chuyển thành danh sách slot với trạng thái
+    const allSlots = [
+      '5:00 - 6:30',
+      '6:40 - 8:10',
+      '8:20 - 9:50',
+      '10:00 - 11:30',
+    ];
+    const bookedSlots = new Set(bookings.map((b) => b.duration));
+
+    const slotsWithStatus = allSlots.map((slot) => ({
+      time: slot,
+      isBooked: bookedSlots.has(slot),
+    }));
+
+    return slotsWithStatus;
+  }
+
+  async getBookingsByUserId(userId: string) {
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid userId format');
+    }
+
+    const bookings = await this.bookingModel
+      .find({ userId: new Types.ObjectId(userId) })
+      .populate('userId', 'name email -_id')
+      .populate({
+        path: 'subFieldId',
+        select: 'name type pricePerHour fieldId -_id',
+        populate: {
+          path: 'fieldId',
+          select: 'name -_id',
+        },
+      })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+
+    return bookings;
+  }
+
+  async getOwnerBookingHistory(fieldId: string) {
+    // 1️⃣ Lấy danh sách subFieldId của field đó
+
+    const subFields = await this.subFieldModel
+      .find({ fieldId: new Types.ObjectId(fieldId) })
+      .select('_id name type pricePerHour fieldId')
+      .lean();
+
+    // chuyển _id ObjectId thành string
+    const subFieldIds = subFields.map((sf) => sf._id.toString());
+
+    // Query booking bằng string
+    const bookings = await this.bookingModel
+      .find({ subFieldId: { $in: subFieldIds } })
+      .populate('userId', 'name email')
+      .populate({
+        path: 'subFieldId',
+        select: 'name type pricePerHour fieldId',
+        populate: {
+          path: 'fieldId',
+          select: 'name',
+        },
+      })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+
+    return bookings;
   }
 }
